@@ -6,7 +6,7 @@
 <title>산업안전 규격 실습장</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Nanum+Pen+Script&display=swap">
 <style>
 :root{
   color-scheme:dark;
@@ -117,7 +117,10 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 .crumb button{font:inherit;padding:5px 10px;border-radius:4px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
 .crumb button:hover{border-color:var(--accent)}
 .subjGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}
-.subjCard{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;cursor:pointer;text-align:left;font:inherit;color:var(--text)}
+.subjCard{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;cursor:pointer;text-align:left;font:inherit;color:var(--text)}
+/* 과목 카드 「★ 강추」 손글씨 도장: 오른쪽 위에 대각선으로 */
+.subjCard .stamp{position:absolute;right:14px;top:10px;transform:rotate(-14deg);font-family:'Nanum Pen Script','Gaegu',cursive;font-size:34px;line-height:1;color:#FF5A3C;border:2.5px solid #FF5A3C;border-radius:60% 40% 55% 45% / 50% 60% 40% 50%;padding:4px 14px 2px;letter-spacing:.02em;opacity:.92;pointer-events:none;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.subjCard .stamp b{font-size:26px;vertical-align:2px;margin-right:2px}
 .subjCard:hover,.subjCard:focus-visible{border-color:var(--accent);outline:none}
 .subjCard.soon{opacity:.55;cursor:default}
 .subjCard .n{font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
@@ -1327,7 +1330,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   /* ---------- 상위 창 ① 과목 나열 ---------- */
   const home = el('home'), list = el('list');
   function buildHome(){
-    el('homeGrid').innerHTML = SUBJECTS.map((s, i)=>{ const soon = !s.topics.length; return `<div class="subjCard${soon?' soon':''}" role="button" tabindex="0" data-subj="${s.id}"><div class="n">제${i+1}과목</div><div class="name">${s.name}</div><div class="desc">${s.desc}</div><div class="stat"><span>3D 규정 <b>${s.topics.length}</b>${soon?' (준비 중)':''}</span><span>규정·법령 기출 <b>${BANK_COUNT[s.name]||0}</b>문항</span></div></div>`; }).join('');
+    el('homeGrid').innerHTML = SUBJECTS.map((s, i)=>{ const soon = !s.topics.length; return `<div class="subjCard${soon?' soon':''}" role="button" tabindex="0" data-subj="${s.id}"><div class="n">제${i+1}과목</div><span class="stamp"><b>★</b>강추</span><div class="name">${s.name}</div><div class="desc">${s.desc}</div><div class="stat"><span>3D 규정 <b>${s.topics.length}</b>${soon?' (준비 중)':''}</span><span>규정·법령 기출 <b>${BANK_COUNT[s.name]||0}</b>문항</span></div></div>`; }).join('');
     document.querySelectorAll('[data-subj]').forEach(card=>{
       const open = ()=>{ S.subj = card.dataset.subj; showList(); };
       card.addEventListener('click', open); card.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } });
