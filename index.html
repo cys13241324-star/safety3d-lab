@@ -2485,6 +2485,24 @@ EXT_STEP.press = (dt, o, R, p)=>{ const hand = R.hand, travel = R.ramTop - R.ram
     else if(okD && test.t >= Math.max(tArr, tStop) + 0.4 && !test.judged){ test.judged = true; done(hand, '슬라이드가 먼저 멈췄습니다', `D ${p.D} mm ≥ ${fmt(1.6*p.T,0)} mm · 손 도달 ${fmt(p.D/1.6,0)} ms ≥ 정지 ${p.T} ms`, allOk('press')); } }
   disposeGroup(R.arm); R.arm = tube(P3(0.15, 1.1, R.zG + 0.6), hand.position.clone(), 0.045, M(0xF07056, .8), stages.press); };
 
+// 굴착면: 벽돌 줍는 사람은 장면에 안 맞으니 뺀다 (사용자 09-03)
+dressAfter('trench', (g, p, R)=>{ AMB.filter(a=> a.parent === ambStages.trench && a.kind==='pick').forEach(a=>{ disposeGroup(a.g); AMB.splice(AMB.indexOf(a), 1); }); });
+MANAGER_POS.plank = [6.0, 0, 1.5]; MANAGER_POS.lux = [-2.6, 0, 2.6];
+
+/* ===== 사람 간격 벌리기 (사용자 09-03: 「사람끼리 너무 붙어 있다」) =====
+   무대마다 빌드 뒤에 실행: 고정 배우(망치·줍기·용접·관리자)는 시험 배우·서로 간 2.2 m 이상, 순찰 경로는 사람들에게서 2.4 m 이상 떨어지게 z 로 밀어낸다. 이미 떨어져 있으면 아무것도 안 하므로 여러 번 돌아도 같다 */
+function segDist(P, A, B){ const dx = B.x - A.x, dz = B.z - A.z, L2 = dx*dx + dz*dz; let t = L2 > 0 ? ((P.x - A.x)*dx + (P.z - A.z)*dz)/L2 : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(A.x + t*dx - P.x, A.z + t*dz - P.z); }
+function spreadActors(key){ const g = ambStages[key]; if(!g) return; const R = X[key] || {};
+  const anchors = [R.w, R.w2, R.top, R.digger, R.puller, R.amb, ...(R.ws || []), R.A && R.A.w, R.B && R.B.w, R.C && R.C.w].filter(o=> o && o.position);
+  const acts = AMB.filter(a=> a.parent === g), fixed = acts.filter(a=> a.kind !== 'walk' && a.g && a.g.userData && a.g.userData.limbs);
+  const pushAway = (mover, P, min)=>{ const M = mover.position, d = Math.hypot(M.x - P.x, M.z - P.z); if(d < min){ const ux = d > 1e-6 ? (M.x - P.x)/d : 1, uz = d > 1e-6 ? (M.z - P.z)/d : 0; M.x += ux*(min - d); M.z += uz*(min - d); } };
+  fixed.forEach(f=> anchors.forEach(o=> pushAway(f.g, o.position, 2.2)));
+  for(let i=0;i<fixed.length;i++) for(let j=i+1;j<fixed.length;j++) pushAway(fixed[j].g, fixed[i].g.position, 2.2);
+  const people = anchors.map(o=> o.position).concat(fixed.map(f=> f.g.position));
+  acts.filter(a=> a.kind==='walk' && a.path).forEach(w=>{ people.forEach(P=>{ let best = Infinity, sign = 1; for(let i=0;i<w.path.length;i++){ const A = w.path[i], B = w.path[(i+1)%w.path.length]; const d = segDist(P, A, B); if(d < best){ best = d; sign = (A.z + B.z)/2 >= P.z ? 1 : -1; } } if(best < 2.4) w.path.forEach(q=> q.z += sign*(2.4 - best)); }); });
+}
+Object.keys(BUILD).forEach(k=>{ const orig = BUILD[k]; BUILD[k] = ()=>{ orig(); spreadActors(k); }; });
+
 /* 과목 카드 설명 갱신 + 홈 다시 그리기 */
 SUBJECTS.find(s=> s.id==='mach').desc = '롤러기·연삭기·프레스·둥근톱·지게차·로봇·보일러·고속회전체 방호 기준과 양중기 와이어로프';
 SUBJECTS.find(s=> s.id==='elec').desc = '가공전선로·충전전로 이격거리, 누전차단기, 아크용접 전격방지기, 조작 작업공간·조도';
