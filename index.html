@@ -68,8 +68,15 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 #tabs button{flex:0 0 auto;font:inherit;font-size:13.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(8,13,22,.8);color:var(--muted);cursor:pointer;backdrop-filter:blur(8px);white-space:nowrap}
 #tabs button[aria-pressed="true"]{background:#24314A;color:var(--text);border-color:var(--accent);font-weight:500}
 /* 3D 창 아래: 값 조정 칩(누르면 슬라이더 팝오버) + 시험 버튼 바 */
-#dock{position:fixed;left:412px;right:16px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:3;pointer-events:none}
+#dock{position:fixed;left:412px;right:16px;bottom:14px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:3;pointer-events:none}
 #dock > *{pointer-events:auto}
+/* 칩·버튼을 「테스트 항목」 카드로 묶어 바닥(아스팔트)과 구분 */
+#dock .card{display:flex;flex-direction:column;gap:8px;padding:10px 16px 10px;border-radius:12px;border:1px solid rgba(140,160,190,.35);background:rgba(8,13,22,.84);backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:100%}
+#dock .dockHd{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap}
+#dock .dockHd .cap{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:2px 10px;white-space:nowrap}
+#dock .dockHd .sub{font-size:12.5px;color:var(--dim)}
+#dock .chip .cb{background:var(--panel2);backdrop-filter:none}
+#dock .act .b{background:var(--panel2);backdrop-filter:none}
 #dock .ctl{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;align-items:flex-end;justify-content:center}
 #dock .act{justify-content:center}
 #dock .hintTxt{margin-left:0;width:100%;text-align:center;font-size:12px}
@@ -198,6 +205,8 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   <div id="labels"></div>
   <div id="tabs" class="tabs"></div>
   <div id="dock">
+   <div class="card">
+    <div class="dockHd"><span class="cap">테스트 항목</span><span class="sub">칩을 누르면 값을 바꿀 수 있습니다 · 규정 밖이면 빨간 테두리</span></div>
     <div class="ctl" id="sliders"></div>
     <div class="act">
       <button class="b primary" id="bTest" type="button"></button>
@@ -205,6 +214,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       <button class="b" id="bAuto" type="button" aria-pressed="true" title="몇 초마다 시험을 저절로 반복">자동 시연 켜짐</button>
       <span class="hintTxt">드래그 회전 · 우클릭 드래그 이동 · 휠 확대</span>
     </div>
+   </div>
   </div>
   <div id="viewBox"><button class="b" type="button" data-view="wide" aria-pressed="true">넓게</button><button class="b" type="button" data-view="focus">가까이</button>
     <div class="zoom"><button class="b zb" type="button" data-zoom="in" title="확대">＋</button><input id="zoomR" type="range" min="0" max="100" step="1" value="50" aria-label="배율 (세로 드래그)"><button class="b zb" type="button" data-zoom="out" title="축소">－</button></div>
