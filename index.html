@@ -110,6 +110,28 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 .screen{position:fixed;inset:0;z-index:5;background:rgba(6,10,17,.84);backdrop-filter:blur(8px);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 32px}
 .screen[hidden]{display:none}
 .screenBox{max-width:1080px;width:100%}
+/* 첫 실행 튜토리얼 */
+#tut{position:fixed;inset:0;z-index:30;background:rgba(4,8,14,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px}
+#tut[hidden]{display:none}
+.tutCard{width:min(560px,100%);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:12px}
+.tutHd{display:flex;justify-content:space-between;align-items:center}
+.tutStep{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.06em}
+.tutCard h3{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+.tutCard p{margin:0;color:var(--muted);font-size:15px;line-height:1.6}
+.tutFt{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.dots{display:flex;gap:6px} .dots i{width:8px;height:8px;border-radius:50%;background:var(--line)} .dots i.on{background:var(--accent)}
+/* 단계 그림: CSS 로 그린 화면 축소판 */
+.tutPic{height:150px;border-radius:8px;background:#0B1220;border:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;position:relative;overflow:hidden}
+.tutPic .mcard{width:120px;height:78px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);padding:8px;display:flex;flex-direction:column;gap:6px}
+.tutPic .mcard i{display:block;height:6px;border-radius:3px;background:var(--line)} .tutPic .mcard i.t{width:60%;background:var(--muted)} .tutPic .mcard i.s{width:85%}
+.tutPic .mcard.hi{border-color:var(--accent);box-shadow:0 0 0 2px rgba(120,170,255,.25)}
+.tutPic .mrow{width:340px;padding:8px 12px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.tutPic .mrow.hi{border-color:var(--accent);color:var(--text)} .tutPic .mcol{display:flex;flex-direction:column;gap:6px}
+.tutPic .mchip{padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+.tutPic .mchip b{font-family:var(--mono);font-size:15px;color:var(--warn);font-weight:500} .tutPic .mchip.bad{border-color:var(--bad)} .tutPic .mchip.bad b{color:var(--bad)}
+.tutPic .mbtn{padding:8px 14px;border-radius:5px;border:1px solid var(--line);background:var(--panel2);font-size:14px;color:var(--text)} .tutPic .mbtn.pri{border-color:var(--warn);color:var(--warn);font-weight:500}
+.tutPic .cursor{position:absolute;width:0;height:0;border-left:9px solid #fff;border-top:5px solid transparent;border-bottom:13px solid transparent;transform:rotate(-30deg);filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.tutPic .bubble{position:absolute;top:12px;right:16px;background:#FFE0D6;border:2px solid #B4471E;color:#8A2A12;border-radius:12px;padding:4px 10px;font-size:13px;font-weight:700}
 .screenBox .eyebrow{font-size:14px}
 .screenBox h1{font-size:30px;margin:0 0 8px}
 .screenBox .lede{font-size:17px;max-width:64ch;margin-bottom:26px}
@@ -228,8 +250,18 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   <div class="screenBox">
     <p class="eyebrow">Three.js · 산업안전기사 · 수치 규정 실습</p>
     <h1>산업안전 규격 실습장</h1>
-    <p class="lede">높이·거리·각도·간격으로 정해진 안전 규정을 3D로 세워 두고, 값을 바꿔 가며 판정과 시험을 봅니다. 과목을 고르면 그 과목의 법령·규정 목록이 열립니다.</p>
+    <p class="lede">높이·거리·각도·간격으로 정해진 안전 규정을 3D로 세워 두고, 값을 바꿔 가며 판정과 시험을 봅니다. 과목을 고르면 그 과목의 법령·규정 목록이 열립니다. <button class="b sm" type="button" id="bTut">사용법 (4단계)</button></p>
     <div class="subjGrid" id="homeGrid"></div>
+  </div>
+</div>
+<!-- 첫 실행 튜토리얼: 4단계, 로딩 후 한 번만 (localStorage). 홈의 「사용법」 버튼으로 다시 볼 수 있음 -->
+<div id="tut" hidden>
+  <div class="tutCard" role="dialog" aria-modal="true" aria-labelledby="tutTitle">
+    <div class="tutHd"><span class="tutStep" id="tutStep">1 / 4</span><button class="b sm" type="button" id="tutSkip">건너뛰기</button></div>
+    <div class="tutPic" id="tutPic"></div>
+    <h3 id="tutTitle"></h3>
+    <p id="tutBody"></p>
+    <div class="tutFt"><div class="dots" id="tutDots"></div><button class="b primary" type="button" id="tutNext">다음</button></div>
   </div>
 </div>
 <div id="list" class="screen" hidden>
@@ -1403,6 +1435,28 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   }
   let auto = !reduced, autoT = 0;
   el('bAuto').addEventListener('click', ()=>{ auto = !auto; autoT = 0; el('bAuto').setAttribute('aria-pressed', auto); el('bAuto').textContent = auto ? '자동 시연 켜짐' : '자동 시연 꺼짐'; el('bAuto').setAttribute('aria-pressed', String(auto)); });
+  /* ---------- 첫 실행 튜토리얼 (4단계, 한 번만) ---------- */
+  const TUT = [
+    {t:'① 과목을 고릅니다', b:'첫 화면의 과목 카드를 누르면 그 과목의 법령·규정 목록이 열립니다. 「★ 추천」이 붙은 건설안전기술부터 보셔도 좋습니다.',
+     pic:'<div class="mcard"><i class="t"></i><i class="s"></i><i></i></div><div class="mcard hi"><i class="t"></i><i class="s"></i><i></i></div><div class="mcard"><i class="t"></i><i class="s"></i><i></i></div><span class="cursor" style="left:56%;top:62%"></span>'},
+    {t:'② 규정을 고르면 3D 현장이 열립니다', b:'목록에서 규정 하나를 누르세요. 왼쪽에 규정 수치 표·근거 조문·판정이, 가운데에 그 규정이 필요한 현장이 나타납니다. 위쪽 칩으로 같은 과목의 다른 규정으로 바로 옮길 수 있습니다.',
+     pic:'<div class="mcol"><div class="mrow"><span>낙하물 방지망</span><span>10 m · 2 m · 20~30°</span></div><div class="mrow hi"><span>안전난간</span><span>90 cm · 중간 1단 · 10 cm</span></div><div class="mrow"><span>사다리식 통로</span><span>75° · 60 cm · 30 cm</span></div></div><span class="cursor" style="left:70%;top:52%"></span>'},
+    {t:'③ 값을 바꿔 보세요', b:'아래 「테스트 항목」 칩을 누르면 슬라이더나 선택 버튼이 열립니다. 규정을 벗어나면 칩 테두리가 빨개지고 현장에 경고 표지가 뜨며 안전관리자가 기준값을 말합니다. 「규정값」을 누르면 처음 값으로 돌아갑니다.',
+     pic:'<div class="mchip"><span>상부 난간대 높이</span><b>90 cm</b></div><div class="mchip"><span>중간 난간대 단수</span><b>1 단</b></div><div class="mchip bad"><span>발끝막이판 높이</span><b>4 cm</b></div><span class="bubble">거기! 발끝막이판 4 cm → 기준 10 cm 이상!</span><span class="cursor" style="left:72%;top:60%"></span>'},
+    {t:'④ 시험으로 확인합니다', b:'「▶ 시험」을 누르면 그 상황을 재현합니다. 규정을 지키면 무사히 끝나고, 어기면 사고가 납니다. 오른쪽 넓게·가까이·배율 슬라이더로 시점을 바꾸고, 드래그로 회전, 우클릭 드래그로 이동합니다.',
+     pic:'<span class="mbtn pri">▶ 난간에 기대기</span><span class="mbtn">↺ 규정값</span><span class="mbtn">자동 시연 켜짐</span><div class="mcol" style="margin-left:18px"><span class="mbtn" style="text-align:center">넓게</span><span class="mbtn" style="text-align:center">가까이</span></div><span class="cursor" style="left:22%;top:58%"></span>'},
+  ];
+  let tutI = 0;
+  const TUT_KEY = 'safety3d_tut_v1';
+  function tutShow(i){ tutI = i; const s = TUT[i]; el('tutStep').textContent = `${i+1} / ${TUT.length}`; el('tutTitle').textContent = s.t; el('tutBody').textContent = s.b; el('tutPic').innerHTML = s.pic;
+    el('tutDots').innerHTML = TUT.map((_, k)=> `<i class="${k===i?'on':''}"></i>`).join(''); el('tutNext').textContent = i === TUT.length - 1 ? '시작하기' : '다음'; el('tut').hidden = false; }
+  function tutClose(){ el('tut').hidden = true; try{ localStorage.setItem(TUT_KEY, '1'); }catch(e){} }
+  el('tutNext').addEventListener('click', ()=>{ if(tutI >= TUT.length - 1) tutClose(); else tutShow(tutI + 1); });
+  el('tutSkip').addEventListener('click', tutClose);
+  el('bTut').addEventListener('click', ()=> tutShow(0));
+  el('tut').addEventListener('click', e=>{ if(e.target === el('tut')) tutClose(); });
+  document.addEventListener('keydown', e=>{ if(el('tut').hidden) return; if(e.key === 'Escape') tutClose(); if(e.key === 'ArrowRight' || e.key === 'Enter') el('tutNext').click(); });
+  { let seen = false; try{ seen = !!localStorage.getItem(TUT_KEY); }catch(e){} if(!seen) tutShow(0); }
   el('bQuiz').addEventListener('click', ()=>{ const w = el('quizWrap'); w.hidden = !w.hidden; el('bQuiz').setAttribute('aria-expanded', String(!w.hidden)); el('bQuiz').textContent = w.hidden ? `문항 보기 (${(Q[S.topic] || []).length})` : '접기'; });
   // 칩 팝오버 바깥을 누르면 닫힘
   document.addEventListener('click', e=>{ if(!e.target.closest('.chip')) document.querySelectorAll('#sliders .chip.open').forEach(x=> x.classList.remove('open')); });
