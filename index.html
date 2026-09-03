@@ -407,7 +407,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     fall:{d:p=>({v:10,t:'10 m 이하'}), Lf:p=>({v:3,t:'3 m 이상'}), sag:p=>({v:12,t:'12 % 이상'})},
     rail:{hTop:p=>({v:90,t:'90 cm 이상'}), mid:p=>({v:p.hTop<=120?1:2, t:p.hTop<=120?'1단 이상 (120 cm 이하)':'2단 이상 (120 cm 초과)'}), toe:p=>({v:10,t:'10 cm 이상'})},
     ladder:{ang:p=>({v:75,t:'75° 이하'}), prot:p=>({v:60,t:'60 cm 이상'}), width:p=>({v:30,t:'30 cm 이상'})},
-    ramp:{ang:p=>({v:30,t:'30° 이하 · 15° 초과 시 미끄럼막이'}), Lh:p=>({v:7,t:'7 m 이내 (높이 8 m 이상)'})},
+    ramp:{ang:p=>({v:30,t:'30° 이하 · 15° 초과 시 미끄럼막이'}), Lh:p=> p.H >= 8 ? {v:7,t:'7 m 이내'} : {v:7,t:'해당 없음 (높이 8 m 미만)'}},
     plank:{w:p=>({v:40,t:'40 cm 이상'}), gap:p=>({v:3,t:'3 cm 이하'}), sup:p=>({v:2,t:'2개 이상'})},
     scaffold:{a:p=>({v:1.85,t:'1.85 m 이하'}), b:p=>({v:1.5,t:'1.5 m 이하'}), h:p=>({v:2,t:'2.0 m 이하'}), tv:p=>({v:5,t:'5 m 이하'}), th:p=>({v:5,t:'5 m 이하'}), load:p=>({v:400,t:'400 kg 이하'})},
     stairs:{w:p=>({v:1,t:'1 m 이상'}), Lland:p=>({v:3,t:'3 m 이내'}), lenLand:p=>({v:1.2,t:'1.2 m 이상'}), head:p=>({v:2,t:'2 m 이상'}), strength:p=>({v:500,t:'500 kg/㎡ 이상'})},
@@ -1497,8 +1497,13 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       const {landed, prev} = flyStep(o, dt, 0); const p = o.position; if(test.kind==='brick') o.rotation.x += dt*4; else flail(o, test.t);
       if(p.x < NET_X1){ for(const tier of netTiers){ const zr = tier.L*Math.cos(tier.a); if(p.z >= 0 && p.z <= zr && prev.y > netSurfaceY(tier, prev.z) && p.y <= netSurfaceY(tier, p.z)){ p.y = netSurfaceY(tier, p.z) + 0.15; const ok = allOk('net'); done(o, '낙하물 방지망이 받아냈습니다', `높이 ${fmt(tier.h)} m 망 · 규정 ${ok?'적합':'일부 부적합'}`, ok, `망이 받아냈습니다 (높이 ${fmt(tier.h)} m). ${ok?'규정도 적합합니다.':'단, 규정 판정에 부적합 항목이 있습니다.'}`); return; } } }
       if(p.x > FALL_X0 && p.x < FALL_X1){ const yN = B.H - S.fall.d; if(p.z >= 0 && p.z <= S.fall.Lf && prev.y > yN && p.y <= yN){ p.y = yN - 0.3; if(test.kind==='faller'){ o.rotation.set(-Math.PI/2, 0, 0); walkPose(o, 0, 0); } const okD = S.fall.d <= 10, ok = allOk('fall');
+        // 안전난간 주제에서 난간을 넘어 떨어진 경우: 망이 받았어도 난간 규정 위반이 결론
+        if(S.topic==='rail'){ done(o, '난간을 넘어 추락 · 추락방호망이 받아냈습니다', `상부 난간대 ${S.rail.hTop} cm < 90 cm`, false, `난간이 낮아 몸이 넘어갔습니다 (상부 난간대 ${S.rail.hTop} cm < 90 cm). 아래 추락방호망이 받아냈습니다.`); return; }
         done(o, '추락방호망이 받아냈습니다', okD ? `낙하 ${fmt(S.fall.d)} m · 규정 ${ok?'적합':'일부 부적합'}` : `낙하 ${fmt(S.fall.d)} m는 10 m 초과 · 충격 과대`, ok, okD ? `망이 받아냈습니다 (낙하 ${fmt(S.fall.d)} m).` + (ok?' 규정도 적합합니다.':' 단, 규정 판정에 부적합 항목이 있습니다.') : `받아냈지만 낙하 높이 ${fmt(S.fall.d)} m는 규정(10 m 이하) 위반입니다.`); return; } }
-      if(landed){ if(test.kind==='faller'){ o.rotation.set(-Math.PI/2, 0, 0); walkPose(o, 0, 0); } impact(p.clone(), test.kind==='faller'); const what = test.kind==='brick' ? '낙하물이 지상까지 떨어졌습니다' : '작업자가 지상까지 떨어졌습니다'; done(o, what, '망이 받아내지 못함', false, what + '. 망의 위치·길이·각도를 확인하세요.'); }
+      if(landed){ if(test.kind==='faller'){ o.rotation.set(-Math.PI/2, 0, 0); walkPose(o, 0, 0); } impact(p.clone(), test.kind==='faller'); const what = test.kind==='brick' ? '낙하물이 지상까지 떨어졌습니다' : '작업자가 지상까지 떨어졌습니다';
+        // 원인은 주제별로: 사다리·난간 주제에선 망 이야기가 아니라 그 구조물의 위반 사유를 적는다
+        const why = S.topic==='ladder' ? (S.ladder.ang > 75 ? `기울기 ${S.ladder.ang}° > 75° · 사다리가 뒤로 넘어감` : '사다리에서 추락') : S.topic==='rail' ? `상부 난간대 ${S.rail.hTop} cm < 90 cm · 난간 너머로 추락` : '망이 받아내지 못함';
+        done(o, what, why, false, what + '. ' + (S.topic==='ladder' || S.topic==='rail' ? why : '망의 위치·길이·각도를 확인하세요.')); }
     } else if(test.phase==='lean'){
       const k = Math.min(1, test.t/1.4); o.rotation.x = -0.45*k; o.position.z = -0.6 + 0.35*k;
       if(k>=1){ if(S.rail.hTop >= 90){ o.rotation.x = -0.25; const ok = allOk('rail'); done(o, '난간이 받쳐 줍니다', `상부 난간대 ${S.rail.hTop} cm ≥ 90 cm`, ok, `상부 난간대 ${S.rail.hTop} cm가 몸을 받쳐 줍니다.` + (ok ? ' 규정도 적합합니다.' : ' 단, 다른 항목에 부적합이 있습니다.')); }
@@ -1556,7 +1561,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     else if(t==='grinder'){ R.wheel.rotation.x += dt*30; const maxE = GRIND_MAX[p.type], bad = p.expo > maxE;
       if(test.t > 0.8 && !test.shot){ test.shot = true; const e = p.expo*Math.PI/180; for(let i=0;i<18;i++){ const a = R.upEdge - Math.random()*e; const dir = P3(0, Math.sin(a), Math.cos(a)); const s = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 5), new THREE.MeshBasicMaterial({color: col(bad ? 0xF07056 : 0xFFE28A)})); s.position.copy(R.center).addScaledVector(dir, R.r); s.userData.v = dir.multiplyScalar(2.5 + Math.random()*2); s.userData.v.x = (Math.random()-.5)*0.8; stages.grinder.add(s); R.sparks.push(s); } }
       R.sparks.forEach(s=>{ s.userData.v.y -= G*dt*0.4; s.position.addScaledVector(s.userData.v, dt); const ang = Math.atan2(s.position.y - R.center.y, s.position.z - R.center.z); if(!bad && s.position.distanceTo(R.center) > R.r + 0.05 && (ang > R.upEdge || ang < R.upEdge - p.expo*Math.PI/180)){ s.userData.v.set(0,0,0); } });
-      if(test.t > 2.4){ done(R.wheel, bad ? '파편이 덮개 밖으로 튑니다' : '덮개가 파편을 막아냅니다', `노출 ${p.expo}° (허용 ${maxE}°)`, !bad && allOk('grinder')); } }
+      if(test.t > 2.4){ const okAll = allOk('grinder'); done(R.wheel, bad ? '파편이 덮개 밖으로 튑니다' : (okAll ? '덮개가 파편을 막아냅니다' : '덮개는 막았지만 워크레스트 간격 초과'), `노출 ${p.expo}° (허용 ${maxE}°)` + (!bad && !okAll ? ` · 워크레스트 ${fmt(p.rest)} mm > 3 mm` : ''), !bad && okAll); } }
     else if(t==='approach'){ const k = Math.min(1, test.t/1.2), L = o.userData.limbs; L.arms[1].rotation.x = -1.6*k; L.arms[0].rotation.x = -0.3*k;
       if(k>=1){ const lim = approachCm(p.kv), bad = p.horiz < lim && !p.guard;
         if(bad){ for(let i=0;i<20;i++){ const s = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5), new THREE.MeshBasicMaterial({color: col(0xFFE28A)})); s.position.set((Math.random()-.5)*0.8, R.wireY - Math.random()*0.8, R.hz*Math.random()); stages.approach.add(s); } done(o, '아크 방전! 감전', `${p.kv} kV 접근한계 ${lim} cm · 현재 ${p.horiz} cm`, false); }
@@ -1650,7 +1655,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   let viaHash = false;
   { const m = (location.hash || '').match(/topic=([a-z]+)/); if(m && T[m[1]]){ S.topic = m[1]; S.subj = SUBJECTS.find(s=>s.topics.includes(S.topic)).id; viaHash = true; } }
   buildHome(); buildTabs(); buildTopicUI(); refresh();
-  window.__dbg = {get labels(){ return labels; }, get AMB(){ return AMB; }, camera, THREE};
+  window.__dbg = {get labels(){ return labels; }, get AMB(){ return AMB; }, camera, THREE, T, LIM, S, DEFAULTS, judge, allOk, get test(){ return test; }};
   home.hidden = viaHash;   // 해시로 바로 들어온 경우가 아니면 과목 창부터
   { const v = viewOf('wide'); Object.assign(orbit, v, {target: v.target.clone()}); }
   const easeIO = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
@@ -1869,7 +1874,7 @@ addTopic('mach', 'robot', {
   idle(dt, T0, free, R, p){ if(R.stopped) return; R.colG.rotation.y = 0.9*Math.sin(T0*0.7); R.upper.rotation.x = -0.35 + 0.3*Math.sin(T0*1.1); R.fore.rotation.x = 0.7 + 0.35*Math.cos(T0*0.9);
     if(R.beams) R.beams.forEach((b,i)=> b.visible = Math.sin(T0*6 + i) > -0.6); },
   step(dt, o, R, p){ const z = o.position.z;
-    if(test.stopAt !== undefined){ if(test.t > test.stopAt + 1.0) done(o, test.title, test.sub, test.ok); return; }
+    if(test.stopAt !== undefined){ if(test.t > test.stopAt + 1.0) done(o, test.title + (test.ok ? '' : ' · 규정 일부 미비'), test.sub + (test.ok ? '' : ' · 교시 작업 기동스위치 조치 없음'), test.ok); return; }
     o.position.z -= 0.9*dt; walkPose(o, test.t*6, 0.5);
     if(p.fence >= 1.8 - 1e-9 && z <= 2.75){ o.position.z = 2.75; walkPose(o, 0, 0); o.userData.limbs.arms[1].rotation.x = -1.3; test.stopAt = test.t; test.title = '울타리가 접근을 막았습니다'; test.sub = `울타리 ${fmt(p.fence)} m ≥ 1.8 m`; test.ok = allOk('robot'); return; }
     if(z <= 2.45 && p.fence > 0.05 && !test.over){ test.over = true; o.position.y = p.fence*0.5; }
@@ -2017,11 +2022,13 @@ addTopic('elec', 'welder', {
     if(p.inst===1){ dimLabels.push(addLabel({cls:'dim ' + (ok[1]?'ok':'bad'), anchor: P3(-1.9, 1.6, -1.0), html:`<b>무부하 ${p.v} V</b>`})); dimLabels.push(addLabel({cls:'dim ' + (ok[2]?'ok':'bad'), anchor: P3(-1.9, 1.35, -0.3), html:`<b>지동 ${fmt(p.td)}초 · 시동감도 ${p.sens} Ω</b>`})); }
     nameLabel(P3(0, 1.9, 0), '교류아크용접 작업', WD_PLACE[p.place]); if(!ok[0] || !ok[1] || !ok[2]) hazardArc(P3(0.35, 0.95, 0.55), P3(0.05, 0.9, 0), 0.5); },
   idle(dt, T0, free, R, p){ if(!free) return; const L = R.w.userData.limbs; L.arms[1].rotation.x = -1.2 + 0.08*Math.sin(T0*3); const on = Math.sin(T0*0.9) > -0.2; R.sparks.forEach((s,i)=>{ s.visible = on; if(on){ const u = (T0*3 + i*0.7) % 1; s.position.set(0.05 + Math.sin(i*5)*0.25*u, 0.92 + 0.5*u - 0.9*u*u, 0.1 + Math.cos(i*3)*0.25*u); } }); },
-  step(dt, o, R, p){ const L = o.userData.limbs, safe = p.inst===1 && p.v <= 25 && p.td <= 1.0 + 1e-9;
+  step(dt, o, R, p){ const L = o.userData.limbs;
+    // 전격방지기가 있으면 25 V·1초 성능이 지켜져야 안전, 없으면 일반 장소(도전성 낮음)에서만 규정상 허용
+    const safe = p.inst===1 ? (p.v <= 25 && p.td <= 1.0 + 1e-9) : p.place===0;
     if(test.t < 1.2){ R.sparks.forEach((s,i)=>{ s.visible = true; const u = (test.t*4 + i*0.7) % 1; s.position.set(0.05 + Math.sin(i*5)*0.3*u, 0.92 + 0.6*u - 1.0*u*u, 0.1 + Math.cos(i*3)*0.3*u); }); return; }
     R.sparks.forEach(s=> s.visible = false); const k = Math.min(1, (test.t - 1.2)/0.8); L.arms[1].rotation.x = -1.2 + 0.6*k; L.arms[0].rotation.x = -0.4 - 0.9*k;
-    if(k >= 1 && !test.judged){ test.judged = true; if(safe){ done(o, '용접봉을 뗀 뒤 안전전압으로 저하 · 접촉해도 감전 없음', `무부하전압 ${p.v} V · 지동시간 ${fmt(p.td)}초`, allOk('welder')); } else { test.shock = true; test.shockT = test.t; hazardArc(P3(0.35, 0.95, 0.55), P3(0.05, 0.95, 0.4), 1); setResult(p.inst===0 ? '자동전격방지기가 없어 홀더에 용접기 2차 무부하전압이 그대로…' : `무부하전압 ${p.v} V · 지동시간 ${fmt(p.td)}초 → 안전전압으로 떨어지기 전에 접촉`, false); yell(o, '찌리릿!!!', 'scream', 1.4); } }
-    if(test.shock){ o.rotation.z = 0.25*Math.sin(test.t*40); if(test.t > test.shockT + 1.0){ o.rotation.z = 0; lieDown(o); o.position.y = 0.15; done(o, '감전 재해', T.welder.rules.filter(r=> !r[1](p))[0][0], false); } } }
+    if(k >= 1 && !test.judged){ test.judged = true; if(safe){ done(o, p.inst===1 ? '용접봉을 뗀 뒤 안전전압으로 저하 · 접촉해도 감전 없음' : '일반 장소 · 자동전격방지기 설치 의무 없음', p.inst===1 ? `무부하전압 ${p.v} V · 지동시간 ${fmt(p.td)}초` : '도전성 낮은 장소 (선박·탱크·습윤·철골 접촉 작업이면 필수)', allOk('welder')); } else { test.shock = true; test.shockT = test.t; hazardArc(P3(0.35, 0.95, 0.55), P3(0.05, 0.95, 0.4), 1); setResult(p.inst===0 ? '자동전격방지기가 없어 홀더에 용접기 2차 무부하전압이 그대로…' : `무부하전압 ${p.v} V · 지동시간 ${fmt(p.td)}초 → 안전전압으로 떨어지기 전에 접촉`, false); yell(o, '찌리릿!!!', 'scream', 1.4); } }
+    if(test.shock){ o.rotation.z = 0.25*Math.sin(test.t*40); if(test.t > test.shockT + 1.0){ o.rotation.z = 0; lieDown(o); o.position.y = 0.15; const f = T.welder.rules.filter(r=> !r[1](p))[0]; done(o, '감전 재해', f ? f[0] : `무부하전압 ${p.v} V · 지동시간 ${fmt(p.td)}초`, false); } } }
 });
 
 /* ---------- 9. 전기 기계·기구 조작 시 안전조치 (전기) ---------- */
@@ -2112,7 +2119,7 @@ addTopic('chem', 'confined', {
   defaults:{o2:20.9, co2:0.3, co:5, h2s:2, vent:1},
   sliders:[['o2','산소 농도','%',10,25,0.5],['co2','탄산가스 농도','%',0,3,0.1],['co','일산화탄소 농도','ppm',0,100,5],['h2s','황화수소 농도','ppm',0,30,1],['vent','환기','',0,1,1,CF_VENT]],
   rules:[['산소 농도 18 % 이상 23.5 % 미만', p=> p.o2 >= 18 - 1e-9 && p.o2 < 23.5, p=>`현재 ${fmt(p.o2)} %`],['탄산가스 농도 1.5 % 미만', p=> p.co2 < 1.5, p=>`현재 ${fmt(p.co2)} %`],['일산화탄소 농도 30 ppm 미만', p=> p.co < 30, p=>`현재 ${p.co} ppm`],['황화수소 농도 10 ppm 미만', p=> p.h2s < 10, p=>`현재 ${p.h2s} ppm`],['작업 시작 전·작업 중 적정공기 상태가 유지되도록 환기', p=> p.vent===1, p=> CF_VENT[p.vent]]],
-  lim:{o2:p=>({v:20.9, t:'18 % 이상 23.5 % 미만', lo:18, hi:23.49}), co2:p=>({v:1.0, t:'1.5 % 미만'}), co:p=>({v:25, t:'30 ppm 미만'}), h2s:p=>({v:5, t:'10 ppm 미만'})},
+  lim:{o2:p=>({v:20.9, t:'18 % 이상 23.5 % 미만', lo:18, hi:23.49}), co2:p=>({v:1.4, t:'1.5 % 미만'}), co:p=>({v:29, t:'30 ppm 미만'}), h2s:p=>({v:9, t:'10 ppm 미만'})},
   law:{root:RULE, art:'제618조(정의: 적정공기) · 제619조(밀폐공간 작업 프로그램) · 제620조(환기 등)'}, sum:'산소 18~23.5 % · CO₂ 1.5 % 미만 · CO 30 ppm 미만 · H₂S 10 ppm 미만',
   yell:{ok:'공기 좋다', bad:'어지러워…'}, mgr:[-3.2, 0, 3.4, Math.atan2(3.2, -3.4)],
   build(){
@@ -2235,7 +2242,13 @@ function dressAfter(key, fn){ const orig = BUILD[key]; BUILD[key] = ()=>{ orig()
 dressAfter('ramp', (g, p, R)=>{ const run = R.run, H = p.H, floors = Math.max(1, Math.round(H/3.5)), fh = H/floors;
   DRESS.frame(g, -6, 6, run + 3.2, run + 11, floors, fh, {nx:2, nz:2});
   DRESS.fence(g, -15, 15, run + 13); DRESS.rebar(g, -5.5, -1.2, 0.2); DRESS.blocks(g, 5.6, 0.6); DRESS.planks(g, -7, 3.2, 0.1); DRESS.cones(g, [[-1.4, -2.6], [1.4, -2.6]]);
-  DRESS.office(g, 12.5, 5, -Math.PI/2); DRESS.mixer(g, -12.5, 8, 0.1); R.view.radius *= 1.12; });
+  DRESS.office(g, 12.5, 5, -Math.PI/2); DRESS.mixer(g, -12.5, 8, 0.1); R.view.radius *= 1.12;
+  // 배경 순찰자는 골조를 뚫고 지나가지 않게 경사로 앞쪽으로
+  AMB.filter(a=> a.parent === ambStages.ramp && a.kind==='walk').forEach(a=>{ a.path = [P3(-7, 0, -3), P3(7, 0, -3), P3(7, 0, -5.5), P3(-7, 0, -5.5)]; }); });
+// 굴착면: 지표면이 y=깊이라서 순찰자·자재 줍는 사람·관리자를 흙 위(블록 안쪽 x±5.5)로 올린다 — 바닥 높이에서 걷던 모순 제거
+dressAfter('trench', (g, p, R)=>{ const D = p.depth + 0.03;
+  AMB.filter(a=> a.parent === ambStages.trench).forEach(a=>{ if(a.kind==='walk') a.path = [P3(-5, D, -9), P3(5, D, -9), P3(5, D, -12.5), P3(-5, D, -12.5)]; if(a.kind==='pick') a.g.position.set(-4.5, D, 6); a.g.position.y = D; }); });
+MANAGER_POS.trench = [-4.6, 0, 5.5];
 // 작업발판: 외벽 공사 중인 건물 앞에 세운 발판
 dressAfter('plank', (g, p, R)=>{ DRESS.frame(g, -7, 7, -9.5, -3.6, 3, 3.3, {nx:2, nz:1});
   DRESS.fence(g, -13, 13, -11); DRESS.blocks(g, 5.6, 1.0); DRESS.rebar(g, -6.2, 0.6, 0.15); DRESS.cones(g, [[-2.6, 3.8], [2.6, 3.8]]); DRESS.office(g, 12, 2, -Math.PI/2); DRESS.planks(g, 7.5, 4.2, 0.4); });
