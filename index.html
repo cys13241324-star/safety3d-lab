@@ -107,8 +107,10 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
   #tabs{top:56px;left:8px;right:8px;padding:4px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none} #tabs::-webkit-scrollbar{display:none}
   #tabs > :first-child{margin-left:0} #tabs > :last-child{margin-right:0} #tabs button{scroll-snap-align:start}
   #dock{left:8px;right:8px;bottom:46px} #dock .card{padding:8px 10px 8px;width:100%;box-sizing:border-box}
-  #dock .ctl{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding-bottom:2px;scrollbar-width:none} #dock .ctl::-webkit-scrollbar{display:none}
-  #dock .dockHd .sub,#dock .hintTxt{display:none} #dock .act{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;scrollbar-width:none}
+  /* 변수 칩은 가로 스크롤 대신 3열 격자로 전부 보이게 (작아도 한눈에) */
+  #dock .ctl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;padding-bottom:0}
+  #dock .chip .cb{width:100%;min-width:0;padding:5px 8px;box-sizing:border-box} #dock .chip .cb span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%} #dock .chip .cb output{font-size:13.5px}
+  #dock .dockHd .sub,#dock .hintTxt{display:none} #dock .act{flex-wrap:wrap;justify-content:center;gap:5px} #dock .act .b{font-size:13px;padding:6px 9px}
   .chip .pop,.chip.flip .pop{position:fixed;left:8px;right:8px;bottom:190px;min-width:0;max-width:none}
   #viewBox{top:104px;bottom:auto;right:8px;transform:none} #viewBox .zoom{display:none} #viewBox .b{min-width:56px;font-size:13px;padding:6px 8px}
   #panelHandle{display:flex!important}
