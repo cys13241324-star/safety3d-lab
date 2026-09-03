@@ -6,7 +6,7 @@
 <title>산업안전 규격 실습장</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Nanum+Pen+Script&family=Gothic+A1:wght@800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Nanum+Pen+Script&family=Gothic+A1:wght@300;400;500;800&family=Cormorant+Garamond:wght@300;400;500&family=Nanum+Myeongjo:wght@400;700&display=swap">
 <style>
 :root{
   color-scheme:dark;
@@ -255,6 +255,56 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
 #blindCard{position:fixed;inset:0;z-index:31;background:rgba(4,8,14,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px} #blindCard[hidden]{display:none}
 #blindCard .tutCard{width:min(600px,100%)} #blindCard table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:14px} #blindCard th{text-align:left;color:var(--dim);font-weight:500;padding:4px 6px;font-size:12.5px} #blindCard td{padding:6px;border-top:1px solid var(--line-soft)}
 #blindCard td.ok{color:var(--ok)} #blindCard td.bad{color:var(--bad)} #blindCard .score{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:34px;letter-spacing:-.02em}
+/* ---------- 아뜰리에 테마(Dior 풍, 09-03): 아이보리 지면 · 먹빛 글자 · 헤어라인 괘선 · 금빛 하나 · 와이드 트래킹 세리프 로고 · 둥글림 없음 · 움직임은 금색 밑줄 하나 ---------- */
+.house,.logo,.kicker,.sectionLbl{display:none}
+body.dior{--bg:#F5F2EC;--panel:rgba(251,250,247,.95);--panel2:#EFEBE3;--line:#D8D0C2;--line-soft:#E8E2D6;--text:#14120F;--muted:#3A352E;--dim:#7A7268;--accent:#A2854E;--accent-ink:#FBFAF7;--ok:#2E7D5B;--ok-soft:rgba(46,125,91,.12);--bad:#B23A2E;--bad-soft:rgba(178,58,46,.12);--warn:#A2854E;--acc:#A2854E;
+  --serif:'Cormorant Garamond','Nanum Myeongjo',serif;--kser:'Nanum Myeongjo',serif;color-scheme:light;background:var(--bg);color:var(--text);font-weight:400}
+body.dior .subjCard[data-subj],body.dior[data-subj]{--acc:#A2854E}
+body.dior .screen{background:#F5F2EC;backdrop-filter:none;padding:0 0 80px}
+body.dior .screenBox{max-width:1160px;padding:0 40px}
+body.dior .house{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-bottom:1px solid var(--line);font-family:var(--serif);font-size:15px;letter-spacing:.42em;text-transform:uppercase;font-weight:400}
+body.dior .house .b{letter-spacing:.08em;text-transform:none;font-family:var(--sans);font-size:12.5px}
+body.dior #home .eyebrow{text-align:center;font-family:var(--sans);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--accent);margin:72px 0 26px;padding-left:.34em}
+body.dior #home h1{text-align:center;font-family:var(--serif);font-weight:300;font-size:clamp(38px,6.4vw,78px);line-height:1.04;letter-spacing:.13em;margin:0;padding-left:.13em;color:var(--text)}
+body.dior #home h1 .logo{display:block} body.dior #home h1 .ko{display:block;font-family:var(--kser);font-weight:400;font-size:.42em;letter-spacing:.24em;color:var(--muted);margin-top:22px;padding-left:.24em}
+body.dior .hazard{width:1px;height:64px;max-width:1px;border-radius:0;background:#C4B9A6;margin:38px auto 0}
+body.dior #home .lede{max-width:52ch;margin:34px auto 0;text-align:center;font-size:14.5px;line-height:2;color:var(--muted);letter-spacing:.01em} body.dior #home .lede .b{margin-left:8px}
+body.dior .homeStats{display:flex;justify-content:center;gap:0;margin:56px auto 0;max-width:900px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)} body.dior .homeStats span{flex:1;text-align:center;padding:24px 8px;border-left:1px solid var(--line);font-family:var(--sans);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);display:flex;flex-direction:column;gap:10px} body.dior .homeStats span:first-child{border-left:0} body.dior .homeStats b{font-family:var(--serif);font-weight:400;font-size:34px;letter-spacing:.04em;line-height:1;color:var(--text);margin:0}
+body.dior .sectionLbl{display:block;text-align:center;margin:80px 0 30px;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--dim);padding-left:.3em}
+body.dior .subjGrid{grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+body.dior .subjCard{position:relative;background:#FBFAF7;border:0;border-left:0;border-radius:0;padding:40px 34px 34px;min-height:290px;gap:0;transition:background .45s;box-shadow:none;transform:none;overflow:visible}
+body.dior .subjCard:hover,body.dior .subjCard:focus-visible{background:#EFEBE3;transform:none;box-shadow:none;border-color:transparent}
+body.dior .subjCard::after{content:'';position:absolute;left:34px;right:34px;bottom:0;height:1px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.2,.7,.3,1)} body.dior .subjCard:hover::after{transform:scaleX(1)}
+body.dior .subjCard .n{font-family:var(--serif);font-size:13px;letter-spacing:.24em;color:var(--accent);text-transform:none}
+body.dior .subjCard .num{display:none}
+body.dior .subjCard .name{font-family:var(--kser);font-weight:700;font-size:20px;line-height:1.45;letter-spacing:.01em;margin:26px 0 0;color:var(--text)}
+body.dior .subjCard .kicker{display:block;font-family:var(--serif);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-top:8px}
+body.dior .subjCard .desc{font-size:13px;line-height:1.95;color:var(--muted);margin:18px 0 0;flex:1}
+body.dior .subjCard .stat{padding-top:18px;margin-top:20px;border-top:1px solid var(--line);font-family:var(--sans);font-size:11px;letter-spacing:.06em;color:var(--dim);gap:20px} body.dior .subjCard .stat b{font-family:var(--serif);font-size:15px;font-weight:500;color:var(--text);margin-right:5px;letter-spacing:.02em}
+body.dior .subjCard .stamp{color:var(--accent);border-color:var(--accent);text-shadow:none;opacity:.85;font-size:27px;right:26px;top:26px} body.dior .subjCard .stamp b{font-size:20px;font-weight:400}
+body.dior .lawRow{border-radius:0;border:1px solid var(--line);border-left:1px solid var(--line);background:#FBFAF7} body.dior .lawRow:hover{transform:none;background:#EFEBE3;border-color:var(--accent)} body.dior .lawRow .name{font-family:var(--kser);font-weight:700} body.dior .lawRow .go{color:var(--accent)}
+body.dior #list .screenBox h1{font-family:var(--kser);font-weight:700;font-size:30px;letter-spacing:.02em;margin-top:40px} body.dior .crumb{margin-top:30px}
+body.dior #navBar,body.dior #panel,body.dior #dock .card,body.dior .chip .cb,body.dior .chip .pop,body.dior #tabs button,body.dior #viewBox .b,body.dior .tutCard,body.dior #panelHandle,body.dior .lawRow{border-radius:0}
+body.dior #navBar{background:rgba(251,250,247,.96);backdrop-filter:none} body.dior #navBar .eyebrow{color:var(--accent);letter-spacing:.06em}
+body.dior #panel{background:rgba(251,250,247,.96);backdrop-filter:none} body.dior #panel h1{font-family:var(--kser);font-weight:700;font-size:23px}
+body.dior h2{color:var(--dim);letter-spacing:.2em} body.dior h2::before{display:none}
+body.dior .rtable th{letter-spacing:.14em} body.dior .rtable tbody tr:nth-child(even) td{background:rgba(20,18,15,.025)}
+body.dior .rules li{border-radius:0} body.dior .pill{border-radius:0;letter-spacing:.08em}
+body.dior #tabs button{background:rgba(251,250,247,.96);backdrop-filter:none;color:var(--muted);border-color:var(--line);letter-spacing:.02em} body.dior #tabs button[aria-pressed="true"]{background:#14120F;color:#FBFAF7;border-color:#14120F;font-weight:500}
+body.dior #dock .card{background:rgba(251,250,247,.96);backdrop-filter:none;border:1px solid var(--line);box-shadow:0 12px 30px rgba(20,18,15,.12)} body.dior #dock .card::before{height:2px;background:var(--accent);border-radius:0}
+body.dior #dock .dockHd .cap{letter-spacing:.2em;text-transform:uppercase;font-size:11px;border-radius:0}
+body.dior .chip .cb,body.dior #dock .chip .cb{background:#FBFAF7;border-color:var(--line);color:var(--muted)} body.dior .chip .cb span{letter-spacing:.02em} body.dior .chip .cb output{color:var(--accent)} body.dior .chip.open .cb{background:#14120F;color:#FBFAF7;border-color:#14120F} body.dior .chip.open .cb output{color:#E8D9B8} body.dior .chip.bad .cb{border-color:var(--bad);box-shadow:none}
+body.dior .chip .pop{background:#FBFAF7;box-shadow:0 12px 30px rgba(20,18,15,.14)}
+body.dior button.b,body.dior #dock .act .b,body.dior #viewBox .b{background:#FBFAF7;backdrop-filter:none;color:var(--text);border-color:var(--line);letter-spacing:.02em} body.dior button.b:hover{border-color:var(--accent)}
+body.dior button.b.primary,body.dior #dock .act .b.primary{background:#14120F;color:#FBFAF7;border-color:#14120F;font-weight:500} body.dior button.b.primary:hover,body.dior #dock .act .b.primary:hover{background:#3A352E;border-color:#3A352E}
+body.dior button.b[aria-pressed="true"]{background:#EFEBE3;border-color:var(--accent)}
+body.dior .slider input[type=range]::-webkit-slider-runnable-track{background:#E8E2D6;border-color:#D8D0C2} body.dior .slider input[type=range]::-webkit-slider-thumb{background:var(--accent);border-color:#FBFAF7} body.dior .slider input[type=range]::-moz-range-track{background:#E8E2D6;border-color:#D8D0C2} body.dior .slider input[type=range]::-moz-range-thumb{background:var(--accent);border-color:#FBFAF7}
+body.dior .dockNote{color:var(--text);background:rgba(162,133,78,.12);border-color:rgba(162,133,78,.5)}
+body.dior .lbl{background:rgba(251,250,247,.92);color:var(--text);border-color:rgba(20,18,15,.28)} body.dior .lbl span{color:var(--dim)} body.dior .lbl.dim{border-color:rgba(20,18,15,.35)}
+body.dior #tut,body.dior #blindCard{background:rgba(245,242,236,.8)} body.dior .tutCard{background:#FBFAF7;box-shadow:0 20px 60px rgba(20,18,15,.18)} body.dior .tutCard h3{font-family:var(--kser);font-weight:700;font-size:20px} body.dior .tutPic{background:#EFEBE3}
+body.dior #panelHandle{background:rgba(251,250,247,.98);color:var(--text)}
+body.dior .zoom .zb{background:#FBFAF7;color:var(--text)} body.dior #zoomR{background:rgba(251,250,247,.6)}
+@media (max-width:760px){ body.dior .screenBox{padding:0 12px} body.dior .subjGrid{grid-template-columns:1fr} body.dior .subjCard{min-height:0;padding:26px 22px} body.dior #home h1{font-size:34px} body.dior .homeStats span{padding:16px 4px} body.dior .homeStats b{font-size:26px} body.dior .house{padding:14px 0;font-size:12px;letter-spacing:.3em} }
 /* ---------- 모바일(760px 이하): 최상단 목록·과목 바 → 그 아래 규정 칩 스트립(스와이프) → 3D → 하단 테스트 항목 카드 → 맨 아래 접이식 「규정 수치·판정·기출」 손잡이 ---------- */
 @media (max-width:760px){
   #navBar{left:8px;right:8px;top:8px;max-width:none}
@@ -309,11 +359,13 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
 
 <div id="home" class="screen">
   <div class="screenBox">
+    <div class="house"><span>ADDTO · Safety Standards</span><button class="b sm" type="button" id="bTheme" title="테마 바꾸기">테마: 아뜰리에</button></div>
     <p class="eyebrow">Three.js · 산업안전기사 · 수치 규정 실습</p>
-    <h1>산업안전 규격 실습장</h1>
+    <h1><span class="logo">ADDTO</span><span class="ko">산업안전 규격 실습장</span></h1>
     <div class="hazard" aria-hidden="true"></div>
     <p class="lede">높이·거리·각도·간격으로 정해진 안전 규정을 3D로 세워 두고, 값을 바꿔 가며 판정과 시험을 봅니다. 과목을 고르면 그 과목의 법령·규정 목록이 열립니다. <button class="b sm" type="button" id="bTut">사용법 (4단계)</button></p>
     <div class="homeStats" id="homeStats"></div>
+    <p class="sectionLbl">Les Six — 여섯 과목</p>
     <div class="subjGrid" id="homeGrid"></div>
   </div>
 </div>
@@ -338,7 +390,7 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
 </div>
 
 <!-- 좌측 상단 고정 내비게이션: 목록·과목 버튼 + 현재 위치. 텍스트 패널은 그 아래 -->
-<div id="navBar"><button class="b" id="bList" type="button">← 목록</button><button class="b" id="bHome" type="button">과목</button><span class="eyebrow" id="crumbPanel">산업안전기사 · 수치 규정 실습</span></div>
+<div id="navBar"><button class="b" id="bList" type="button">← 목록</button><button class="b" id="bHome" type="button">과목</button><span class="eyebrow" id="crumbPanel">산업안전기사 · 수치 규정 실습</span><button class="b sm" id="bTheme2" type="button" title="테마 바꾸기">◐</button></div>
 <aside id="panel">
   <header>
     <div>
@@ -551,8 +603,12 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   scene.background = col(0x0A1018);
   // 하늘: 그라데이션 돔 (광원 효과·블룸 없음, 무광 유지) + 지평선 색과 맞춘 안개로 원근감
   function skyTexture(){ const c = document.createElement('canvas'); c.width = 4; c.height = 512; const g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 512); gr.addColorStop(0, '#0B1220'); gr.addColorStop(0.42, '#1A2740'); gr.addColorStop(0.5, '#33455F'); gr.addColorStop(0.56, '#4E6078'); gr.addColorStop(0.62, '#3B4858'); gr.addColorStop(1, '#2A3340'); g.fillStyle = gr; g.fillRect(0, 0, 4, 512); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t; }
-  const sky = new THREE.Mesh(new THREE.SphereGeometry(420, 32, 16), new THREE.MeshBasicMaterial({map: skyTexture(), side: THREE.BackSide, fog: false})); scene.add(sky);
+  // 낮(아뜰리에 테마: 흐린 아이보리 하늘) / 밤(다크 테마) 하늘 두 벌 — applyTheme 이 바꾼다
+  function skyTextureStops(stops){ const c = document.createElement('canvas'); c.width = 4; c.height = 512; const g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 512); stops.forEach(([o, h])=> gr.addColorStop(o, h)); g.fillStyle = gr; g.fillRect(0, 0, 4, 512); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t; }
+  const skyNight = skyTexture(), skyDay = skyTextureStops([[0, '#AEB4BE'], [0.4, '#D2D4D6'], [0.5, '#ECE8E0'], [0.56, '#E6E1D7'], [0.62, '#CFC9BD'], [1, '#B9B2A5']]);
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(420, 32, 16), new THREE.MeshBasicMaterial({map: skyNight, side: THREE.BackSide, fog: false})); scene.add(sky);
   scene.fog = new THREE.Fog(col(0x2C394D), 80, 260);
+  const FOG_NIGHT = col(0x2C394D), FOG_DAY = col(0xD8D3C9);
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 900);
   const hemi = new THREE.HemisphereLight(col(0xC9DBFF), col(0x1A2230), 0.85); scene.add(hemi);
@@ -1462,8 +1518,9 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
 
   /* ---------- 상위 창 ① 과목 나열 ---------- */
   const home = el('home'), list = el('list');
+  const KICKER = {mgmt:'Management', ergo:'Ergonomics', mach:'Machinery', elec:'Electricity', chem:'Chemical', const:'Construction'};
   function buildHome(){
-    el('homeGrid').innerHTML = SUBJECTS.map((s, i)=>{ const soon = !s.topics.length; return `<div class="subjCard${soon?' soon':''}" role="button" tabindex="0" data-subj="${s.id}"><div class="n">제${i+1}과목</div><span class="num" aria-hidden="true">0${i+1}</span>${s.id==='const' ? '<span class="stamp"><b>★</b>추천</span>' : ''}<div class="name">${s.name}</div><div class="desc">${s.desc}</div><div class="stat"><span>3D 규정 <b>${s.topics.length}</b>${soon?' (준비 중)':''}</span><span>규정·법령 기출 <b>${BANK_COUNT[s.name]||0}</b>문항</span></div></div>`; }).join('');
+    el('homeGrid').innerHTML = SUBJECTS.map((s, i)=>{ const soon = !s.topics.length; return `<div class="subjCard${soon?' soon':''}" role="button" tabindex="0" data-subj="${s.id}"><div class="n">제${i+1}과목</div><span class="num" aria-hidden="true">0${i+1}</span><div class="kicker">${KICKER[s.id]||''}</div>${s.id==='const' ? '<span class="stamp"><b>★</b>추천</span>' : ''}<div class="name">${s.name}</div><div class="desc">${s.desc}</div><div class="stat"><span>3D 규정 <b>${s.topics.length}</b>${soon?' (준비 중)':''}</span><span>규정·법령 기출 <b>${BANK_COUNT[s.name]||0}</b>문항</span></div></div>`; }).join('');
     { const nT = SUBJECTS.reduce((n, s)=> n + s.topics.length, 0), nQ = Object.values(BANK_COUNT).reduce((a, b)=> a + b, 0); el('homeStats').innerHTML = `<span><b>${SUBJECTS.length}</b>과목</span><span><b>${nT}</b>규정 장면</span><span><b>${nT}</b>시험 시나리오</span><span><b>${nQ.toLocaleString('ko-KR')}</b>규정·법령 기출</span>`; }
     document.querySelectorAll('[data-subj]').forEach(card=>{
       const open = ()=>{ S.subj = card.dataset.subj; showList(); };
@@ -1561,6 +1618,13 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   document.addEventListener('keydown', e=>{ if(el('tut').hidden) return; if(e.key === 'Escape') tutClose(); if(e.key === 'ArrowRight' || e.key === 'Enter') el('tutNext').click(); });
   // 주소에 ?tut 또는 #tut 이 있으면 본 적이 있어도 튜토리얼을 띄운다
   { let seen = false; try{ seen = !!localStorage.getItem(TUT_KEY); }catch(e){} const force = /[?&#]tut\b/.test(location.search + location.hash); if(!seen || force) tutShow(0); }
+  /* ---------- 테마: 아뜰리에(아이보리·먹빛·금빛 하나, Dior 풍) / 다크. 기본은 아뜰리에, localStorage 에 기억 ---------- */
+  const THEME_KEY = 'safety3d_theme';
+  function applyTheme(name){ const dior = name !== 'dark'; document.body.classList.toggle('dior', dior); sky.material.map = dior ? skyDay : skyNight; sky.material.needsUpdate = true; scene.fog.color.copy(dior ? FOG_DAY : FOG_NIGHT); hemi.intensity = dior ? 1.0 : 0.85;
+    const label = dior ? '테마: 아뜰리에' : '테마: 다크'; el('bTheme').textContent = label; el('bTheme2').title = label + ' (누르면 바꿈)'; try{ localStorage.setItem(THEME_KEY, dior ? 'dior' : 'dark'); }catch(e){} }
+  function toggleTheme(){ applyTheme(document.body.classList.contains('dior') ? 'dark' : 'dior'); }
+  el('bTheme').addEventListener('click', toggleTheme); el('bTheme2').addEventListener('click', toggleTheme);
+  { let saved = 'dior'; try{ saved = localStorage.getItem(THEME_KEY) || 'dior'; }catch(e){} applyTheme(saved); }
   /* ---------- 빈칸(블라인드) 모드: 기준값을 감추고 슬라이더를 규정값에 맞혀 채점 ---------- */
   function blindSliders(){ const t = S.topic; return T[t].sliders.filter(([k,,,,,,names])=> !names && LIM[t] && LIM[t][k]); }
   function blindScramble(){ const t = S.topic, p = S[t];
