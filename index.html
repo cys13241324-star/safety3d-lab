@@ -1582,8 +1582,9 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
         const why = S.topic==='ladder' ? (S.ladder.ang > 75 ? `기울기 ${S.ladder.ang}° > 75° · 사다리가 뒤로 넘어감` : '사다리에서 추락') : S.topic==='rail' ? `상부 난간대 ${S.rail.hTop} cm < 90 cm · 난간 너머로 추락` : '망이 받아내지 못함';
         done(o, what, why, false, what + '. ' + (S.topic==='ladder' || S.topic==='rail' ? why : '망의 위치·길이·각도를 확인하세요.')); }
     } else if(test.phase==='lean'){
-      const k = Math.min(1, test.t/1.4); o.rotation.x = -0.45*k; o.position.z = -0.6 + 0.35*k;
-      if(k>=1){ if(S.rail.hTop >= 90){ o.rotation.x = -0.25; const ok = allOk('rail'); done(o, '난간이 받쳐 줍니다', `상부 난간대 ${S.rail.hTop} cm ≥ 90 cm`, ok, `상부 난간대 ${S.rail.hTop} cm가 몸을 받쳐 줍니다.` + (ok ? ' 규정도 적합합니다.' : ' 단, 다른 항목에 부적합이 있습니다.')); }
+      // 난간에 등을 기댄다: 몸을 돌려(난간을 등지고) 뒤로 젖히며 물러서고, 팔은 뒤로 난간 위에 얹는다
+      const k = Math.min(1, test.t/1.4); o.rotation.y = Math.PI; o.rotation.x = 0.45*k; o.position.z = -0.6 + 0.3*k; o.userData.limbs.arms.forEach(a=> a.rotation.x = 0.9*k);
+      if(k>=1){ if(S.rail.hTop >= 90){ o.rotation.x = 0.25; const ok = allOk('rail'); done(o, '난간이 받쳐 줍니다', `상부 난간대 ${S.rail.hTop} cm ≥ 90 cm`, ok, `상부 난간대 ${S.rail.hTop} cm가 몸을 받쳐 줍니다.` + (ok ? ' 규정도 적합합니다.' : ' 단, 다른 항목에 부적합이 있습니다.')); }
         else { test.phase = 'fly'; test.kind = 'faller'; test.vel = P3(0, 1.2, 1.4); o.position.z = 0.3; setResult(`상부 난간대 ${S.rail.hTop} cm는 90 cm 미만이라 몸이 넘어갑니다…`, false); startFall(o, '어어어… 으아아아악!'); } }
     } else if(test.phase==='climb'){
       const L = ladder, k = Math.min(1, test.t/2.6), s = k*(L.Lad - 0.4); L.g.updateMatrixWorld(true);
@@ -2369,23 +2370,24 @@ function vdtStation(g, z, dist, gaze, elbow, vest){
 }
 BUILD.vdt = function(){
   const g = stage('vdt'), p = S.vdt;
-  const A = vdtStation(g, -3.0, 50, p.gaze, 90, 0x5FA6F5), B = vdtStation(g, 0, p.dist, 12, 90, 0xF07056), C = vdtStation(g, 3.0, 50, 12, p.elbow, 0xE3B54D);
-  X.vdt = {A, B, C, ws:[A.w, B.w, C.w], w: B.w, eye: B.eye, screenTopY: B.screenTopY, scz: B.scz};
+  // 화면 왼쪽부터 ① 화면 거리(z=+3) ② 시선 각도(0) ③ 팔꿈치(-3) — 옆에서(+x) 보므로 +z 가 왼쪽
+  const A = vdtStation(g, 3.0, p.dist, 12, 90, 0xF07056), B = vdtStation(g, 0, 50, p.gaze, 90, 0x5FA6F5), C = vdtStation(g, -3.0, 50, 12, p.elbow, 0xE3B54D);
+  X.vdt = {A, B, C, ws:[A.w, B.w, C.w], w: A.w, eye: A.eye, screenTopY: A.screenTopY, scz: A.scz};
   ambOnce('vdt', a=>{ ambWalker(a, [P3(-4, 0, -6.5), P3(4, 0, -6.5), P3(4, 0, -8), P3(-4, 0, -8)], 0.8, 0x5FA6F5, null); });
   X.vdt.view = {target:P3(0, 1.0, 0), theta:1.35, phi:1.3, radius:8.5};
 };
 ANNOT.vdt = function(){ const p = S.vdt, ok = T.vdt.rules.map(r=> r[1](p)), {A, B, C} = X.vdt;
-  dimGroup.add(lineOf([A.eye.clone().add(P3(0.3, 0, 0)), P3(0.3, A.screenTopY, A.scz)], 0xE8EEF8)); dimGroup.add(lineOf([A.eye.clone().add(P3(0.3, 0, 0)), P3(0.3, A.eye.y, A.scz)], 0xE8EEF8, .5));
-  dimLabels.push(addLabel({cls:'dim ' + (ok[1]?'ok':'bad'), anchor: P3(0.3, A.eye.y - 0.32, A.scz + 0.05), html:`<b>시선 아래 ${p.gaze}°</b>`}));
-  nameLabel(P3(0, 2.0, A.z - 0.3), '① 시선 각도', '화면 상단은 눈높이 아래 10~15°');
-  dim(B.eye.clone().add(P3(0.5, 0, 0)), P3(0.5, B.eye.y, B.scz), `거리 ${p.dist} cm`, ok[0], P3(0, 1, 0), 0.08);
-  nameLabel(P3(0, 2.0, B.z - 0.3), '② 화면 거리', '눈에서 화면까지 40 cm 이상');
+  dim(A.eye.clone().add(P3(0.5, 0, 0)), P3(0.5, A.eye.y, A.scz), `거리 ${p.dist} cm`, ok[0], P3(0, 1, 0), 0.08);
+  nameLabel(P3(0, 2.0, A.z - 0.3), '① 화면 거리', '눈에서 화면까지 40 cm 이상');
+  dimGroup.add(lineOf([B.eye.clone().add(P3(0.3, 0, 0)), P3(0.3, B.screenTopY, B.scz)], 0xE8EEF8)); dimGroup.add(lineOf([B.eye.clone().add(P3(0.3, 0, 0)), P3(0.3, B.eye.y, B.scz)], 0xE8EEF8, .5));
+  dimLabels.push(addLabel({cls:'dim ' + (ok[1]?'ok':'bad'), anchor: P3(0.3, B.eye.y - 0.32, B.scz + 0.05), html:`<b>시선 아래 ${p.gaze}°</b>`}));
+  nameLabel(P3(0, 2.0, B.z - 0.3), '② 시선 각도', '화면 상단은 눈높이 아래 10~15°');
   dimLabels.push(addLabel({cls:'dim ' + (ok[2]?'ok':'bad'), anchor: P3(0.55, 1.05, C.z + 0.2), html:`<b>팔꿈치 ${p.elbow}°</b>`}));
   nameLabel(P3(0, 2.0, C.z - 0.3), '③ 팔꿈치 각도', '90° 이상'); };
 EXT_IDLE.vdt = (dt, T0, free, R, p)=>{ if(!free) return;
   R.ws.forEach((w, j)=>{ const L = w.userData.limbs; L.arms.forEach((a,i)=> a.rotation.x = w.userData.elbowBase + 0.06*Math.sin(T0*11 + i*2 + j)); w.userData.head.rotation.x = 0.04*Math.sin(T0*1.3 + j); });
   if(IDLE.rub && T0 < IDLE.rub && IDLE.rubW) IDLE.rubW.userData.limbs.arms[1].rotation.x = -2.3;
-  if(T0 > idleNext){ idleNext = T0 + 9; if(!T.vdt.rules.every(r=> r[1](p))){ const who = p.dist < 40 ? [R.B.w, '아이고, 눈이 아프다…'] : p.elbow < 90 ? [R.C.w, '팔이 저리네…'] : [R.A.w, '목이 뻐근하네…']; IDLE.rub = T0 + 0.9; IDLE.rubW = who[0]; if(onScreen(who[0], 0.06)) yell(who[0], who[1], 'talk', 2.4, P3(0, 1.95, 0), false); } } };
+  if(T0 > idleNext){ idleNext = T0 + 9; if(!T.vdt.rules.every(r=> r[1](p))){ const who = p.dist < 40 ? [R.A.w, '아이고, 눈이 아프다…'] : p.elbow < 90 ? [R.C.w, '팔이 저리네…'] : [R.B.w, '목이 뻐근하네…']; IDLE.rub = T0 + 0.9; IDLE.rubW = who[0]; if(onScreen(who[0], 0.06)) yell(who[0], who[1], 'talk', 2.4, P3(0, 1.95, 0), false); } } };
 MANAGER_POS.vdt = [-2.2, 0, 5.4];
 
 function grinderUnit(g, z, p, vest){
