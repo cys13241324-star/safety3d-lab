@@ -101,22 +101,6 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 .chip .pop{display:none;position:absolute;left:0;bottom:calc(100% + 8px);min-width:300px;max-width:440px;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(12px);box-shadow:0 8px 28px rgba(0,0,0,.45)}
 .chip.open .pop{display:block}
 .chip .pop .slider label{font-size:14px} .chip .pop .pick .segc{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
-/* ---------- 모바일(760px 이하): 최상단 목록·과목 바 → 그 아래 규정 칩 스트립(스와이프) → 3D → 하단 테스트 항목 카드 → 맨 아래 접이식 「규정 수치·판정·기출」 손잡이 ---------- */
-@media (max-width:760px){
-  #navBar{left:8px;right:8px;top:8px;max-width:none}
-  #tabs{top:56px;left:8px;right:8px;padding:4px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none} #tabs::-webkit-scrollbar{display:none}
-  #tabs > :first-child{margin-left:0} #tabs > :last-child{margin-right:0} #tabs button{scroll-snap-align:start}
-  #dock{left:8px;right:8px;bottom:46px} #dock .card{padding:8px 10px 8px;width:100%;box-sizing:border-box}
-  /* 변수 칩은 가로 스크롤 대신 3열 격자로 전부 보이게 (작아도 한눈에) */
-  #dock .ctl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;padding-bottom:0}
-  #dock .chip .cb{width:100%;min-width:0;padding:5px 8px;box-sizing:border-box} #dock .chip .cb span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%} #dock .chip .cb output{font-size:13.5px}
-  #dock .dockHd .sub,#dock .hintTxt{display:none} #dock .act{flex-wrap:wrap;justify-content:center;gap:5px} #dock .act .b{font-size:13px;padding:6px 9px}
-  .chip .pop,.chip.flip .pop{position:fixed;left:8px;right:8px;bottom:190px;min-width:0;max-width:none}
-  #viewBox{top:104px;bottom:auto;right:8px;transform:none} #viewBox .zoom{display:none} #viewBox .b{min-width:56px;font-size:13px;padding:6px 8px}
-  #panelHandle{display:flex!important}
-  #panel{left:0;right:0;top:auto;bottom:40px;width:auto;max-height:62vh;border-radius:10px 10px 0 0;border-bottom:0;padding:12px 14px;transform:translateY(110%);transition:transform .25s ease;z-index:6}
-  body.panelOpen #panel{transform:translateY(0)}
-}
 
 #navBar{position:fixed;left:16px;top:16px;z-index:4;display:flex;gap:6px;align-items:center;padding:6px 10px 6px 6px;border-radius:8px;border:1px solid var(--line);background:rgba(8,13,22,.88);backdrop-filter:blur(10px);max-width:380px;box-sizing:border-box}
 #navBar .b{font-size:14px;padding:6px 11px;white-space:nowrap} #navBar .eyebrow{margin:0 0 0 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.02em;text-transform:none}
@@ -235,6 +219,28 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
 .vw{display:flex;gap:6px}
 /* 모바일 전용 손잡이 (PC 에서는 숨김) */
 #panelHandle{display:none;position:fixed;left:0;right:0;bottom:0;height:40px;align-items:center;justify-content:center;gap:8px;font:inherit;font-size:14px;font-weight:500;background:rgba(8,13,22,.96);color:var(--text);border:0;border-top:1px solid var(--line);z-index:7;cursor:pointer}
+/* ---------- 모바일(760px 이하): 최상단 목록·과목 바 → 그 아래 규정 칩 스트립(스와이프) → 3D → 하단 테스트 항목 카드 → 맨 아래 접이식 「규정 수치·판정·기출」 손잡이 ---------- */
+@media (max-width:760px){
+  #navBar{left:8px;right:8px;top:8px;max-width:none}
+  #tabs{top:56px;left:8px;right:8px;padding:4px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none} #tabs::-webkit-scrollbar{display:none}
+  #tabs > :first-child{margin-left:0} #tabs > :last-child{margin-right:0} #tabs button{scroll-snap-align:start}
+  #dock{left:8px;right:8px;bottom:46px} #dock .card{padding:8px 10px 8px;width:100%;box-sizing:border-box}
+  /* 변수 칩은 가로 스크롤 대신 3열 격자로 전부 보이게 (작아도 한눈에) */
+  #dock .ctl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;padding-bottom:0}
+  #dock .chip .cb{width:100%;min-width:0;padding:5px 8px;box-sizing:border-box} #dock .chip .cb span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%} #dock .chip .cb output{font-size:13.5px}
+  #dock .dockHd .sub,#dock .hintTxt{display:none} #dock .act{flex-wrap:wrap;justify-content:center;gap:5px} #dock .act .b{font-size:13px;padding:6px 9px}
+  .chip .pop,.chip.flip .pop{position:fixed;left:8px;right:8px;bottom:190px;min-width:0;max-width:none}
+  #viewBox{top:104px;bottom:auto;right:8px;transform:none} #viewBox .zoom{display:none} #viewBox .b{min-width:56px;font-size:13px;padding:6px 8px}
+  /* 과목·규정 목록 화면: 오른쪽 「3D 실습 · 기출 · 시험」 칸을 아래 한 줄로 내려 설명이 좁아지지 않게 */
+  .screen{padding:20px 12px} .screenBox h1{font-size:24px} .screenBox .lede{font-size:14px;margin-bottom:16px}
+  .subjCard{padding:14px 14px} .subjCard .name{font-size:18px} .subjCard .stamp{font-size:28px;right:10px;top:6px}
+  .lawRow{grid-template-columns:1fr;gap:8px;padding:12px 14px} .lawRow .name{font-size:17px} .lawRow .law{font-size:12.5px;line-height:1.4} .lawRow .sum{font-size:14px}
+  .lawRow .go{flex-direction:row;align-items:center;justify-content:space-between;white-space:normal;gap:10px;padding-top:8px;border-top:1px solid var(--line-soft);font-size:13.5px} .lawRow .go small{font-size:12.5px;text-align:right}
+  #panelHandle{display:flex!important}
+  #panel{left:0;right:0;top:auto;bottom:40px;width:auto;max-height:62vh;border-radius:10px 10px 0 0;border-bottom:0;padding:12px 14px;transform:translateY(110%);transition:transform .25s ease;z-index:6}
+  body.panelOpen #panel{transform:translateY(0)}
+}
+#panelHandle.off{display:none!important}
 </style>
 </head>
 <body>
@@ -1762,6 +1768,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       if(k>=1) tween = null; }
     applyCamera(); syncZoom();
     if(!reduced) stepAmbient(dt); if(!reduced && home.hidden && list.hidden) stepIdle(dt);
+    { const in3d = home.hidden && list.hidden; el('panelHandle').classList.toggle('off', !in3d); if(!in3d) document.body.classList.remove('panelOpen'); }
     stepHazards(dt, now); stepFx(dt); if(!reduced && home.hidden && list.hidden) stepChatter(dt);
     labels.filter(d=> d.expire && now > d.expire).forEach(removeLabel);
     if(auto && !test && home.hidden && list.hidden){ autoT += dt; if(autoT > 4){ autoT = -6; startTest(); } }   // 자동 시연: 4초 뒤 시작, 끝나고 6초 뒤 반복
