@@ -2265,6 +2265,18 @@ dressAfter('ramp', (g, p, R)=>{ const run = R.run, H = p.H, floors = Math.max(1,
   DRESS.office(g, 12.5, 5, -Math.PI/2); DRESS.mixer(g, -12.5, 8, 0.1); R.view.radius *= 1.12;
   // 배경 순찰자는 골조를 뚫고 지나가지 않게 경사로 앞쪽으로
   AMB.filter(a=> a.parent === ambStages.ramp && a.kind==='walk').forEach(a=>{ a.path = [P3(-7, 0, -3), P3(7, 0, -3), P3(7, 0, -5.5), P3(-7, 0, -5.5)]; }); });
+// 말비계: 실내 마감 공사 현장 — 골조 기둥·위층 슬래브 아래, 뒷벽·옆벽(창 개구부), 페인트통·자재
+dressAfter('horse', (g, p, R)=>{ const ceil = Math.max(5.0, p.H + 2.6);
+  // 위층 슬래브가 카메라를 가리지 않게 시점을 낮춰 천장 아래로 들여다본다
+  R.view = {target:P3(0, p.H*0.5 + 0.4, 0), theta:0.6, phi:1.42, radius: 7 + p.H*1.2};
+  DRESS.frame(g, -6.5, 6.5, -5, 5, 1, ceil, {nx:2, nz:1, rail:false});
+  box(13.4, ceil, 0.25, concrete, g, 0, ceil/2, -5.15); [-3.2, 3.2].forEach(x=> box(1.8, 1.5, 0.08, M(0x1A2230, .9), g, x, 1.7, -4.98));
+  box(0.25, ceil, 10.4, concrete, g, -6.65, ceil/2, 0); box(0.08, 1.5, 1.8, M(0x1A2230, .9), g, -6.48, 1.7, 1.5);
+  // 천장 마감 자재: 페인트통·석고보드 더미·널판·블록
+  [[-2.4, 3.2], [-1.9, 3.5], [2.6, 3.0]].forEach(([x, z])=>{ const c = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 0.32, 14), M(0xE8EEF8, .6)); c.position.set(x, 0.16, z); g.add(c); box(0.06, 0.02, 0.2, darkSteel, g, x, 0.33, z); });
+  for(let i=0;i<5;i++) box(1.2, 0.02, 2.4, M(0xD9D4C7, .95), g, 4.6, 0.05 + i*0.025, -3.4);
+  DRESS.planks(g, 4.9, 3.6, 0.15); DRESS.blocks(g, -4.6, -3.6); DRESS.cones(g, [[-1.6, 5.6], [1.6, 5.6]]); DRESS.office(g, 12.5, 6.5, -Math.PI/2);
+  AMB.filter(a=> a.parent === ambStages.horse && a.kind==='walk').forEach(a=>{ a.path = [P3(-5, 0, 6.2), P3(5, 0, 6.2), P3(5, 0, 8.2), P3(-5, 0, 8.2)]; }); });
 // 굴착면: 지표면이 y=깊이라서 순찰자·자재 줍는 사람·관리자를 흙 위(블록 안쪽 x±5.5)로 올린다 — 바닥 높이에서 걷던 모순 제거
 dressAfter('trench', (g, p, R)=>{ const D = p.depth + 0.03;
   AMB.filter(a=> a.parent === ambStages.trench).forEach(a=>{ if(a.kind==='walk') a.path = [P3(-5, D, -9), P3(5, D, -9), P3(5, D, -12.5), P3(-5, D, -12.5)]; if(a.kind==='pick') a.g.position.set(-4.5, D, 6); a.g.position.y = D; }); });
