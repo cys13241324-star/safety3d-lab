@@ -70,7 +70,13 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 /* 3D 창 아래: 값 조정 칩(누르면 슬라이더 팝오버) + 시험 버튼 바 */
 #dock{position:fixed;left:412px;right:16px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:3;pointer-events:none}
 #dock > *{pointer-events:auto}
-#dock .ctl{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;align-items:flex-end;justify-content:flex-start}
+#dock .ctl{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;align-items:flex-end;justify-content:center}
+#dock .act{justify-content:center}
+#dock .hintTxt{margin-left:0;width:100%;text-align:center;font-size:12px}
+#tabs > :first-child{margin-left:auto} #tabs > :last-child{margin-right:auto}
+/* 시점 버튼은 3D 창 오른쪽 가운데 세로로 */
+#viewBox{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:3}
+#viewBox .b{background:rgba(8,13,22,.85);backdrop-filter:blur(8px);min-width:64px}
 .chip.flip .pop{left:auto;right:0}
 #dock .act{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 #dock .act .b{background:rgba(8,13,22,.85);backdrop-filter:blur(8px)}
@@ -193,10 +199,10 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       <button class="b primary" id="bTest" type="button"></button>
       <button class="b" id="bReset" type="button" title="이 주제의 모든 값을 처음 규정값으로">↺ 규정값</button>
       <button class="b" id="bAuto" type="button" aria-pressed="true" title="몇 초마다 시험을 저절로 반복">자동 시연 켜짐</button>
-      <span class="vw"><button class="b" type="button" data-view="wide" aria-pressed="true">넓게</button><button class="b" type="button" data-view="focus">가까이</button></span>
       <span class="hintTxt">드래그 회전 · 우클릭 드래그 이동 · 휠 확대</span>
     </div>
   </div>
+  <div id="viewBox"><button class="b" type="button" data-view="wide" aria-pressed="true">넓게</button><button class="b" type="button" data-view="focus">가까이</button></div>
 </div>
 
 <div id="home" class="screen">
@@ -371,7 +377,14 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       rules:[['눈과 화면의 거리는 40 cm 이상', p=> p.dist >= 40, p=>`현재 ${p.dist} cm`],['화면 상단이 시선 수평선 아래 10~15°에 오도록', p=> p.gaze >= 10 && p.gaze <= 15, p=>`현재 ${p.gaze}°`],['팔꿈치 내각은 90° 이상, 아래팔과 손등은 수평', p=> p.elbow >= 90, p=>`현재 ${p.elbow}°`]]},
   };
   // 처음 규정값 (되돌리기용)
-  const DEFAULTS = {}; Object.keys(T).forEach(k=> DEFAULTS[k] = Object.assign({}, S[k]));
+  // 기본값 = 규정 경계값: 규정 기준(LIM)이 있는 슬라이더는 처음 값을 기준값으로 맞춘다 (사용자 요청 09-03: "디폴트는 규정값으로")
+  // 조건값(강우·강설)·유형 문턱(톱날 지름)·장면 성격상 고속이어야 하는 값(회전체 원주속도)은 저자 기본값 유지
+  const KEEP_DEFAULT = {weather:['rain', 'snow'], rotor:['v'], sawblade:['dia']};
+  const DEFAULTS = {};
+  function applyRegDefaults(t){
+    (T[t].sliders || []).forEach(([k,,,min,max,,names])=>{ if(names || (KEEP_DEFAULT[t] || []).includes(k)) return; const lf = LIM[t] && LIM[t][k]; if(!lf) return; const v = lf(S[t]).v; if(typeof v === 'number' && isFinite(v)) S[t][k] = Math.min(max, Math.max(min, v)); });
+    DEFAULTS[t] = Object.assign({}, S[t]);
+  }
   // 슬라이더별 규정 경계값과 표시 문구 (다른 선택에 따라 달라지는 것은 함수로 계산)
   const LIM = {
     net:{spacing:p=>({v:10,t:'10 m 이내'}), L:p=>({v:2,t:'2 m 이상'}), ang:p=>({v:25,t:'20° 이상 30° 이하',lo:20,hi:30})},
@@ -397,6 +410,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     vdt:{dist:p=>({v:40,t:'40 cm 이상'}), gaze:p=>({v:12,t:'10~15° 아래',lo:10,hi:15}), elbow:p=>({v:90,t:'90° 이상'})},
   };
   // 근거 법령: 계층 + 조문 제목
+  Object.keys(T).forEach(applyRegDefaults);
   const LAW = {
     net:{root:RULE, art:'제14조(낙하물에 의한 위험의 방지) 제2항'}, fall:{root:RULE, art:'제42조(추락의 방지) 제2항'}, rail:{root:RULE, art:'제13조(안전난간의 구조 및 설치요건)'}, ladder:{root:RULE, art:'제24조(사다리식 통로 등의 구조)'},
     ramp:{root:RULE, art:'제23조(가설통로의 구조)'}, plank:{root:RULE, art:'제56조(작업발판의 구조)'}, scaffold:{root:RULE, art:'제60조(강관비계의 구조)'}, stairs:{root:RULE, art:'제26조(계단의 강도) · 제27조(계단의 폭) · 제28조(계단참의 높이) · 제29조(천장의 높이) · 제30조(계단의 난간)'},
@@ -1645,6 +1659,7 @@ function addTopic(subj, key, spec){
   LIM[key] = spec.lim || {}; LAW[key] = spec.law; SUM[key] = spec.sum; YELL[key] = spec.yell || {ok:'휴, 안전!', bad:'으악!'};
   MANAGER_POS[key] = spec.mgr; BUILD[key] = spec.build; ANNOT[key] = spec.annotate; EXT_STEP[key] = spec.step; if(spec.idle) EXT_IDLE[key] = spec.idle;
   SUBJECTS.find(s=> s.id===subj).topics.push(key);
+  applyRegDefaults(key);
 }
 /* 입자(비·눈) */
 function makePoints(n, w, h, d, hex, size){ const pos = new Float32Array(n*3); for(let i=0;i<n;i++){ pos[i*3] = (Math.random()-.5)*w; pos[i*3+1] = Math.random()*h; pos[i*3+2] = (Math.random()-.5)*d; }
@@ -2038,10 +2053,13 @@ addTopic('chem', 'staticflow', {
     const tank = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.15, 5.2, 32), M(0xDCE4F0, .4, {metalness:.25})); tank.rotation.z = Math.PI/2; tank.position.set(-0.6, 2.1, 0); tank.castShadow = true; g.add(tank);
     box(1.6, 1.6, 2.0, M(0x2A5F9E, .6), g, 3.4, 1.7, 0); box(1.4, 0.7, 0.1, M(0x8FC1FF, .3), g, 3.4, 1.9, 1.02);
     const dome = P3(0.4, 3.35, 0); tube(dome.clone().add(P3(0, -0.2, 0)), dome, 0.3, steel, g);
-    const rack = P3(0.4, 0, 3.2); tube(rack, rack.clone().add(P3(0, 5.0, 0)), 0.08, steel, g); tube(P3(0.4, 4.9, 3.2), P3(0.4, 4.9, 0), 0.07, steel, g); tube(P3(0.4, 4.9, 0), P3(0.4, 3.3, 0), 0.07, steel, g);
+    // 주입 배관은 반투명(유리관처럼)으로 그려 안의 유체 흐름이 보이게 한다: 펌프 → 위로 → 가로 → 돔으로
+    const pipeM = M(0xC9D6E8, .25, {transparent:true, opacity:.3, side:THREE.DoubleSide, depthWrite:false});
+    const rack = P3(0.4, 0, 3.2); tube(rack, P3(0.4, 1.95, 3.2), 0.08, steel, g); tube(P3(0.4, 2.45, 3.2), P3(0.4, 4.9, 3.2), 0.09, pipeM, g); tube(P3(0.4, 4.9, 3.2), P3(0.4, 4.9, 0), 0.09, pipeM, g); tube(P3(0.4, 4.9, 0), P3(0.4, 3.3, 0), 0.09, pipeM, g);
+    [[0.4, 4.9, 3.2], [0.4, 4.9, 0]].forEach(([x,y,z])=>{ const el = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 10), steel); el.position.set(x, y, z); g.add(el); });
     box(0.5, 0.5, 0.5, darkSteel, g, 0.4, 2.2, 3.2); const valve = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.03, 8, 16), redMat); valve.position.set(0.7, 2.2, 3.2); valve.rotation.y = Math.PI/2; g.add(valve);
     if(p.gnd===1){ tube(P3(-3.5, 0.6, 1.3), P3(-4.8, 0.05, 2.6), 0.02, M(0x2E8B57, .6), g); tube(P3(-4.8, 0, 2.6), P3(-4.8, 0.5, 2.6), 0.04, M(0x2E8B57, .6), g); box(0.2, 0.15, 0.1, M(0x2E8B57, .6), g, -3.5, 0.6, 1.3); }
-    const drops = []; for(let i=0;i<16;i++){ const d = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5), new THREE.MeshBasicMaterial({color: col(0x8FC1FF)})); g.add(d); drops.push(d); }
+    const drops = []; for(let i=0;i<30;i++){ const d = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), new THREE.MeshBasicMaterial({color: col(i%3 ? 0x8FC1FF : 0xDCEBFF)})); g.add(d); drops.push(d); }
     const flame = new THREE.Mesh(new THREE.ConeGeometry(0.7, 2.2, 12), new THREE.MeshBasicMaterial({color: col(0xF07056)})); flame.position.copy(dome).add(P3(0, 1.2, 0)); flame.visible = false; g.add(flame);
     X.staticflow = {drops, valve, flame, dome};
     X.staticflow.w = worker(0xF07056, g); X.staticflow.w.position.set(1.3, 0, 3.6); X.staticflow.w.rotation.y = -Math.PI/2; X.staticflow.w.userData.limbs.arms[1].rotation.x = -1.1;
@@ -2052,7 +2070,10 @@ addTopic('chem', 'staticflow', {
     dimLabels.push(addLabel({cls:'dim ' + (ok[0]?'ok':'bad'), anchor: P3(0.4, 5.4, 1.6), html:`<b>유속 ${fmt(p.v)} m/s</b><span>${SF_LIQ[p.liq]} 한계 ${SF_V[p.liq]} m/s</span>`}));
     dimLabels.push(addLabel({cls:'dim ' + (ok[1]?'ok':'bad'), anchor: P3(-4.2, 1.2, 2.2), html:`<b>${SF_GND[p.gnd]}</b>`}));
     nameLabel(P3(-0.6, 4.0, 0), '탱크로리 주입', SF_LIQ[p.liq]); if(!ok[0] || !ok[1]) hazardSparks(P3(0.4, 3.4, 0.2), 8); },
-  idle(dt, T0, free, R, p){ const sp = 0.25 + p.v*0.12; R.drops.forEach((d,i)=>{ const u = ((T0*sp + i/16) % 1); const L1 = 3.2, L2 = 1.6, tot = L1 + L2, s = u*tot; if(s < L1) d.position.set(0.4, 4.9, 3.2 - s); else d.position.set(0.4, 4.9 - (s - L1), 0); }); if(free) R.valve.rotation.x += dt*0.8; },
+  idle(dt, T0, free, R, p){ const sp = 0.12 + p.v*0.1, L0 = 2.45, L1 = 3.2, L2 = 1.6, tot = L0 + L1 + L2;
+    // 유속 슬라이더에 비례해 유체 알갱이가 반투명 배관 안을 흐른다 (펌프 → 위 → 가로 → 돔)
+    R.drops.forEach((d,i)=>{ const s = ((T0*sp + i/30) % 1)*tot, w = 0.03*Math.sin(i*2.1 + T0*3); if(s < L0) d.position.set(0.4 + w, 2.45 + s, 3.2); else if(s < L0 + L1) d.position.set(0.4 + w, 4.9, 3.2 - (s - L0)); else d.position.set(0.4 + w, 4.9 - (s - L0 - L1), 0); });
+    if(free) R.valve.rotation.x += dt*(0.3 + p.v*0.1); },
   step(dt, o, R, p){ const bad = p.v > SF_V[p.liq] + 1e-9 ? `유속 ${fmt(p.v)} m/s > ${SF_V[p.liq]} m/s · 유동대전 축적` : p.gnd===0 ? '접지 없음 · 탱크에 정전기 축적' : null;
     if(test.fire){ R.flame.scale.set(1, 0.8 + 0.4*Math.abs(Math.sin(test.t*9)), 1); if(!test.fled){ o.position.x += 1.6*dt; walkPose(o, test.t*9, 0.6); if(o.position.x > 4.5){ test.fled = true; walkPose(o, 0, 0); done(o, '정전기 방전 · 화재', bad, false); } } return; }
     if(bad && test.t > 1.8){ test.fire = true; R.flame.visible = true; hazardSparks(R.dome.clone(), 30); impact(R.dome.clone().add(P3(0, 0.3, 0)), true); setResult(bad + ' → 방전 불꽃 · 착화!', false); yell(o, '펑!!!', 'scream', 1.4); }
@@ -2166,6 +2187,43 @@ addTopic('const', 'caisson', {
     if(p.h < 1.8 - 1e-9 && k > 0.5 && !test.hurt){ test.hurt = true; o.scale.y = 0.75; yell(o, '으악, 머리!', 'scream', 1.6); setResult(bad + '…', false); impact(P3(0.2, p.h - 0.3, -0.4)); }
     if(k >= 1 && !test.judged){ test.judged = true; if(bad){ if(p.h >= 1.8) yell(o, p.o2 < 18 ? '숨이…' : '연락이 안 돼…', 'scream', 1.6); lieDown(o); o.scale.y = 1; o.position.y = 0.15; done(o, '잠함 내부 재해', bad, false); } else done(o, '규정대로 침하 작업', `천장 ${fmt(p.h)} m · 깊이 ${p.depth} m · O₂ ${fmt(p.o2)} %`, true); } }
 });
+
+/* ===== 건설 장면 주변 환경: 골조 공사 중인 건물·가설 울타리·자재·현장 사무실·믹서트럭 =====
+   가설통로·작업발판·강관비계·계단·동바리는 "그 가시설이 필요한 현장" 속에 놓여야 한다 (사용자 요청 09-03) */
+const rebarM = M(0x6B4E2E, .8), wireM = new THREE.MeshBasicMaterial({color: col(0xA9B7CC), wireframe:true, transparent:true, opacity:.5});
+const DRESS = {
+  frame(g, x0, x1, z0, z1, floors, fh, opts={}){ const nx = opts.nx || 2, nz = opts.nz || 2, top = floors*fh;
+    for(let f=1; f<=floors; f++) box(x1-x0, 0.25, z1-z0, concrete, g, (x0+x1)/2, f*fh + 0.125, (z0+z1)/2);
+    for(let i=0;i<=nx;i++) for(let j=0;j<=nz;j++){ const x = x0 + i*(x1-x0)/nx, z = z0 + j*(z1-z0)/nz; box(0.45, top, 0.45, concrete, g, x, top/2, z);
+      [[-0.12,-0.12],[0.12,-0.12],[-0.12,0.12],[0.12,0.12]].forEach(([dx,dz])=> tube(P3(x+dx, top + 0.25, z+dz), P3(x+dx, top + 1.3, z+dz), 0.012, rebarM, g)); }
+    if(opts.rail !== false){ const y = top + 0.25; [[x0,z0,x1,z0],[x0,z1,x1,z1],[x0,z0,x0,z1],[x1,z0,x1,z1]].forEach(([ax,az,bx,bz])=>{ tube(P3(ax,y+0.95,az), P3(bx,y+0.95,bz), 0.03, yellowMat, g); tube(P3(ax,y+0.5,az), P3(bx,y+0.5,bz), 0.025, yellowMat, g); const n = Math.max(1, Math.round(Math.hypot(bx-ax, bz-az)/2)); for(let k=0;k<=n;k++){ const x = ax + (bx-ax)*k/n, z = az + (bz-az)*k/n; tube(P3(x,y,z), P3(x,y+1.0,z), 0.025, steel, g); } }); } },
+  fence(g, x0, x1, z, h=2){ for(let x=x0; x<x1-0.01; x+=2.5){ const len = Math.min(2.5, x1-x); const m = new THREE.Mesh(new THREE.PlaneGeometry(len, h, 6, 3), wireM); m.position.set(x+len/2, h/2, z); g.add(m); tube(P3(x,0,z), P3(x,h,z), 0.03, steel, g); } tube(P3(x1,0,z), P3(x1,h,z), 0.03, steel, g); tube(P3(x0,h,z), P3(x1,h,z), 0.025, steel, g); },
+  rebar(g, x, z, ry=0){ const b = new THREE.Group(); b.position.set(x, 0, z); b.rotation.y = ry; g.add(b); for(let i=0;i<9;i++){ const r = 0.1 + (i%3)*0.05, a = i*0.75, y = 0.12 + Math.floor(i/3)*0.05; tube(P3(Math.cos(a)*r, y, -1.6), P3(Math.cos(a)*r*0.9, y, 1.6), 0.015, rebarM, b); } [-1.0, 1.0].forEach(z=> box(0.6, 0.1, 0.12, wood, b, 0, 0.05, z)); },
+  blocks(g, x, z){ box(1.1, 0.12, 1.1, wood, g, x, 0.06, z); for(let i=0;i<3;i++) for(let j=0;j<2;j++) for(let k=0;k<2;k++) box(0.34, 0.19, 0.5, M(0x8A8F99, .9), g, x - 0.36 + i*0.36, 0.22 + j*0.2, z - 0.26 + k*0.52); },
+  planks(g, x, z, ry=0){ const s = new THREE.Group(); s.position.set(x, 0, z); s.rotation.y = ry; g.add(s); for(let i=0;i<4;i++) for(let j=0;j<3;j++) box(0.24, 0.05, 3.0, wood, s, -0.4 + i*0.27, 0.04 + j*0.06, 0); },
+  cones(g, pts){ pts.forEach(([x,z])=>{ const c = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.55, 12), M(0xF07056, .6)); c.position.set(x, 0.28, z); g.add(c); box(0.4, 0.03, 0.4, M(0x2A2A2A), g, x, 0.015, z); }); },
+  office(g, x, z, ry=0){ const o = new THREE.Group(); o.position.set(x, 0, z); o.rotation.y = ry; g.add(o); box(6, 0.3, 2.5, darkSteel, o, 0, 0.15, 0); box(6, 2.6, 2.5, M(0xE8EEF8, .7), o, 0, 1.6, 0); box(6.1, 0.15, 2.6, M(0x2A5F9E, .6), o, 0, 2.97, 0); box(0.9, 1.9, 0.06, M(0x2A5F9E, .6), o, -2.0, 1.25, 1.26); [-0.4, 1.4].forEach(wx=> box(1.1, 0.8, 0.06, M(0x8FC1FF, .3), o, wx, 1.8, 1.26)); box(1.6, 0.35, 0.06, M(0xF07056, .6), o, 1.8, 2.55, 1.26); },
+  mixer(g, x, z, ry=0){ const t = new THREE.Group(); t.position.set(x, 0, z); t.rotation.y = ry; g.add(t); box(6.5, 0.5, 2.3, darkSteel, t, 0, 0.7, 0); [-2.2, 0, 2.3].forEach(wx=> [-1.15, 1.15].forEach(wz=>{ const w = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.35, 16), darkSteel); w.rotation.x = Math.PI/2; w.position.set(wx, 0.5, wz); t.add(w); })); box(1.7, 1.7, 2.1, M(0xE3B54D, .6), t, 2.9, 1.8, 0); box(1.5, 0.7, 0.1, M(0x8FC1FF, .3), t, 2.9, 2.1, 1.06); const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.1, 3.2, 20), M(0xF2F5F8, .5)); drum.rotation.z = Math.PI/2 + 0.25; drum.position.set(-0.6, 2.2, 0); t.add(drum); [-0.7, 0.7].forEach(dz=>{ const s = box(0.06, 0.28, 3.0, M(0xF07056, .6), drum, 0, 0, 0); s.position.set(dz, 0, 0); }); return t; },
+};
+function dressAfter(key, fn){ const orig = BUILD[key]; BUILD[key] = ()=>{ orig(); fn(stages[key], S[key], X[key]); }; }
+// 가설통로: 경사로가 닿는 곳에 골조 공사 중인 건물 (슬래브 높이 = 통로 높이)
+dressAfter('ramp', (g, p, R)=>{ const run = R.run, H = p.H, floors = Math.max(1, Math.round(H/3.5)), fh = H/floors;
+  DRESS.frame(g, -6, 6, run + 3.2, run + 11, floors, fh, {nx:2, nz:2});
+  DRESS.fence(g, -15, 15, run + 13); DRESS.rebar(g, -5.5, -1.2, 0.2); DRESS.blocks(g, 5.6, 0.6); DRESS.planks(g, -7, 3.2, 0.1); DRESS.cones(g, [[-1.4, -2.6], [1.4, -2.6]]);
+  DRESS.office(g, 12.5, 5, -Math.PI/2); DRESS.mixer(g, -12.5, 8, 0.1); R.view.radius *= 1.12; });
+// 작업발판: 외벽 공사 중인 건물 앞에 세운 발판
+dressAfter('plank', (g, p, R)=>{ DRESS.frame(g, -7, 7, -9.5, -3.6, 3, 3.3, {nx:2, nz:1});
+  DRESS.fence(g, -13, 13, -11); DRESS.blocks(g, 5.6, 1.0); DRESS.rebar(g, -6.2, 0.6, 0.15); DRESS.cones(g, [[-2.6, 3.8], [2.6, 3.8]]); DRESS.office(g, 12, 2, -Math.PI/2); DRESS.planks(g, 7.5, 4.2, 0.4); });
+// 강관비계: 벽 뒤로 골조가 이어지고 앞마당엔 자재·사무실·믹서트럭
+dressAfter('scaffold', (g, p, R)=>{ const z1 = R.z1; DRESS.frame(g, -5.5, 5.5, z1 - 9, z1 - 1.6, 4, 3.25, {nx:2, nz:1, rail:false});
+  DRESS.fence(g, -15, 15, z1 - 11); DRESS.rebar(g, -9, -1, 0.1); DRESS.blocks(g, -8.6, 2.2); DRESS.planks(g, 8.8, 0.2, 0.3); DRESS.cones(g, [[-3, 6.8], [3, 6.8]]); DRESS.office(g, 13.5, 6, -Math.PI/2); DRESS.mixer(g, -14, 7.5, 0.15); });
+// 계단·계단참: 계단이 올라가는 위층 골조
+dressAfter('stairs', (g, p, R)=>{ const top = R.top, floors = Math.max(1, Math.round(top.y/3.3)), fh = top.y/floors;
+  DRESS.frame(g, -4, 4, top.z + 2.2, top.z + 9.5, floors, fh, {nx:2, nz:2});
+  DRESS.fence(g, -14, 14, top.z + 11.5); DRESS.rebar(g, -4.6, -1.2, 0.1); DRESS.blocks(g, -4.2, 2.6); DRESS.cones(g, [[-1.4, -2.4], [1.4, -2.4]]); DRESS.office(g, -12, 6, Math.PI/2); DRESS.planks(g, -7.5, 4.5, 0.2); R.view.radius *= 1.1; });
+// 거푸집 동바리: 옆 구획은 이미 타설된 슬래브, 뒤엔 울타리·자재·믹서트럭
+dressAfter('shore', (g, p, R)=>{ const H = R.H; DRESS.frame(g, 5.6, 12.5, -3.3, 3.3, 1, H, {nx:1, nz:1});
+  DRESS.fence(g, -15, 15, -9.5); DRESS.rebar(g, -7.2, 5.2, 0.1); DRESS.blocks(g, -8.4, 1.2); DRESS.cones(g, [[-3.2, 3.8], [3.2, 3.8]]); DRESS.office(g, 12.5, -6.5, -Math.PI/2); DRESS.mixer(g, -13, 7.8, 0.1); DRESS.planks(g, 7.8, 5.6, 0.2); });
 
 /* 과목 카드 설명 갱신 + 홈 다시 그리기 */
 SUBJECTS.find(s=> s.id==='mach').desc = '롤러기·연삭기·프레스·둥근톱·지게차·로봇·보일러·고속회전체 방호 기준과 양중기 와이어로프';
