@@ -237,10 +237,17 @@ h2::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50
 .rtable tbody tr:nth-child(even) td{background:rgba(255,255,255,.025)}
 #navBar .eyebrow{color:var(--acc,var(--accent))}
 #tabs button[aria-pressed="true"]{background:var(--acc,var(--accent));color:#0B1220;border-color:var(--acc,var(--accent));font-weight:600}
-#dock .card{position:relative;overflow:hidden;padding-top:14px} #dock .card::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:repeating-linear-gradient(135deg,#E3B54D 0 12px,#141A24 12px 24px)}
+#dock .card{position:relative;padding-top:14px} #dock .card::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;border-radius:12px 12px 0 0;background:repeating-linear-gradient(135deg,#E3B54D 0 12px,#141A24 12px 24px)}
 #dock .dockHd .cap{color:var(--acc,var(--accent));border-color:var(--acc,var(--accent))}
 button.b{border-radius:6px} button.b.primary,#dock .act .b.primary{background:var(--warn);color:#1A1200;border-color:var(--warn);font-weight:600} button.b.primary:hover,#dock .act .b.primary:hover{background:#F2C660;border-color:#F2C660}
 .tutCard h3{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:21px}
+/* 조정 슬라이더: 굵은 트랙 + 큰 손잡이 (모바일에서 잘 보이게), −/＋ 한 눈금 버튼 */
+.slider input[type=range]{-webkit-appearance:none;appearance:none;height:34px;background:transparent;margin:0}
+.slider input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:#3A4A66;border:1px solid #4A5B7A}
+.slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--warn);border:3px solid #FFF7D6;margin-top:-10px;box-shadow:0 2px 8px rgba(0,0,0,.55)}
+.slider input[type=range]::-moz-range-track{height:10px;border-radius:5px;background:#3A4A66;border:1px solid #4A5B7A} .slider input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--warn);border:3px solid #FFF7D6;box-shadow:0 2px 8px rgba(0,0,0,.55)}
+.stepRow{grid-column:1/-1;display:flex;gap:8px;justify-content:center;margin-top:6px} .stepRow .stepb{min-width:64px;font-size:18px;padding:6px 0;line-height:1}
+.dockNote{font-size:13.5px;color:#FFF1C2;background:rgba(227,181,77,.14);border:1px solid rgba(227,181,77,.5);border-radius:8px;padding:7px 12px;text-align:center} .dockNote b{color:var(--warn)}
 /* ---------- 빈칸(블라인드) 모드: 기준값을 감추고 학습자가 슬라이더로 맞힌다 ---------- */
 body.blind .rules,body.blind #rcOk,body.blind [data-lim],body.blind .slider .marks,body.blind .lbl.name span{display:none!important}
 body.blind .chip.bad .cb{border-color:var(--line);box-shadow:none} body.blind .chip.bad .cb output{color:var(--warn)}
@@ -258,7 +265,8 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   #dock .ctl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;padding-bottom:0}
   #dock .chip .cb{width:100%;min-width:0;padding:5px 8px;box-sizing:border-box} #dock .chip .cb span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%} #dock .chip .cb output{font-size:13.5px}
   #dock .dockHd .sub,#dock .hintTxt{display:none} #dock .act{flex-wrap:wrap;justify-content:center;gap:5px} #dock .act .b{font-size:13px;padding:6px 9px}
-  .chip .pop,.chip.flip .pop{position:fixed;left:8px;right:8px;bottom:190px;min-width:0;max-width:none}
+  .chip .pop,.chip.flip .pop{position:fixed;left:8px;right:8px;bottom:200px;min-width:0;max-width:none;padding:14px 16px 12px}
+  .chip .pop .slider label{font-size:16px} .chip .pop .slider label small{font-size:14px} .stepRow .stepb{min-width:84px;font-size:22px;padding:8px 0}
   #viewBox{top:104px;bottom:auto;right:8px;transform:none} #viewBox .zoom{display:none} #viewBox .b{min-width:56px;font-size:13px;padding:6px 8px}
   /* 과목·규정 목록 화면: 오른쪽 「3D 실습 · 기출 · 시험」 칸을 아래 한 줄로 내려 설명이 좁아지지 않게 */
   .screen{padding:20px 12px} .screenBox h1{font-size:24px} .screenBox .lede{font-size:14px;margin-bottom:16px}
@@ -282,12 +290,13 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   <div id="dock">
    <div class="card">
     <div class="dockHd"><span class="cap">테스트 항목</span><span class="sub">칩을 누르면 값을 바꿀 수 있습니다 · 규정 밖이면 빨간 테두리</span></div>
+    <div class="dockNote" id="dockNote" hidden>빈칸 채우기: 값이 섞였습니다. 각 항목을 규정값이라고 생각하는 값으로 맞춘 뒤 <b>채점</b>을 누르세요.</div>
     <div class="ctl" id="sliders"></div>
     <div class="act">
       <button class="b primary" id="bTest" type="button"></button>
       <button class="b" id="bReset" type="button" title="이 주제의 모든 값을 처음 규정값으로">↺ 규정값</button>
       <button class="b" id="bAuto" type="button" aria-pressed="true" title="몇 초마다 시험을 저절로 반복">자동 시연 켜짐</button>
-      <button class="b" id="bBlind" type="button" aria-pressed="false" title="기준값을 감추고 슬라이더로 맞혀 보기">빈칸 모드</button>
+      <button class="b" id="bBlind" type="button" aria-pressed="false" title="기준값을 감추고 슬라이더로 맞혀 보기">빈칸 채우기</button>
       <button class="b primary" id="bScore" type="button" hidden>채점</button>
       <span class="hintTxt">드래그 회전 · 우클릭 드래그 이동 · 휠 확대</span>
     </div>
@@ -1481,7 +1490,7 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
     el('tabs').innerHTML = s.topics.map(k=>`<button type="button" data-topic="${k}" aria-pressed="${k===S.topic}">${T[k].name}</button>`).join('');
     document.querySelectorAll('[data-topic]').forEach(b=> b.addEventListener('click', ()=>{ S.topic = b.dataset.topic; selectTopic(); }));
   }
-  function selectTopic(){ S.reveal = false; if(BLIND){ BLIND = false; document.body.classList.remove('blind'); el('bBlind').setAttribute('aria-pressed', 'false'); el('bBlind').textContent = '빈칸 모드'; el('bScore').hidden = true; el('blindCard').hidden = true; } endTest(); buildTabs(); buildTopicUI(); refresh(); goView('wide'); autoT = 0; }
+  function selectTopic(){ S.reveal = false; if(BLIND){ BLIND = false; document.body.classList.remove('blind'); el('bBlind').setAttribute('aria-pressed', 'false'); el('bBlind').textContent = '빈칸 채우기'; el('bScore').hidden = true; el('dockNote').hidden = true; el('blindCard').hidden = true; } endTest(); buildTabs(); buildTopicUI(); refresh(); goView('wide'); autoT = 0; }
   function buildTopicUI(){
     const t = S.topic, def = T[t];
     el('lawRoot').innerHTML = LAW[t].root;
@@ -1489,7 +1498,8 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
     // 값 조정은 3D 창 아래 칩으로: 칩을 누르면 슬라이더(또는 선택 버튼) 팝오버가 열린다
     el('sliders').innerHTML = def.sliders.map(([k, label, unit, min, max, step, names])=> names
       ? `<div class="chip" id="chip_${k}"><button type="button" class="cb"><span>${label}</span><output id="o_${k}"></output></button><div class="pop"><div class="pick" data-pick="${k}"><div class="segc">${names.map((n,i)=>`<button type="button" data-val="${i}" aria-pressed="${S[t][k]===i}">${n}</button>`).join('')}</div></div></div></div>`
-      : `<div class="chip" id="chip_${k}"><button type="button" class="cb"><span>${label}</span><output id="o_${k}"></output></button><div class="pop"><div class="slider"><label for="s_${k}">${label}${LIM[t] && LIM[t][k] ? `<small id="lt_${k}"></small>` : ''}</label><span class="val">${LIM[t] && LIM[t][k] ? `<button type="button" data-lim="${k}" title="규정 경계값으로">기준값</button>` : ''}</span><input id="s_${k}" type="range" min="${min}" max="${max}" step="${step}" value="${S[t][k]}" data-key="${k}"><div class="marks" id="mk_${k}"></div></div></div></div>`).join('');
+      : `<div class="chip" id="chip_${k}"><button type="button" class="cb"><span>${label}</span><output id="o_${k}"></output></button><div class="pop"><div class="slider"><label for="s_${k}">${label}${LIM[t] && LIM[t][k] ? `<small id="lt_${k}"></small>` : ''}</label><span class="val">${LIM[t] && LIM[t][k] ? `<button type="button" data-lim="${k}" title="규정 경계값으로">기준값</button>` : ''}</span><input id="s_${k}" type="range" min="${min}" max="${max}" step="${step}" value="${S[t][k]}" data-key="${k}"><div class="marks" id="mk_${k}"></div><div class="stepRow"><button type="button" class="b stepb" data-stepk="${k}" data-dir="-1" aria-label="한 눈금 줄이기">−</button><button type="button" class="b stepb" data-stepk="${k}" data-dir="1" aria-label="한 눈금 늘리기">＋</button></div></div></div></div>`).join('');
+    document.querySelectorAll('.stepb').forEach(b=> b.addEventListener('click', ()=>{ const inp = el('s_' + b.dataset.stepk), step = +inp.step || 1, v = Math.min(+inp.max, Math.max(+inp.min, +inp.value + step*(+b.dataset.dir))); inp.value = +v.toFixed(6); inp.dispatchEvent(new Event('input')); inp.dispatchEvent(new Event('change')); }));
     document.querySelectorAll('#sliders .chip .cb').forEach(b=> b.addEventListener('click', e=>{ const c = b.parentElement, open = c.classList.contains('open'); document.querySelectorAll('#sliders .chip.open').forEach(x=> x.classList.remove('open')); if(!open){ c.classList.toggle('flip', c.getBoundingClientRect().left + 450 > window.innerWidth); c.classList.add('open'); } e.stopPropagation(); }));
     def.sliders.forEach(([k,,unit,,,,names])=>{ if(names){ document.querySelectorAll(`[data-pick="${k}"] button`).forEach(b=> b.addEventListener('click', ()=>{ S[t][k] = +b.dataset.val; refresh(); })); }
       else { const inp = el('s_'+k); inp.addEventListener('input', e=>{ S[t][k] = +e.target.value; el('o_'+k).textContent = `${S[t][k]} ${unit}`; scheduleRefresh(); }); inp.addEventListener('change', ()=>{ S[t][k] = +inp.value; refresh(); }); } });
@@ -1556,8 +1566,8 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   function blindScramble(){ const t = S.topic, p = S[t];
     blindSliders().forEach(([k,,,min,max,step])=>{ const lim = LIM[t][k](p); for(let tries=0; tries<20; tries++){ const v = Math.round((min + Math.random()*(max - min))/step)*step; const far = lim.lo !== undefined ? (v < lim.lo - step || v > lim.hi + step) : Math.abs(v - lim.v) > step*1.5; if(far){ p[k] = +v.toFixed(6); break; } } });
     endTest(); buildTopicUI(); refresh(); setResult('빈칸 모드: 값이 섞였습니다. 슬라이더를 규정값에 맞춘 뒤 「채점」을 누르세요.', true); }
-  function blindEnter(){ BLIND = true; document.body.classList.add('blind'); el('bBlind').setAttribute('aria-pressed', 'true'); el('bBlind').textContent = '빈칸 모드 켜짐'; el('bScore').hidden = false; blindScramble(); }
-  function blindExit(){ BLIND = false; document.body.classList.remove('blind'); el('bBlind').setAttribute('aria-pressed', 'false'); el('bBlind').textContent = '빈칸 모드'; el('bScore').hidden = true; el('blindCard').hidden = true; const t = S.topic; S[t] = Object.assign({}, DEFAULTS[t]); endTest(); buildTopicUI(); refresh(); setResult('빈칸 모드를 끝내고 규정값으로 돌아왔습니다.', true); }
+  function blindEnter(){ BLIND = true; document.body.classList.add('blind'); el('bBlind').setAttribute('aria-pressed', 'true'); el('bBlind').textContent = '빈칸 채우기 끝'; el('bScore').hidden = false; el('dockNote').hidden = false; blindScramble(); }
+  function blindExit(){ BLIND = false; document.body.classList.remove('blind'); el('bBlind').setAttribute('aria-pressed', 'false'); el('bBlind').textContent = '빈칸 채우기'; el('bScore').hidden = true; el('dockNote').hidden = true; el('blindCard').hidden = true; const t = S.topic; S[t] = Object.assign({}, DEFAULTS[t]); endTest(); buildTopicUI(); refresh(); setResult('빈칸 모드를 끝내고 규정값으로 돌아왔습니다.', true); }
   function blindScore(){ const t = S.topic, p = S[t]; let n = 0; const rows = blindSliders().map(([k,label,unit,,,step])=>{ const lim = LIM[t][k](p), v = p[k]; const hit = lim.lo !== undefined ? (v >= lim.lo - 1e-9 && v <= lim.hi + 1e-9) : Math.abs(v - lim.v) <= step*1.0001; if(hit) n++; return `<tr><td>${label.replace(/\s*\(.*?\)/g, '')}</td><td class="${hit?'ok':'bad'}">${v} ${unit}</td><td>${lim.t}</td><td class="${hit?'ok':'bad'}">${hit?'정답':'오답'}</td></tr>`; });
     el('blindTitle').textContent = `${T[t].name} · 기준값 맞히기`; el('blindBody').innerHTML = `<table><thead><tr><th>항목</th><th>내 답</th><th>규정</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table>`; el('blindScore').textContent = `${n} / ${rows.length}`; el('blindScore').style.color = n === rows.length ? 'var(--ok)' : 'var(--warn)'; el('blindCard').hidden = false; }
   el('bBlind').addEventListener('click', ()=>{ if(BLIND) blindExit(); else blindEnter(); });
