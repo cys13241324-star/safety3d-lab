@@ -77,6 +77,10 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 /* 시점 버튼은 3D 창 오른쪽 가운데 세로로 */
 #viewBox{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:3}
 #viewBox .b{background:rgba(8,13,22,.85);backdrop-filter:blur(8px);min-width:64px}
+/* 배율: ＋ / 세로 드래그 슬라이더 / － (위가 가까이) */
+#viewBox .zoom{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px}
+#viewBox .zb{min-width:0;width:40px;padding:3px 0;font-size:16px;line-height:1.1}
+#zoomR{writing-mode:vertical-lr;direction:rtl;height:150px;width:24px;margin:0;accent-color:var(--accent);cursor:ns-resize;background:rgba(8,13,22,.55);border-radius:999px}
 .chip.flip .pop{left:auto;right:0}
 #dock .act{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 #dock .act .b{background:rgba(8,13,22,.85);backdrop-filter:blur(8px)}
@@ -202,7 +206,9 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       <span class="hintTxt">드래그 회전 · 우클릭 드래그 이동 · 휠 확대</span>
     </div>
   </div>
-  <div id="viewBox"><button class="b" type="button" data-view="wide" aria-pressed="true">넓게</button><button class="b" type="button" data-view="focus">가까이</button></div>
+  <div id="viewBox"><button class="b" type="button" data-view="wide" aria-pressed="true">넓게</button><button class="b" type="button" data-view="focus">가까이</button>
+    <div class="zoom"><button class="b zb" type="button" data-zoom="in" title="확대">＋</button><input id="zoomR" type="range" min="0" max="100" step="1" value="50" aria-label="배율 (세로 드래그)"><button class="b zb" type="button" data-zoom="out" title="축소">－</button></div>
+  </div>
 </div>
 
 <div id="home" class="screen">
@@ -1444,7 +1450,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       HL.arms[1].rotation.x = -1.2 + 0.7*sw(T0*6); HL.arms[0].rotation.x = -0.4;
       if(t==='rail'){ HR.arms.forEach(a=> a.rotation.x = -0.75); wR.userData.head.rotation.y = sw(T0*0.8)*0.6; }
       else if(t==='fall'){ wR.userData.head.rotation.x = 0.35 + 0.08*sw(T0*2); wR.rotation.x = 0.1; HR.arms.forEach(a=> a.rotation.x = -0.3); }
-      else if(t==='ladder'){ const L = ladder, s = 0.2 + shuttle('climb', L.Lad - 0.8, 0.7, dt); wS.visible = true; L.g.updateMatrixWorld(true); wS.position.copy(L.g.localToWorld(P3(0, s, 0.32))); wS.rotation.x = -(Math.PI/2 - L.a); walkPose(wS, s*9, 0.45); }
+      else if(t==='ladder'){ const L = ladder, s = 0.2 + shuttle('climb', L.Lad - 0.8, 0.7, dt); wS.visible = true; L.g.updateMatrixWorld(true); wS.position.copy(L.g.localToWorld(P3(0, s, 0.32))); wS.rotation.y = Math.PI; wS.rotation.x = -(Math.PI/2 - L.a); walkPose(wS, s*9, 0.45); }
       else { HR.arms[1].rotation.x = -2.6 + 0.3*sw(T0*3); HR.arms[0].rotation.x = 0; }
       return;
     }
@@ -1489,12 +1495,12 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
         else { test.phase = 'fly'; test.kind = 'faller'; test.vel = P3(0, 1.2, 1.4); o.position.z = 0.3; setResult(`상부 난간대 ${S.rail.hTop} cm는 90 cm 미만이라 몸이 넘어갑니다…`, false); startFall(o, '어어어… 으아아아악!'); } }
     } else if(test.phase==='climb'){
       const L = ladder, k = Math.min(1, test.t/2.6), s = k*(L.Lad - 0.4); L.g.updateMatrixWorld(true);
-      o.position.copy(L.g.localToWorld(P3(0, s, 0.32))); o.rotation.x = -(Math.PI/2 - L.a); walkPose(o, k*26, 0.45);
+      o.position.copy(L.g.localToWorld(P3(0, s, 0.32))); o.rotation.y = Math.PI; o.rotation.x = -(Math.PI/2 - L.a); walkPose(o, k*26, 0.45);
       if(k>=1){ test.t = 0; if(S.ladder.ang > 75){ test.phase = 'tip'; setResult(`기울기 ${S.ladder.ang}°는 75° 초과. 사다리가 뒤로 넘어갑니다…`, false); yell(o, '어어어어…?!', 'scream', 1.3); }
         else { const ok = allOk('ladder'); const sub = S.ladder.prot < 60 ? `상단 돌출 ${S.ladder.prot} cm < 60 cm · 잡을 곳이 부족` : `기울기 ${S.ladder.ang}° · 돌출 ${S.ladder.prot} cm`; done(o, ok ? '안전하게 올라갔습니다' : '올라갔지만 규정 부적합', sub, ok); } }
     } else if(test.phase==='tip'){
       const k = Math.min(1, test.t/1.1), tip = 0.9*k*k, L = ladder; L.g.rotation.x = L.a - Math.PI/2 + tip; L.g.updateMatrixWorld(true);
-      o.position.copy(L.g.localToWorld(P3(0, L.Lad - 0.4, 0.32))); o.rotation.x = -(Math.PI/2 - L.a) + tip;
+      o.position.copy(L.g.localToWorld(P3(0, L.Lad - 0.4, 0.32))); o.rotation.y = Math.PI; o.rotation.x = -(Math.PI/2 - L.a) + tip;
       if(k>=1){ test.phase = 'fly'; test.kind = 'faller'; test.vel = P3(0, 0.5, 1.5); startFall(o); }
     }
   }
@@ -1578,7 +1584,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     if(T[S.topic].site) stepSite(dt); else stepStage(dt); }
 
   /* ---------- 카메라 ---------- */
-  const SITE_VIEWS = { net:{theta:0.55, phi:1.2, radius:24, target:P3(-6, 8, 1)}, fall:{theta:-0.5, phi:1.15, radius:24, target:P3(6, 9, 1.5)}, rail:{theta:0.35, phi:1.25, radius:13, target:P3(0, ROOF + 0.6, 0)}, ladder:{theta:0.55, phi:1.2, radius:13, target:P3(18, 3, 1)} };
+  const SITE_VIEWS = { net:{theta:0.55, phi:1.2, radius:24, target:P3(-6, 8, 1)}, fall:{theta:-0.5, phi:1.15, radius:24, target:P3(6, 9, 1.5)}, rail:{theta:0.35, phi:1.25, radius:11, target:P3(6, ROOF + 0.8, -0.2)}, ladder:{theta:0.55, phi:1.2, radius:13, target:P3(18, 3, 1)} };
   function viewOf(name){ const t = S.topic; if(name==='wide'){ return T[t].site ? Object.assign({}, SITE_VIEWS[t], {radius: SITE_VIEWS[t].radius*1.7}) : Object.assign({}, X[t].view, {radius: X[t].view.radius*1.7}); } return T[t].site ? SITE_VIEWS[t] : X[t].view; }
   const orbit = Object.assign({}, SITE_VIEWS.net, {target: SITE_VIEWS.net.target.clone()});
   let tween = null, userInteracted = reduced, shift = new THREE.Vector3(), lastInteract = performance.now();
@@ -1612,6 +1618,15 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   const release = e=>{ pointers.delete(e.pointerId); pinchDist = 0; };
   canvas.addEventListener('pointerup', release); canvas.addEventListener('pointercancel', release);
   canvas.addEventListener('wheel', e=>{ e.preventDefault(); userInteracted = true; tween = null; lastInteract = performance.now(); orbit.radius = clamp(orbit.radius * (1 + e.deltaY*0.001), 2, 90); }, {passive:false});
+  // 배율 슬라이더: 값 50 = 「가까이」 시점 거리, 25당 2배 (위로 갈수록 가까이). 휠·핀치로 바꾼 거리도 슬라이더에 되비친다
+  const zoomR = el('zoomR'); let zoomDrag = false;
+  const zoomBase = ()=> viewOf('focus').radius;
+  const zoomReady = ()=> S.topic && T[S.topic] && (T[S.topic].site || X[S.topic]);
+  function setZoom(v){ if(!zoomReady()) return; userInteracted = true; tween = null; lastInteract = performance.now(); orbit.radius = clamp(zoomBase()*Math.pow(2, (50 - v)/25), 2, 90); }
+  function syncZoom(){ if(zoomDrag || !zoomReady()) return; zoomR.value = clamp(Math.round(50 - 25*Math.log2(orbit.radius/zoomBase())), 0, 100); }
+  zoomR.addEventListener('input', ()=> setZoom(+zoomR.value));
+  zoomR.addEventListener('pointerdown', ()=> zoomDrag = true); window.addEventListener('pointerup', ()=> zoomDrag = false);
+  document.querySelectorAll('[data-zoom]').forEach(b=> b.addEventListener('click', ()=>{ const v = clamp((+zoomR.value) + (b.dataset.zoom==='in' ? 8 : -8), 0, 100); zoomR.value = v; setZoom(v); }));
   window.addEventListener('keydown', e=>{ const tag = (document.activeElement && document.activeElement.tagName) || ''; if(tag==='INPUT' || tag==='TEXTAREA' || tag==='BUTTON') return;
     const step = 40, map = {ArrowLeft:[-step,0], ArrowRight:[step,0], ArrowUp:[0,-step], ArrowDown:[0,step], a:[-step,0], d:[step,0], w:[0,-step], s:[0,step]};
     if(map[e.key]){ panBy(-map[e.key][0], -map[e.key][1]); e.preventDefault(); }
@@ -1636,7 +1651,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       orbit.theta = tween.from.theta + (tween.to.theta-tween.from.theta)*e; orbit.phi = tween.from.phi + (tween.to.phi-tween.from.phi)*e;
       orbit.radius = tween.from.radius + (tween.to.radius-tween.from.radius)*e; orbit.target.copy(tween.from.target).lerp(tween.to.target, e);
       if(k>=1) tween = null; }
-    applyCamera();   // 카메라 자동 회전 없음: 사용자가 움직일 때만 움직인다
+    applyCamera(); syncZoom();
     if(!reduced) stepAmbient(dt); if(!reduced && home.hidden && list.hidden) stepIdle(dt);
     stepHazards(dt, now); stepFx(dt); if(!reduced && home.hidden && list.hidden) stepChatter(dt);
     labels.filter(d=> d.expire && now > d.expire).forEach(removeLabel);
