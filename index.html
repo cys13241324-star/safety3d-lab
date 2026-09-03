@@ -53,23 +53,40 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 .lbl.dim.ok b{color:var(--ok)} .lbl.dim.bad b{color:var(--bad)}
 .lbl.verdict{padding:8px 12px;font-size:16px;border-width:2px} .lbl.verdict.ok{border-color:var(--ok)} .lbl.verdict.ok b{color:var(--ok)} .lbl.verdict.bad{border-color:var(--bad)} .lbl.verdict.bad b{color:var(--bad)}
 #hint{position:absolute;right:16px;bottom:14px;font-size:14px;color:var(--dim);pointer-events:none;font-family:var(--mono)}
-/* 우측 상단 규정 요약 카드 */
-#regcard{position:fixed;right:16px;top:16px;width:380px;max-width:calc(100vw - 32px);background:rgba(8,13,22,.86);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(8px);padding:10px 12px 8px;font-size:14px;z-index:3}
-#regcard .hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-#regcard .hd b{font-size:15px;font-weight:600}
-#regcard .hd .art{font-family:var(--mono);font-size:12.5px;color:var(--dim);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#regcard .hd .ok{font-family:var(--mono);font-size:13px;white-space:nowrap}
-#regcard .hd button{font:inherit;font-size:12.5px;padding:2px 7px;border-radius:4px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer}
-#regcard table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px;table-layout:fixed}
-#regcard th{font-weight:500;color:var(--dim);text-align:left;padding:2px 4px;font-size:12px;letter-spacing:.04em}
-#regcard td{padding:3px 4px;border-top:1px solid var(--line-soft);vertical-align:top;overflow-wrap:anywhere}
-#regcard td.item{color:var(--text);font-family:var(--sans)}
-#regcard td.cur{color:var(--warn)}
-#regcard td.j{text-align:right;white-space:nowrap} #regcard td.j.ok{color:var(--ok)} #regcard td.j.bad{color:var(--bad)} #regcard td.j.na{color:var(--dim)}
-#regcard.min table{display:none}
-@media (max-width:900px){#regcard{display:none}}
+/* 왼쪽 패널: 규정 수치 표 (텍스트 최소화, 수치 위주) */
+.secHd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px} .secHd h2{margin:0}
+.secHd .ok{font-family:var(--mono);font-size:13.5px;white-space:nowrap}
+.rtable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13.5px;table-layout:fixed;margin-bottom:8px}
+.rtable th{font-weight:500;color:var(--dim);text-align:left;padding:2px 4px;font-size:12px;letter-spacing:.04em}
+.rtable td{padding:4px 4px;border-top:1px solid var(--line-soft);vertical-align:top;overflow-wrap:anywhere}
+.rtable td.item{color:var(--text);font-family:var(--sans)}
+.rtable td.cur{color:var(--warn)}
+.rtable td.j{text-align:right;white-space:nowrap} .rtable td.j.ok{color:var(--ok)} .rtable td.j.bad{color:var(--bad)} .rtable td.j.na{color:var(--dim)}
+.hbtn{display:flex;flex-direction:column;gap:6px} button.b.sm{font-size:13px;padding:4px 9px}
+/* 3D 창 위: 같은 과목의 다른 규정 칩 */
+#tabs{position:fixed;left:412px;right:16px;top:16px;display:flex;gap:6px;overflow-x:auto;padding:4px 2px;z-index:3;scrollbar-width:thin}
+#tabs button{flex:0 0 auto;font:inherit;font-size:13.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(8,13,22,.8);color:var(--muted);cursor:pointer;backdrop-filter:blur(8px);white-space:nowrap}
+#tabs button[aria-pressed="true"]{background:#24314A;color:var(--text);border-color:var(--accent);font-weight:500}
+/* 3D 창 아래: 값 조정 칩(누르면 슬라이더 팝오버) + 시험 버튼 바 */
+#dock{position:fixed;left:412px;right:16px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:3;pointer-events:none}
+#dock > *{pointer-events:auto}
+#dock .ctl{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;align-items:flex-end;justify-content:flex-start}
+.chip.flip .pop{left:auto;right:0}
+#dock .act{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#dock .act .b{background:rgba(8,13,22,.85);backdrop-filter:blur(8px)}
+#dock .hintTxt{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--dim);white-space:nowrap}
+.chip{position:relative}
+.chip .cb{font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(8,13,22,.85);backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;min-width:96px;text-align:left}
+.chip .cb span{font-size:12px;letter-spacing:-.01em;line-height:1.2} .chip .cb output{font-family:var(--mono);font-size:15px;color:var(--warn);font-variant-numeric:tabular-nums;line-height:1.2}
+.chip .cb:hover{border-color:var(--accent)} .chip .cb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip.bad .cb{border-color:var(--bad);box-shadow:inset 0 0 0 1px rgba(240,112,86,.35)} .chip.bad .cb output{color:var(--bad)}
+.chip.open .cb{border-color:var(--accent);background:#24314A;color:var(--text)}
+.chip .pop{display:none;position:absolute;left:0;bottom:calc(100% + 8px);min-width:300px;max-width:440px;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(12px);box-shadow:0 8px 28px rgba(0,0,0,.45)}
+.chip.open .pop{display:block}
+.chip .pop .slider label{font-size:14px} .chip .pop .pick .segc{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+@media (max-width:760px){#tabs,#dock{left:8px;right:8px} #dock{bottom:calc(50vh + 8px)}}
 
-#panel{position:fixed;left:16px;top:16px;width:510px;max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;padding:18px 20px 16px;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(12px);display:flex;flex-direction:column;gap:18px}
+#panel{position:fixed;left:16px;top:16px;width:380px;max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;padding:16px 18px 14px;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(12px);display:flex;flex-direction:column;gap:14px}
 #panel header{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
 #panel header .b{white-space:nowrap}
 /* 상위 창 ①과목 나열 · ②법령 리스트 */
@@ -169,8 +186,17 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
 <div id="stage">
   <canvas id="c"></canvas>
   <div id="labels"></div>
-  <div id="hint">드래그 회전 · 우클릭/Shift 드래그 이동 · 방향키 이동 · PgUp/PgDn 상하 · 휠 확대</div>
-  <div id="regcard"><div class="hd"><b id="rcName"></b><span class="art" id="rcArt"></span><span class="ok" id="rcOk"></span><button type="button" id="rcToggle">접기</button></div><table><thead><tr><th style="width:34%">항목</th><th style="width:30%">규정 기준</th><th style="width:22%">현재</th><th style="width:14%;text-align:right">판정</th></tr></thead><tbody id="rcBody"></tbody></table></div>
+  <div id="tabs" class="tabs"></div>
+  <div id="dock">
+    <div class="ctl" id="sliders"></div>
+    <div class="act">
+      <button class="b primary" id="bTest" type="button"></button>
+      <button class="b" id="bReset" type="button" title="이 주제의 모든 값을 처음 규정값으로">↺ 규정값</button>
+      <button class="b" id="bAuto" type="button" aria-pressed="true" title="몇 초마다 시험을 저절로 반복">자동 시연 켜짐</button>
+      <span class="vw"><button class="b" type="button" data-view="wide" aria-pressed="true">넓게</button><button class="b" type="button" data-view="focus">가까이</button></span>
+      <span class="hintTxt">드래그 회전 · 우클릭 드래그 이동 · 휠 확대</span>
+    </div>
+  </div>
 </div>
 
 <div id="home" class="screen">
@@ -194,41 +220,32 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   <header>
     <div>
       <p class="eyebrow" id="crumbPanel">산업안전기사 · 수치 규정 실습</p>
-      <h1>산업안전 규격 실습장</h1>
-      <p class="lede">슬라이더로 값을 바꾸면 3D 치수선과 규정 판정이 따라오고, 시험 버튼으로 실제 상황을 재현합니다.</p>
+      <h1 id="rcName">산업안전 규격 실습장</h1>
+      <p class="law art" id="rcArt"></p>
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px"><button class="b" id="bList" type="button">← 법령 목록</button><button class="b" id="bHome" type="button">과목</button></div>
+    <div class="hbtn"><button class="b sm" id="bList" type="button">← 목록</button><button class="b sm" id="bHome" type="button">과목</button></div>
   </header>
 
   <section>
-    <h2>같은 과목의 다른 규정</h2>
-    <div class="tabs" id="tabs"></div>
+    <div class="secHd"><h2>규정 수치</h2><span class="ok" id="rcOk"></span></div>
+    <table class="rtable"><thead><tr><th style="width:36%">항목</th><th style="width:30%">기준</th><th style="width:20%">현재</th><th style="width:14%;text-align:right">판정</th></tr></thead><tbody id="rcBody"></tbody></table>
     <p class="law" id="lawRoot"></p>
-    <p class="law art" id="law"></p>
-    <div class="ctl" id="sliders"></div>
-    <div class="row">
-      <button class="b primary" id="bTest" type="button"></button>
-      <button class="b" id="bReset" type="button" title="이 주제의 모든 값을 처음 규정값으로">↺ 규정값으로 되돌리기</button>
-      <button class="b" id="bAuto" type="button" aria-pressed="true" title="몇 초마다 시험을 저절로 반복">자동 시연 켜짐</button>
-      <span class="vw">
-        <button class="b" type="button" data-view="wide" aria-pressed="true">넓게 보기</button>
-        <button class="b" type="button" data-view="focus">주제 보기</button>
-      </span>
-    </div>
+  </section>
+
+  <section>
+    <h2>판정</h2>
+    <ul class="rules" id="rules"></ul>
     <p id="result"></p>
   </section>
 
   <section>
-    <h2>규정 판정</h2>
-    <ul class="rules" id="rules"></ul>
-  </section>
-
-  <section>
-    <h2>기출 확인</h2>
-    <div class="q" id="quiz"></div>
-    <div class="row">
-      <button class="b" id="bAns" type="button">정답 보기</button>
-      <button class="b" id="bNext" type="button">다른 문항</button>
+    <div class="secHd"><h2>기출</h2><button class="b sm" id="bQuiz" type="button" aria-expanded="false">문항 보기</button></div>
+    <div id="quizWrap" hidden>
+      <div class="q" id="quiz"></div>
+      <div class="row">
+        <button class="b" id="bAns" type="button">정답 보기</button>
+        <button class="b" id="bNext" type="button">다른 문항</button>
+      </div>
     </div>
   </section>
 </aside>
@@ -1292,10 +1309,13 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   function selectTopic(){ S.reveal = false; endTest(); buildTabs(); buildTopicUI(); refresh(); goView('wide'); autoT = 0; }
   function buildTopicUI(){
     const t = S.topic, def = T[t];
-    el('lawRoot').innerHTML = LAW[t].root; el('law').textContent = LAW[t].art;
+    el('lawRoot').innerHTML = LAW[t].root;
+    el('quizWrap').hidden = true; el('bQuiz').setAttribute('aria-expanded', 'false'); el('bQuiz').textContent = `문항 보기 (${(Q[t] || []).length})`;
+    // 값 조정은 3D 창 아래 칩으로: 칩을 누르면 슬라이더(또는 선택 버튼) 팝오버가 열린다
     el('sliders').innerHTML = def.sliders.map(([k, label, unit, min, max, step, names])=> names
-      ? `<div class="pick" data-pick="${k}"><div class="lab">${label}</div><div class="segc">${names.map((n,i)=>`<button type="button" data-val="${i}" aria-pressed="${S[t][k]===i}">${n}</button>`).join('')}</div></div>`
-      : `<div class="slider"><label for="s_${k}">${label}${LIM[t] && LIM[t][k] ? `<small id="lt_${k}"></small>` : ''}</label><span class="val"><output id="o_${k}"></output>${LIM[t] && LIM[t][k] ? `<button type="button" data-lim="${k}" title="규정 경계값으로">기준값</button>` : ''}</span><input id="s_${k}" type="range" min="${min}" max="${max}" step="${step}" value="${S[t][k]}" data-key="${k}"><div class="marks" id="mk_${k}"></div></div>`).join('');
+      ? `<div class="chip" id="chip_${k}"><button type="button" class="cb"><span>${label}</span><output id="o_${k}"></output></button><div class="pop"><div class="pick" data-pick="${k}"><div class="segc">${names.map((n,i)=>`<button type="button" data-val="${i}" aria-pressed="${S[t][k]===i}">${n}</button>`).join('')}</div></div></div></div>`
+      : `<div class="chip" id="chip_${k}"><button type="button" class="cb"><span>${label}</span><output id="o_${k}"></output></button><div class="pop"><div class="slider"><label for="s_${k}">${label}${LIM[t] && LIM[t][k] ? `<small id="lt_${k}"></small>` : ''}</label><span class="val">${LIM[t] && LIM[t][k] ? `<button type="button" data-lim="${k}" title="규정 경계값으로">기준값</button>` : ''}</span><input id="s_${k}" type="range" min="${min}" max="${max}" step="${step}" value="${S[t][k]}" data-key="${k}"><div class="marks" id="mk_${k}"></div></div></div></div>`).join('');
+    document.querySelectorAll('#sliders .chip .cb').forEach(b=> b.addEventListener('click', e=>{ const c = b.parentElement, open = c.classList.contains('open'); document.querySelectorAll('#sliders .chip.open').forEach(x=> x.classList.remove('open')); if(!open){ c.classList.toggle('flip', c.getBoundingClientRect().left + 450 > window.innerWidth); c.classList.add('open'); } e.stopPropagation(); }));
     def.sliders.forEach(([k,,unit,,,,names])=>{ if(names){ document.querySelectorAll(`[data-pick="${k}"] button`).forEach(b=> b.addEventListener('click', ()=>{ S[t][k] = +b.dataset.val; refresh(); })); }
       else { const inp = el('s_'+k); inp.addEventListener('input', e=>{ S[t][k] = +e.target.value; el('o_'+k).textContent = `${S[t][k]} ${unit}`; scheduleRefresh(); }); inp.addEventListener('change', ()=>{ S[t][k] = +inp.value; refresh(); }); } });
     document.querySelectorAll('[data-lim]').forEach(b=> b.addEventListener('click', ()=>{ const k = b.dataset.lim, lim = LIM[t][k](S[t]); S[t][k] = lim.v; el('s_'+k).value = lim.v; refresh(); }));
@@ -1305,8 +1325,9 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   }
   function paintRules(){
     const t = S.topic, p = S[t];
-    el('rules').innerHTML = T[t].rules.map(([text, fn, val])=>{ const ok = fn(p); return `<li class="${ok?'ok':'bad'}"><div>${text}<small>${val(p)}</small></div><span class="pill ${ok?'ok':'bad'}">${ok?'적합':'부적합'}</span></li>`; }).join('');
-    T[t].sliders.forEach(([k,,unit,min,max,,names])=>{ const v = S[t][k]; if(names){ document.querySelectorAll(`[data-pick="${k}"] button`).forEach(b=> b.setAttribute('aria-pressed', +b.dataset.val===v ? 'true' : 'false')); return; }
+    // 판정 목록은 한 줄 요약(전문은 툴팁)
+    el('rules').innerHTML = T[t].rules.map(([text, fn, val])=>{ const ok = fn(p); return `<li class="${ok?'ok':'bad'}" title="${text.replace(/"/g, '&quot;')}"><div>${briefRule(text)}<small>${val(p)}</small></div><span class="pill ${ok?'ok':'bad'}">${ok?'적합':'부적합'}</span></li>`; }).join('');
+    T[t].sliders.forEach(([k,,unit,min,max,,names])=>{ const v = S[t][k]; if(names){ document.querySelectorAll(`[data-pick="${k}"] button`).forEach(b=> b.setAttribute('aria-pressed', +b.dataset.val===v ? 'true' : 'false')); const o = el('o_'+k); if(o) o.textContent = names[v]; return; }
       el('o_'+k).textContent = `${v} ${unit}`;
       const lf = LIM[t] && LIM[t][k]; if(!lf) return; const lim = lf(p); el('lt_'+k).textContent = '기준 ' + lim.t;
       const pct = x => clamp((x-min)/(max-min), 0, 1)*100;
@@ -1321,7 +1342,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     el('rcBody').innerHTML = T[t].sliders.map(([k, label, unit,,,, names])=>{ const v = p[k];
       if(names) return `<tr><td class="item">${label}</td><td>선택</td><td class="cur">${names[v]}</td><td class="j na">—</td></tr>`;
       const lf = LIM[t] && LIM[t][k]; if(!lf) return `<tr><td class="item">${label}</td><td>—</td><td class="cur">${v} ${unit}</td><td class="j na">—</td></tr>`;
-      const lim = lf(p), j = judge(lim, v); return `<tr><td class="item">${label}</td><td>${lim.t}</td><td class="cur">${v} ${unit}</td><td class="j ${j===null?'na':j?'ok':'bad'}">${j===null?'—':j?'적합':'부적합'}</td></tr>`; }).join('');
+      const lim = lf(p), j = judge(lim, v); const ch = el('chip_'+k); if(ch) ch.classList.toggle('bad', j===false); return `<tr><td class="item">${label}</td><td>${lim.t}</td><td class="cur">${v} ${unit}</td><td class="j ${j===null?'na':j?'ok':'bad'}">${j===null?'—':j?'적합':'부적합'}</td></tr>`; }).join('');
   }
   function paintQuiz(){
     const t = S.topic, list = Q[t] || [];
@@ -1331,8 +1352,12 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     el('bAns').textContent = S.reveal ? '정답 숨기기' : '정답 보기';
   }
   let auto = !reduced, autoT = 0;
-  el('bAuto').addEventListener('click', ()=>{ auto = !auto; autoT = 0; el('bAuto').setAttribute('aria-pressed', auto); el('bAuto').textContent = auto ? '자동 시연 켜짐' : '자동 시연 꺼짐'; });
-  el('rcToggle').addEventListener('click', ()=>{ const c = el('regcard'); c.classList.toggle('min'); el('rcToggle').textContent = c.classList.contains('min') ? '펼치기' : '접기'; });
+  el('bAuto').addEventListener('click', ()=>{ auto = !auto; autoT = 0; el('bAuto').setAttribute('aria-pressed', auto); el('bAuto').textContent = auto ? '자동 시연 켜짐' : '자동 시연 꺼짐'; el('bAuto').setAttribute('aria-pressed', String(auto)); });
+  el('bQuiz').addEventListener('click', ()=>{ const w = el('quizWrap'); w.hidden = !w.hidden; el('bQuiz').setAttribute('aria-expanded', String(!w.hidden)); el('bQuiz').textContent = w.hidden ? `문항 보기 (${(Q[S.topic] || []).length})` : '접기'; });
+  // 칩 팝오버 바깥을 누르면 닫힘
+  document.addEventListener('click', e=>{ if(!e.target.closest('.chip')) document.querySelectorAll('#sliders .chip.open').forEach(x=> x.classList.remove('open')); });
+  // 판정 문장 한 줄 요약: 괄호·부연 제거, 52자 넘으면 말줄임
+  function briefRule(s){ const c = s.replace(/\s*\(.*?\)/g, '').split(' · ')[0].trim(); return c.length > 52 ? c.slice(0, 50) + '…' : c; }
   el('bReset').addEventListener('click', ()=>{ const t = S.topic; S[t] = Object.assign({}, DEFAULTS[t]); endTest(); buildTopicUI(); refresh(); setResult('처음 규정값으로 되돌렸습니다.', true); });
   el('bAns').addEventListener('click', ()=>{ S.reveal = !S.reveal; paintQuiz(); });
   el('bNext').addEventListener('click', ()=>{ S.qi[S.topic] = (S.qi[S.topic]||0) + 1; S.reveal = false; paintQuiz(); });
@@ -1726,7 +1751,7 @@ const fkNeed = p => Math.min(2*p.load, 4);
 addTopic('mach', 'forklift', {
   name:'지게차 헤드가드', lawText:'산업안전보건기준에 관한 규칙 제180조 · KS B ISO 6055', test:'낙하물 시험',
   defaults:{mode:0, open:12, hg:1.0, load:2, str:4},
-  sliders:[['mode','조작 방식','',0,1,1,FK_MODE],['open','상부틀 개구부 폭·길이','cm',5,30,1],['hg','좌석 윗면(입승식: 바닥면)~상부틀 아랫면','m',0.5,2.4,0.01],['load','지게차 최대하중','t',0.5,6,0.5],['str','헤드가드 강도 (등분포정하중)','t',0,10,0.5]],
+  sliders:[['mode','조작 방식','',0,1,1,FK_MODE],['open','상부틀 개구부 폭·길이','cm',5,30,1],['hg','헤드가드 높이 (좌석 윗면~상부틀, 입승식은 바닥면~)','m',0.5,2.4,0.01],['load','지게차 최대하중','t',0.5,6,0.5],['str','헤드가드 강도 (등분포정하중)','t',0,10,0.5]],
   rules:[['상부틀의 각 개구의 폭 또는 길이 16 cm 미만', p=> p.open < 16, p=>`현재 ${p.open} cm`],['좌승식: 좌석 윗면에서 상부틀 아랫면까지 0.903 m 이상 · 입승식: 바닥면에서 상부틀 하면까지 1.88 m 이상', p=> p.hg >= FK_H[p.mode] - 1e-9, p=>`${FK_MODE[p.mode]} ${FK_H[p.mode]} m 이상 · 현재 ${p.hg} m`],['강도: 최대하중의 2배 값(4 t 초과 시 4 t)의 등분포정하중에 견딜 것', p=> p.str >= fkNeed(p) - 1e-9, p=>`필요 ${fmt(fkNeed(p))} t · 현재 ${p.str} t`]],
   lim:{open:p=>({v:15, t:'16 cm 미만'}), hg:p=>({v:FK_H[p.mode], t:`${FK_H[p.mode]} m 이상`}), str:p=>({v:fkNeed(p), t:`${fmt(fkNeed(p))} t 이상 (최대하중 2배·4 t 상한)`})},
   law:{root:RULE, art:'제180조(헤드가드) · 한국산업표준 KS B ISO 6055'}, sum:'개구부 16 cm 미만 · 좌승식 0.903 m·입승식 1.88 m 이상 · 강도 최대하중 2배(4 t 상한)',
