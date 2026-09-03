@@ -615,8 +615,21 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     const t = S.topic, fails = T[t].rules.filter(r=> !r[1](S[t])), bad = fails.length ? fails[0][0] : null;
     // 값을 바꿨을 때: 새 위반이면 바로 지적, 같은 상태면 2.5초 쿨다운
     if(!force && now < managerCool && bad === managerLastBad) return; managerCool = now + 2500; managerLastBad = bad;
-    if(bad){ yell(m.g, `거기! 규정 위반! ${shortRule(bad)}`, 'boss-bad', 3.2, P3(0, 1.95, 0), false); m.point = 1.6; }
-    else yell(m.g, MANAGER_OK[Math.floor(Math.random()*MANAGER_OK.length)], 'boss', 2.6, P3(0, 1.95, 0), false);
+    const line = managerLine();
+    if(line.bad){ yell(m.g, line.text, 'boss-bad', 5.0, P3(0, 1.95, 0), false); m.point = 1.6; }
+    else yell(m.g, line.text, 'boss', 3.2, P3(0, 1.95, 0), false);
+  }
+  // 관리자 대사는 구체적으로: 슬라이더 규정(LIM)이 있으면 「항목 현재값 → 기준」 으로 지적하고, 적합일 땐 기준을 하나씩 짚어 준다
+  let managerIdx = 0;
+  function managerLine(){
+    const t = S.topic, p = S[t], fails = T[t].rules.filter(r=> !r[1](p));
+    const lims = T[t].sliders.filter(([k,,,,,,names])=> !names && LIM[t] && LIM[t][k]).map(([k,label,unit])=>{ const lim = LIM[t][k](p); return {label: label.replace(/\s*\(.*?\)/g, ''), unit, lim, j: judge(lim, p[k]), v: p[k]}; });
+    const badS = lims.find(x=> x.j===false);
+    if(badS) return {bad:true, text:`거기! ${badS.label} ${badS.v} ${badS.unit} → 기준 ${badS.lim.t}!`};
+    if(fails.length) return {bad:true, text:`거기! 규정 위반! ${shortRule(fails[0][0])}`};
+    const oks = lims.filter(x=> x.j===true); managerIdx++;
+    if(oks.length && managerIdx % 2 === 1){ const x = oks[Math.floor(managerIdx/2) % oks.length]; return {bad:false, text:`${x.label} ${x.lim.t} 확인, 좋습니다`}; }
+    return {bad:false, text: MANAGER_OK[Math.floor(Math.random()*MANAGER_OK.length)]};
   }
   function ambBeacon(parent, pos){ const g = new THREE.Group(); g.position.copy(pos); parent.add(g); g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 0.08, 12), darkSteel)); const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.16, 0.28), new THREE.MeshStandardMaterial({color: col(0xF07056), roughness:.5})); lamp.position.y = 0.14; g.add(lamp); AMB.push({kind:'beacon', g, parent}); return g; }
   function ambFlag(parent, pos, hex=0xF07056){ tube(pos, pos.clone().add(P3(0, 3, 0)), 0.03, steel, parent); const geo = new THREE.PlaneGeometry(1.4, 0.9, 14, 6); const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color: col(hex), side: THREE.DoubleSide, roughness:.85})); m.position.copy(pos).add(P3(0.7, 2.55, 0)); parent.add(m); AMB.push({kind:'flag', g:m, parent, geo, base: Float32Array.from(geo.attributes.position.array), t: Math.random()*6}); return m; }
@@ -628,7 +641,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     for(const a of AMB){ if(!a.parent.visible) continue;
       if(a.kind==='beacon'){ a.g.rotation.y += dt*6; continue; }
       if(a.kind==='manager'){ const L = a.g.userData.limbs; a.g.userData.head.rotation.y = Math.sin(performance.now()*0.0006 + 1)*0.55; if(a.point > 0){ a.point -= dt; L.arms[1].rotation.x += (-1.5 - L.arms[1].rotation.x)*Math.min(1, dt*8); } else L.arms[1].rotation.x += (0 - L.arms[1].rotation.x)*Math.min(1, dt*4);
-        a.t -= dt; if(a.t <= 0){ a.t = 10 + Math.random()*6; if(home.hidden && list.hidden && onScreen(a.g, 0.06)) managerSpeak(true); } continue; }
+        a.t -= dt; if(a.t <= 0){ a.t = (T[S.topic] && !allOk(S.topic)) ? 6 + Math.random()*3 : 10 + Math.random()*6; if(home.hidden && list.hidden && onScreen(a.g, 0.06)) managerSpeak(true); } continue; }
       if(a.kind==='flag'){ a.t += dt; const pos = a.geo.attributes.position.array, base = a.base; for(let i=0;i<pos.length;i+=3){ const x = base[i]; const k = (x + 0.7)/1.4; pos[i+2] = 0.14*k*Math.sin(x*4 + a.t*5) + 0.05*k*Math.sin(x*9 - a.t*7); } a.geo.attributes.position.needsUpdate = true; a.geo.computeVertexNormals(); continue; }
       if(a.kind==='cloud'){ a.g.position.x += a.speed*dt; if(a.g.position.x > 60) a.g.position.x = -60; continue; }
       if(a.kind==='birds'){ a.t += dt*0.35; a.birds.forEach(bd=>{ const ang = a.t + bd.off*0.25; bd.b.position.set(a.center.x + a.r*Math.cos(ang), a.y + Math.sin(a.t*2 + bd.off)*0.8, a.center.z + a.r*Math.sin(ang)); bd.b.rotation.y = -ang; const f = Math.sin(a.t*14 + bd.ph)*0.7; bd.wl.rotation.z = f; bd.wr.rotation.z = -f; }); continue; }
@@ -658,7 +671,10 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   // 말풍선은 사람 머리(머리 메시 실제 위치)에 고정하고, 한 사람에 하나만 둔다 (새 대사가 오면 교체)
   // 사람(발~머리)이 화면 안에 있는지: 화면 밖 사람의 말풍선만 삐죽 들어오지 않게
   const _os = new THREE.Vector3();
-  function onScreen(obj, margin=0.04){ obj.getWorldPosition(_os); const feet = _os.clone().project(camera); _os.y += 1.7; const head = _os.project(camera); const ok = v => v.z < 1 && Math.abs(v.x) < 1 - margin && Math.abs(v.y) < 1 - margin; return ok(feet) && ok(head); }
+  // 「테스트 항목」 카드(#dock) 뒤에 가려지는 자리는 화면 밖으로 친다 — 카드 밑에서 말풍선이 나오지 않게
+  let dockRect = null, viewW = 1, viewH = 1;
+  function inDock(px, py){ return !!dockRect && px >= dockRect.left - 8 && px <= dockRect.right + 8 && py >= dockRect.top - 36; }
+  function onScreen(obj, margin=0.04){ obj.getWorldPosition(_os); const feet = _os.clone().project(camera); _os.y += 1.7; const head = _os.project(camera); const ok = v => v.z < 1 && Math.abs(v.x) < 1 - margin && Math.abs(v.y) < 1 - margin; return ok(feet) && ok(head) && !inDock((feet.x + 1)/2*viewW, (1 - feet.y)/2*viewH); }
   // 숨겨진 무대(다른 주제)의 사람은 말풍선을 띄우지 않는다 — 장면을 바꾼 뒤 이전 장면의 판정 대사가 새 장면에 떠오르던 문제
   function inScene(o){ for(let n = o; n; n = n.parent){ if(n.visible === false) return false; } return true; }
   function yell(obj, text, cls='scream', life=2.4, off=P3(0, 1.85, 0), useHead=true){
@@ -691,13 +707,13 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   }
   // 라벨 배치: 투영 → 우선순위 순으로 놓고, 겹치면 위로 밀어 올리며 지시선을 남긴다. 자리가 없으면 숨김.
   function placeLabels(w, h){
-    const items = [];
+    const items = []; viewW = w; viewH = h; { const card = el('dock').firstElementChild; dockRect = card && home.hidden && list.hidden ? card.getBoundingClientRect() : null; }
     for(const d of labels){
       if(d.isYell && d.base && !onScreen(d.base, 0.01)){ d.el.style.display = 'none'; continue; }   // 사람이 화면 밖이면 말풍선도 숨김
       if(d.follow){ d.follow.getWorldPosition(tmpW); tmpW.add(d.off||P3(0,0,0)); } else tmpW.copy(d.anchor);
       const dist = tmpW.distanceTo(camera.position); tmpV.copy(tmpW).project(camera);
       if(tmpV.z > 1 || d.hidden || Math.abs(tmpV.x) > 1.3 || Math.abs(tmpV.y) > 1.3){ d.el.style.display = 'none'; continue; }
-      d.el.style.display = ''; d._x = (tmpV.x+1)/2*w; d._y = (1-tmpV.y)/2*h; d._dist = dist; d._s = clamp(1.12 - dist/70, 0.72, 1); items.push(d);
+      d.el.style.display = ''; d._x = (tmpV.x+1)/2*w; d._y = (1-tmpV.y)/2*h; d._dist = dist; d._s = d.isYell ? 1 : clamp(1.12 - dist/70, 0.72, 1); items.push(d);
     }
     items.sort((a,b)=> (LBL_PRI(b) - LBL_PRI(a)) || (a._dist - b._dist));
     const placed = [];
@@ -711,6 +727,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       let sx = d._x, sy = y;
       if(!d.fixed && d._sx !== undefined && Math.hypot(d._sx - sx, d._sy - sy) < 300){ sx = d._sx + (sx - d._sx)*0.35; sy = d._sy + (sy - d._sy)*0.35; }
       d._sx = sx; d._sy = sy;
+      if(d.isYell && inDock(sx, sy)){ el.style.display = 'none'; continue; }
       const lead = Math.max(0, d._y - sy);
       el.style.setProperty('--lead', lead.toFixed(0) + 'px');
       el.style.transform = `translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px) translate(-50%,-100%) scale(${d._s.toFixed(3)})`;
@@ -2249,6 +2266,8 @@ dressAfter('ramp', (g, p, R)=>{ const run = R.run, H = p.H, floors = Math.max(1,
 dressAfter('trench', (g, p, R)=>{ const D = p.depth + 0.03;
   AMB.filter(a=> a.parent === ambStages.trench).forEach(a=>{ if(a.kind==='walk') a.path = [P3(-5, D, -9), P3(5, D, -9), P3(5, D, -12.5), P3(-5, D, -12.5)]; if(a.kind==='pick') a.g.position.set(-4.5, D, 6); a.g.position.y = D; }); });
 MANAGER_POS.trench = [-4.6, 0, 5.5];
+// 가공전선로: 관리자를 크레인 옆(화면 가운데)으로 — 앞쪽 끝에 두면 하단 카드에 가려 말풍선이 안 보였음
+MANAGER_POS.powerline = [-1.5, 0, 4.0];
 // 작업발판: 외벽 공사 중인 건물 앞에 세운 발판
 dressAfter('plank', (g, p, R)=>{ DRESS.frame(g, -7, 7, -9.5, -3.6, 3, 3.3, {nx:2, nz:1});
   DRESS.fence(g, -13, 13, -11); DRESS.blocks(g, 5.6, 1.0); DRESS.rebar(g, -6.2, 0.6, 0.15); DRESS.cones(g, [[-2.6, 3.8], [2.6, 3.8]]); DRESS.office(g, 12, 2, -Math.PI/2); DRESS.planks(g, 7.5, 4.2, 0.4); });
