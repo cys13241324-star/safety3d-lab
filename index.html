@@ -103,7 +103,9 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 .chip .pop .slider label{font-size:14px} .chip .pop .pick .segc{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
 @media (max-width:760px){#tabs,#dock{left:8px;right:8px} #dock{bottom:calc(50vh + 8px)}}
 
-#panel{position:fixed;left:16px;top:16px;width:380px;max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;padding:16px 18px 14px;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(12px);display:flex;flex-direction:column;gap:14px}
+#navBar{position:fixed;left:16px;top:16px;z-index:4;display:flex;gap:6px;align-items:center;padding:6px 10px 6px 6px;border-radius:8px;border:1px solid var(--line);background:rgba(8,13,22,.88);backdrop-filter:blur(10px);max-width:380px;box-sizing:border-box}
+#navBar .b{font-size:14px;padding:6px 11px;white-space:nowrap} #navBar .eyebrow{margin:0 0 0 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.02em;text-transform:none}
+#panel{position:fixed;left:16px;top:72px;width:380px;max-height:calc(100vh - 88px);overflow:auto;box-sizing:border-box;padding:16px 18px 14px;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(12px);display:flex;flex-direction:column;gap:14px}
 #panel header{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
 #panel header .b{white-space:nowrap}
 /* 상위 창 ①과목 나열 · ②법령 리스트 */
@@ -273,14 +275,14 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   </div>
 </div>
 
+<!-- 좌측 상단 고정 내비게이션: 목록·과목 버튼 + 현재 위치. 텍스트 패널은 그 아래 -->
+<div id="navBar"><button class="b" id="bList" type="button">← 목록</button><button class="b" id="bHome" type="button">과목</button><span class="eyebrow" id="crumbPanel">산업안전기사 · 수치 규정 실습</span></div>
 <aside id="panel">
   <header>
     <div>
-      <p class="eyebrow" id="crumbPanel">산업안전기사 · 수치 규정 실습</p>
       <h1 id="rcName">산업안전 규격 실습장</h1>
       <p class="law art" id="rcArt"></p>
     </div>
-    <div class="hbtn"><button class="b sm" id="bList" type="button">← 목록</button><button class="b sm" id="bHome" type="button">과목</button></div>
   </header>
 
   <section>
