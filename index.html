@@ -6,7 +6,7 @@
 <title>산업안전 규격 실습장</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Nanum+Pen+Script&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Nanum+Pen+Script&family=Gothic+A1:wght@800&display=swap">
 <style>
 :root{
   color-scheme:dark;
@@ -219,6 +219,35 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
 .vw{display:flex;gap:6px}
 /* 모바일 전용 손잡이 (PC 에서는 숨김) */
 #panelHandle{display:none;position:fixed;left:0;right:0;bottom:0;height:40px;align-items:center;justify-content:center;gap:8px;font:inherit;font-size:14px;font-weight:500;background:rgba(8,13,22,.96);color:var(--text);border:0;border-top:1px solid var(--line);z-index:7;cursor:pointer}
+/* ---------- 꾸미기 패스(09-03): 과목별 강조색 · 굵은 제목 서체(Gothic A1) · 안전 표지 줄무늬 모티프 · 카드 들림 ---------- */
+.subjCard[data-subj=mgmt],body[data-subj=mgmt]{--acc:#E3B54D} .subjCard[data-subj=ergo],body[data-subj=ergo]{--acc:#5CC9C0} .subjCard[data-subj=mach],body[data-subj=mach]{--acc:#F07056}
+.subjCard[data-subj=elec],body[data-subj=elec]{--acc:#FFD166} .subjCard[data-subj=chem],body[data-subj=chem]{--acc:#B48CFF} .subjCard[data-subj=const],body[data-subj=const]{--acc:#5CC08A}
+.hazard{height:6px;max-width:300px;border-radius:3px;margin:12px 0 16px;background:repeating-linear-gradient(135deg,#E3B54D 0 14px,#141A24 14px 28px)}
+.screenBox h1{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:40px;letter-spacing:-.02em;line-height:1.15}
+.homeStats{display:flex;gap:22px;flex-wrap:wrap;margin:-8px 0 22px;font-family:var(--mono);font-size:14px;color:var(--muted)} .homeStats b{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:22px;color:var(--text);margin-right:5px;letter-spacing:-.02em}
+.subjCard{border-left:4px solid var(--acc,var(--accent));background:linear-gradient(180deg,rgba(24,34,52,.92),rgba(14,20,32,.92));transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;overflow:hidden}
+.subjCard:hover,.subjCard:focus-visible{transform:translateY(-2px);border-color:var(--acc,var(--accent));box-shadow:0 10px 26px rgba(0,0,0,.35)}
+.subjCard .n{color:var(--acc,var(--accent))} .subjCard .name{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:23px;letter-spacing:-.01em}
+.subjCard .num{position:absolute;right:14px;bottom:2px;font-family:'Gothic A1',var(--sans);font-weight:800;font-size:56px;line-height:1;color:rgba(255,255,255,.045);letter-spacing:-.05em;pointer-events:none}
+.subjCard .stat b{color:var(--acc,var(--warn))}
+.lawRow{border-left:4px solid var(--acc,var(--accent));transition:transform .12s ease,border-color .12s ease} .lawRow:hover{transform:translateX(3px)} .lawRow .name{font-family:'Gothic A1',var(--sans);font-weight:800} .lawRow .go{color:var(--acc,var(--accent))}
+.crumb button:hover{border-color:var(--acc,var(--accent))}
+#panel h1{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:24px;letter-spacing:-.015em}
+h2::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--acc,var(--accent));margin-right:7px;vertical-align:1px}
+.rtable tbody tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+#navBar .eyebrow{color:var(--acc,var(--accent))}
+#tabs button[aria-pressed="true"]{background:var(--acc,var(--accent));color:#0B1220;border-color:var(--acc,var(--accent));font-weight:600}
+#dock .card{position:relative;overflow:hidden;padding-top:14px} #dock .card::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:repeating-linear-gradient(135deg,#E3B54D 0 12px,#141A24 12px 24px)}
+#dock .dockHd .cap{color:var(--acc,var(--accent));border-color:var(--acc,var(--accent))}
+button.b{border-radius:6px} button.b.primary,#dock .act .b.primary{background:var(--warn);color:#1A1200;border-color:var(--warn);font-weight:600} button.b.primary:hover,#dock .act .b.primary:hover{background:#F2C660;border-color:#F2C660}
+.tutCard h3{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:21px}
+/* ---------- 빈칸(블라인드) 모드: 기준값을 감추고 학습자가 슬라이더로 맞힌다 ---------- */
+body.blind .rules,body.blind #rcOk,body.blind [data-lim],body.blind .slider .marks,body.blind .lbl.name span{display:none!important}
+body.blind .chip.bad .cb{border-color:var(--line);box-shadow:none} body.blind .chip.bad .cb output{color:var(--warn)}
+body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)}
+#blindCard{position:fixed;inset:0;z-index:31;background:rgba(4,8,14,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px} #blindCard[hidden]{display:none}
+#blindCard .tutCard{width:min(600px,100%)} #blindCard table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:14px} #blindCard th{text-align:left;color:var(--dim);font-weight:500;padding:4px 6px;font-size:12.5px} #blindCard td{padding:6px;border-top:1px solid var(--line-soft)}
+#blindCard td.ok{color:var(--ok)} #blindCard td.bad{color:var(--bad)} #blindCard .score{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:34px;letter-spacing:-.02em}
 /* ---------- 모바일(760px 이하): 최상단 목록·과목 바 → 그 아래 규정 칩 스트립(스와이프) → 3D → 하단 테스트 항목 카드 → 맨 아래 접이식 「규정 수치·판정·기출」 손잡이 ---------- */
 @media (max-width:760px){
   #navBar{left:8px;right:8px;top:8px;max-width:none}
@@ -258,6 +287,8 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       <button class="b primary" id="bTest" type="button"></button>
       <button class="b" id="bReset" type="button" title="이 주제의 모든 값을 처음 규정값으로">↺ 규정값</button>
       <button class="b" id="bAuto" type="button" aria-pressed="true" title="몇 초마다 시험을 저절로 반복">자동 시연 켜짐</button>
+      <button class="b" id="bBlind" type="button" aria-pressed="false" title="기준값을 감추고 슬라이더로 맞혀 보기">빈칸 모드</button>
+      <button class="b primary" id="bScore" type="button" hidden>채점</button>
       <span class="hintTxt">드래그 회전 · 우클릭 드래그 이동 · 휠 확대</span>
     </div>
    </div>
@@ -271,11 +302,14 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   <div class="screenBox">
     <p class="eyebrow">Three.js · 산업안전기사 · 수치 규정 실습</p>
     <h1>산업안전 규격 실습장</h1>
+    <div class="hazard" aria-hidden="true"></div>
     <p class="lede">높이·거리·각도·간격으로 정해진 안전 규정을 3D로 세워 두고, 값을 바꿔 가며 판정과 시험을 봅니다. 과목을 고르면 그 과목의 법령·규정 목록이 열립니다. <button class="b sm" type="button" id="bTut">사용법 (4단계)</button></p>
+    <div class="homeStats" id="homeStats"></div>
     <div class="subjGrid" id="homeGrid"></div>
   </div>
 </div>
 <!-- 첫 실행 튜토리얼: 4단계, 로딩 후 한 번만 (localStorage). 홈의 「사용법」 버튼으로 다시 볼 수 있음 -->
+<div id="blindCard" hidden><div class="tutCard" role="dialog" aria-modal="true" aria-labelledby="blindTitle"><div class="tutHd"><span class="tutStep">빈칸 채점</span><button class="b sm" type="button" id="blindClose">닫기</button></div><h3 id="blindTitle"></h3><div id="blindBody"></div><div class="tutFt"><span class="score" id="blindScore"></span><span><button class="b" type="button" id="blindAgain">다시 섞기</button> <button class="b primary" type="button" id="blindExit">빈칸 모드 끝</button></span></div></div></div>
 <div id="tut" hidden>
   <div class="tutCard" role="dialog" aria-modal="true" aria-labelledby="tutTitle">
     <div class="tutHd"><span class="tutStep" id="tutStep">1 / 4</span><button class="b sm" type="button" id="tutSkip">건너뛰기</button></div>
@@ -340,6 +374,8 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   const fmt = (n, d=1) => (Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toLocaleString('ko-KR',{maximumFractionDigits:d});
   // 2차 확장 주제(ext_topics.js)가 시험 진행·상시 애니메이션을 등록하는 훅
   const EXT_STEP = {}, EXT_IDLE = {};
+  // 빈칸(블라인드) 모드: 켜져 있으면 기준값·판정·위험 이펙트를 감춘다
+  let BLIND = false;
   const Q = JSON.parse(document.getElementById('quizdata').textContent);
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -679,6 +715,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   // 관리자 대사는 구체적으로: 슬라이더 규정(LIM)이 있으면 「항목 현재값 → 기준」 으로 지적하고, 적합일 땐 기준을 하나씩 짚어 준다
   let managerIdx = 0;
   function managerLine(){
+    if(BLIND) return {bad:false, text: ['기준값을 맞혀 보세요', '슬라이더로 규정값 찾기!', '다 맞추면 채점!'][managerIdx++ % 3]};
     const t = S.topic, p = S[t], fails = T[t].rules.filter(r=> !r[1](p));
     const lims = T[t].sliders.filter(([k,,,,,,names])=> !names && LIM[t] && LIM[t][k]).map(([k,label,unit])=>{ const lim = LIM[t][k](p); return {label: label.replace(/\s*\(.*?\)/g, ''), unit, lim, j: judge(lim, p[k]), v: p[k]}; });
     // 항목 이름은 짧게: 8자를 넘으면 마지막 두 단어만 (「붐 끝~전선 이격거리」 → 「전선 이격거리」)
@@ -727,7 +764,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   /* ---------- HTML 라벨 · 치수선 ---------- */
   const labelRoot = $('#labels');
   let labels = [];
-  function addLabel(def){ def.el = document.createElement('div'); def.el.className = 'lbl ' + (def.cls||''); def.el.innerHTML = def.html||''; labelRoot.appendChild(def.el); labels.push(def); return def; }
+  function addLabel(def){ if(BLIND && /\bdim\b/.test(def.cls||'')) def.cls = def.cls.replace(/\b(ok|bad)\b/g, '').trim(); def.el = document.createElement('div'); def.el.className = 'lbl ' + (def.cls||''); def.el.innerHTML = def.html||''; labelRoot.appendChild(def.el); labels.push(def); return def; }
   function removeLabel(d){ if(!d) return; d.el.remove(); labels = labels.filter(x=>x!==d); }
   const tmpV = new THREE.Vector3(), tmpW = new THREE.Vector3();
   const LBL_PRI = d => d.el.classList.contains('yell') ? 4 : d.el.classList.contains('verdict') ? 3 : (d.el.classList.contains('proc') || d.el.classList.contains('name')) ? 2 : 1;
@@ -815,6 +852,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     dimGroup.add(m); return m;
   }
   function dim(a, b, text, ok, offsetDir, tick=0.3){
+    if(BLIND) ok = undefined;
     const d = b.clone().sub(a).normalize();
     let n = offsetDir ? offsetDir.clone() : new THREE.Vector3(0,0,1).cross(d); if(n.length()<0.05) n = new THREE.Vector3(1,0,0).cross(d); n.normalize();
     const mat = dimMat[dimKey(ok)], L = a.distanceTo(b);
@@ -828,6 +866,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     dimLabels.push(addLabel({cls:'dim ' + (ok===undefined?'':ok?'ok':'bad'), anchor: a.clone().add(b).multiplyScalar(.5).add(n.clone().multiplyScalar(tick*1.6)), html:`<b>${text}</b>`}));
   }
   function arcYZ(center, r, a0, a1, text, ok){
+    if(BLIND) ok = undefined;
     const at = a=> P3(center.x, center.y + r*Math.sin(a), center.z + r*Math.cos(a));
     const mat = dimMat[dimKey(ok)];
     const pts = []; for(let i=0;i<=24;i++) pts.push(at(a0 + (a1-a0)*i/24));
@@ -844,15 +883,15 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   [hazMat, signMat, arcMat, arcMat2].forEach(m=> KEEP.add(m));
   function warningSign(){ const tri = new THREE.Shape(); tri.moveTo(0, 0.5); tri.lineTo(-0.46, -0.3); tri.lineTo(0.46, -0.3); tri.closePath(); const hole = new THREE.Path(); hole.moveTo(0, 0.32); hole.lineTo(-0.3, -0.19); hole.lineTo(0.3, -0.19); hole.closePath(); tri.holes.push(hole);
     const s = new THREE.Mesh(new THREE.ShapeGeometry(tri), signMat); const bang = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.28, 0.02), signMat); bang.position.y = 0.06; s.add(bang); const dot = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.08, 0.02), signMat); dot.position.y = -0.14; s.add(dot); return s; }
-  function hazardAt(pos, size=0.5){
+  function hazardAt(pos, size=0.5){ if(BLIND) return;
     const orb = new THREE.Mesh(new THREE.SphereGeometry(size, 16, 12), hazMat); orb.position.copy(pos); dimGroup.add(orb);
     const sign = warningSign(); sign.position.copy(pos).add(P3(0, size + 0.9, 0)); sign.scale.setScalar(0.9); dimGroup.add(sign);
     hazards.push({kind:'mark', orb, sign, base: sign.position.y, ph: Math.random()*6, size});
   }
-  function hazardArc(a, b, strength=1){ const l1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array(14).fill(0).map(()=>a.clone())), arcMat), l2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array(14).fill(0).map(()=>a.clone())), arcMat2); dimGroup.add(l1); dimGroup.add(l2); hazards.push({kind:'arc', a:a.clone(), b:b.clone(), l1, l2, t:0, strength}); }
-  function hazardSparks(pos, rate=14){ hazards.push({kind:'sparks', pos:pos.clone(), rate, list:[]}); }
-  function hazardFlame(mesh){ mesh.visible = true; hazards.push({kind:'flame', mesh, t:Math.random()*6}); }
-  function hazardPebbles(topZ, bottomZ, D){ hazards.push({kind:'pebbles', topZ, bottomZ, D, list:[], t:0}); }
+  function hazardArc(a, b, strength=1){ if(BLIND) return; const l1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array(14).fill(0).map(()=>a.clone())), arcMat), l2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array(14).fill(0).map(()=>a.clone())), arcMat2); dimGroup.add(l1); dimGroup.add(l2); hazards.push({kind:'arc', a:a.clone(), b:b.clone(), l1, l2, t:0, strength}); }
+  function hazardSparks(pos, rate=14){ if(BLIND) return; hazards.push({kind:'sparks', pos:pos.clone(), rate, list:[]}); }
+  function hazardFlame(mesh){ if(BLIND) return; mesh.visible = true; hazards.push({kind:'flame', mesh, t:Math.random()*6}); }
+  function hazardPebbles(topZ, bottomZ, D){ if(BLIND) return; hazards.push({kind:'pebbles', topZ, bottomZ, D, list:[], t:0}); }
   function stepHazards(dt, now){
     for(const h of hazards){
       if(h.kind==='mark'){ const k = 0.5 + 0.5*Math.sin(now/1000*5 + h.ph); h.orb.scale.setScalar(0.7 + 0.5*k); h.orb.material = hazMat; h.sign.position.y = h.base + 0.12*Math.sin(now/1000*2.5 + h.ph); h.sign.quaternion.copy(camera.quaternion); }
@@ -1415,7 +1454,8 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   /* ---------- 상위 창 ① 과목 나열 ---------- */
   const home = el('home'), list = el('list');
   function buildHome(){
-    el('homeGrid').innerHTML = SUBJECTS.map((s, i)=>{ const soon = !s.topics.length; return `<div class="subjCard${soon?' soon':''}" role="button" tabindex="0" data-subj="${s.id}"><div class="n">제${i+1}과목</div>${s.id==='const' ? '<span class="stamp"><b>★</b>추천</span>' : ''}<div class="name">${s.name}</div><div class="desc">${s.desc}</div><div class="stat"><span>3D 규정 <b>${s.topics.length}</b>${soon?' (준비 중)':''}</span><span>규정·법령 기출 <b>${BANK_COUNT[s.name]||0}</b>문항</span></div></div>`; }).join('');
+    el('homeGrid').innerHTML = SUBJECTS.map((s, i)=>{ const soon = !s.topics.length; return `<div class="subjCard${soon?' soon':''}" role="button" tabindex="0" data-subj="${s.id}"><div class="n">제${i+1}과목</div><span class="num" aria-hidden="true">0${i+1}</span>${s.id==='const' ? '<span class="stamp"><b>★</b>추천</span>' : ''}<div class="name">${s.name}</div><div class="desc">${s.desc}</div><div class="stat"><span>3D 규정 <b>${s.topics.length}</b>${soon?' (준비 중)':''}</span><span>규정·법령 기출 <b>${BANK_COUNT[s.name]||0}</b>문항</span></div></div>`; }).join('');
+    { const nT = SUBJECTS.reduce((n, s)=> n + s.topics.length, 0), nQ = Object.values(BANK_COUNT).reduce((a, b)=> a + b, 0); el('homeStats').innerHTML = `<span><b>${SUBJECTS.length}</b>과목</span><span><b>${nT}</b>규정 장면</span><span><b>${nT}</b>시험 시나리오</span><span><b>${nQ.toLocaleString('ko-KR')}</b>규정·법령 기출</span>`; }
     document.querySelectorAll('[data-subj]').forEach(card=>{
       const open = ()=>{ S.subj = card.dataset.subj; showList(); };
       card.addEventListener('click', open); card.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } });
@@ -1424,7 +1464,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   /* ---------- 상위 창 ② 법령 리스트 ---------- */
   function showList(){
     const s = SUBJECTS.find(x=>x.id===S.subj);
-    el('crumbSubj').textContent = s.name; el('listTitle').textContent = s.name + ' · 규정 목록';
+    el('crumbSubj').textContent = s.name; el('listTitle').textContent = s.name + ' · 규정 목록'; document.body.dataset.subj = S.subj;
     el('listLede').textContent = s.topics.length ? `${s.topics.length}개 규정을 3D로 세워 두었습니다. 규정을 누르면 실습장이 열립니다.` : '이 과목의 3D 규정은 준비 중입니다. 다른 과목을 골라 주세요.';
     el('lawList').innerHTML = s.topics.length ? s.topics.map(k=>`<div class="lawRow" role="button" tabindex="0" data-law="${k}"><div><div class="name">${T[k].name}</div><div class="law">${LAW[k].root}</div><div class="law art">${LAW[k].art}</div><div class="sum">${SUM[k]||''}</div></div><div class="go"><span>▶ 3D 실습</span><small>기출 ${(Q[k]||[]).length}문항 · 시험 「${T[k].test}」</small></div></div>`).join('') : '<div class="empty">준비 중</div>';
     document.querySelectorAll('[data-law]').forEach(row=>{ const go = ()=>{ S.topic = row.dataset.law; home.hidden = true; list.hidden = true; selectTopic(); }; row.addEventListener('click', go); row.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); go(); } }); });
@@ -1441,7 +1481,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     el('tabs').innerHTML = s.topics.map(k=>`<button type="button" data-topic="${k}" aria-pressed="${k===S.topic}">${T[k].name}</button>`).join('');
     document.querySelectorAll('[data-topic]').forEach(b=> b.addEventListener('click', ()=>{ S.topic = b.dataset.topic; selectTopic(); }));
   }
-  function selectTopic(){ S.reveal = false; endTest(); buildTabs(); buildTopicUI(); refresh(); goView('wide'); autoT = 0; }
+  function selectTopic(){ S.reveal = false; if(BLIND){ BLIND = false; document.body.classList.remove('blind'); el('bBlind').setAttribute('aria-pressed', 'false'); el('bBlind').textContent = '빈칸 모드'; el('bScore').hidden = true; el('blindCard').hidden = true; } endTest(); buildTabs(); buildTopicUI(); refresh(); goView('wide'); autoT = 0; }
   function buildTopicUI(){
     const t = S.topic, def = T[t];
     el('lawRoot').innerHTML = LAW[t].root;
@@ -1464,7 +1504,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     el('rules').innerHTML = T[t].rules.map(([text, fn, val])=>{ const ok = fn(p); return `<li class="${ok?'ok':'bad'}" title="${text.replace(/"/g, '&quot;')}"><div>${briefRule(text)}<small>${val(p)}</small></div><span class="pill ${ok?'ok':'bad'}">${ok?'적합':'부적합'}</span></li>`; }).join('');
     T[t].sliders.forEach(([k,,unit,min,max,,names])=>{ const v = S[t][k]; if(names){ document.querySelectorAll(`[data-pick="${k}"] button`).forEach(b=> b.setAttribute('aria-pressed', +b.dataset.val===v ? 'true' : 'false')); const o = el('o_'+k); if(o) o.textContent = names[v]; return; }
       el('o_'+k).textContent = `${v} ${unit}`;
-      const lf = LIM[t] && LIM[t][k]; if(!lf) return; const lim = lf(p); el('lt_'+k).textContent = '기준 ' + lim.t;
+      const lf = LIM[t] && LIM[t][k]; if(!lf) return; const lim = lf(p); el('lt_'+k).textContent = BLIND ? '기준 ? (맞혀 보세요)' : '기준 ' + lim.t;
       const pct = x => clamp((x-min)/(max-min), 0, 1)*100;
       el('mk_'+k).innerHTML = (lim.lo!==undefined ? `<i style="left:${pct(lim.lo)}%"></i><i style="left:${pct(lim.hi)}%"></i>` : `<i style="left:${pct(lim.v)}%"></i>`); });
     paintCard();
@@ -1477,7 +1517,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     el('rcBody').innerHTML = T[t].sliders.map(([k, label, unit,,,, names])=>{ const v = p[k];
       if(names) return `<tr><td class="item">${label}</td><td>선택</td><td class="cur">${names[v]}</td><td class="j na">—</td></tr>`;
       const lf = LIM[t] && LIM[t][k]; if(!lf) return `<tr><td class="item">${label}</td><td>—</td><td class="cur">${v} ${unit}</td><td class="j na">—</td></tr>`;
-      const lim = lf(p), j = judge(lim, v); const ch = el('chip_'+k); if(ch) ch.classList.toggle('bad', j===false); return `<tr><td class="item">${label}</td><td>${lim.t}</td><td class="cur">${v} ${unit}</td><td class="j ${j===null?'na':j?'ok':'bad'}">${j===null?'—':j?'적합':'부적합'}</td></tr>`; }).join('');
+      const lim = lf(p), j = BLIND ? null : judge(lim, v); const ch = el('chip_'+k); if(ch) ch.classList.toggle('bad', j===false); return `<tr><td class="item">${label}</td><td>${BLIND ? '<span style="color:var(--warn)">? (맞혀 보세요)</span>' : lim.t}</td><td class="cur">${v} ${unit}</td><td class="j ${j===null?'na':j?'ok':'bad'}">${j===null?'—':j?'적합':'부적합'}</td></tr>`; }).join('');
   }
   function paintQuiz(){
     const t = S.topic, list = Q[t] || [];
@@ -1511,6 +1551,20 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   document.addEventListener('keydown', e=>{ if(el('tut').hidden) return; if(e.key === 'Escape') tutClose(); if(e.key === 'ArrowRight' || e.key === 'Enter') el('tutNext').click(); });
   // 주소에 ?tut 또는 #tut 이 있으면 본 적이 있어도 튜토리얼을 띄운다
   { let seen = false; try{ seen = !!localStorage.getItem(TUT_KEY); }catch(e){} const force = /[?&#]tut\b/.test(location.search + location.hash); if(!seen || force) tutShow(0); }
+  /* ---------- 빈칸(블라인드) 모드: 기준값을 감추고 슬라이더를 규정값에 맞혀 채점 ---------- */
+  function blindSliders(){ const t = S.topic; return T[t].sliders.filter(([k,,,,,,names])=> !names && LIM[t] && LIM[t][k]); }
+  function blindScramble(){ const t = S.topic, p = S[t];
+    blindSliders().forEach(([k,,,min,max,step])=>{ const lim = LIM[t][k](p); for(let tries=0; tries<20; tries++){ const v = Math.round((min + Math.random()*(max - min))/step)*step; const far = lim.lo !== undefined ? (v < lim.lo - step || v > lim.hi + step) : Math.abs(v - lim.v) > step*1.5; if(far){ p[k] = +v.toFixed(6); break; } } });
+    endTest(); buildTopicUI(); refresh(); setResult('빈칸 모드: 값이 섞였습니다. 슬라이더를 규정값에 맞춘 뒤 「채점」을 누르세요.', true); }
+  function blindEnter(){ BLIND = true; document.body.classList.add('blind'); el('bBlind').setAttribute('aria-pressed', 'true'); el('bBlind').textContent = '빈칸 모드 켜짐'; el('bScore').hidden = false; blindScramble(); }
+  function blindExit(){ BLIND = false; document.body.classList.remove('blind'); el('bBlind').setAttribute('aria-pressed', 'false'); el('bBlind').textContent = '빈칸 모드'; el('bScore').hidden = true; el('blindCard').hidden = true; const t = S.topic; S[t] = Object.assign({}, DEFAULTS[t]); endTest(); buildTopicUI(); refresh(); setResult('빈칸 모드를 끝내고 규정값으로 돌아왔습니다.', true); }
+  function blindScore(){ const t = S.topic, p = S[t]; let n = 0; const rows = blindSliders().map(([k,label,unit,,,step])=>{ const lim = LIM[t][k](p), v = p[k]; const hit = lim.lo !== undefined ? (v >= lim.lo - 1e-9 && v <= lim.hi + 1e-9) : Math.abs(v - lim.v) <= step*1.0001; if(hit) n++; return `<tr><td>${label.replace(/\s*\(.*?\)/g, '')}</td><td class="${hit?'ok':'bad'}">${v} ${unit}</td><td>${lim.t}</td><td class="${hit?'ok':'bad'}">${hit?'정답':'오답'}</td></tr>`; });
+    el('blindTitle').textContent = `${T[t].name} · 기준값 맞히기`; el('blindBody').innerHTML = `<table><thead><tr><th>항목</th><th>내 답</th><th>규정</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table>`; el('blindScore').textContent = `${n} / ${rows.length}`; el('blindScore').style.color = n === rows.length ? 'var(--ok)' : 'var(--warn)'; el('blindCard').hidden = false; }
+  el('bBlind').addEventListener('click', ()=>{ if(BLIND) blindExit(); else blindEnter(); });
+  el('bScore').addEventListener('click', blindScore);
+  el('blindClose').addEventListener('click', ()=> el('blindCard').hidden = true);
+  el('blindAgain').addEventListener('click', ()=>{ el('blindCard').hidden = true; blindScramble(); });
+  el('blindExit').addEventListener('click', blindExit);
   // 모바일: 하단 손잡이로 텍스트 패널 접기/펼치기 (기본 접힘)
   el('panelHandle').addEventListener('click', ()=>{ const open = document.body.classList.toggle('panelOpen'); el('panelHandle').setAttribute('aria-expanded', String(open)); el('panelHandle').textContent = open ? '▼ 접기' : '▲ 규정 수치 · 판정 · 기출'; });
   el('bQuiz').addEventListener('click', ()=>{ const w = el('quizWrap'); w.hidden = !w.hidden; el('bQuiz').setAttribute('aria-expanded', String(!w.hidden)); el('bQuiz').textContent = w.hidden ? `문항 보기 (${(Q[S.topic] || []).length})` : '접기'; });
@@ -1802,7 +1856,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     { const in3d = home.hidden && list.hidden; el('panelHandle').classList.toggle('off', !in3d); if(!in3d) document.body.classList.remove('panelOpen'); }
     stepHazards(dt, now); stepFx(dt); if(!reduced && home.hidden && list.hidden) stepChatter(dt);
     labels.filter(d=> d.expire && now > d.expire).forEach(removeLabel);
-    if(auto && !test && home.hidden && list.hidden){ autoT += dt; if(autoT > 4){ autoT = -6; startTest(); } }   // 자동 시연: 4초 뒤 시작, 끝나고 6초 뒤 반복
+    if(auto && !BLIND && !test && home.hidden && list.hidden){ autoT += dt; if(autoT > 4){ autoT = -6; startTest(); } }   // 자동 시연: 4초 뒤 시작, 끝나고 6초 뒤 반복
     stepTest(dt);
     renderer.render(scene, camera);
     placeLabels(W, H);
