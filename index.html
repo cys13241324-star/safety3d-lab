@@ -1330,7 +1330,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   /* ---------- 상위 창 ① 과목 나열 ---------- */
   const home = el('home'), list = el('list');
   function buildHome(){
-    el('homeGrid').innerHTML = SUBJECTS.map((s, i)=>{ const soon = !s.topics.length; return `<div class="subjCard${soon?' soon':''}" role="button" tabindex="0" data-subj="${s.id}"><div class="n">제${i+1}과목</div><span class="stamp"><b>★</b>강추</span><div class="name">${s.name}</div><div class="desc">${s.desc}</div><div class="stat"><span>3D 규정 <b>${s.topics.length}</b>${soon?' (준비 중)':''}</span><span>규정·법령 기출 <b>${BANK_COUNT[s.name]||0}</b>문항</span></div></div>`; }).join('');
+    el('homeGrid').innerHTML = SUBJECTS.map((s, i)=>{ const soon = !s.topics.length; return `<div class="subjCard${soon?' soon':''}" role="button" tabindex="0" data-subj="${s.id}"><div class="n">제${i+1}과목</div>${s.id==='const' ? '<span class="stamp"><b>★</b>추천</span>' : ''}<div class="name">${s.name}</div><div class="desc">${s.desc}</div><div class="stat"><span>3D 규정 <b>${s.topics.length}</b>${soon?' (준비 중)':''}</span><span>규정·법령 기출 <b>${BANK_COUNT[s.name]||0}</b>문항</span></div></div>`; }).join('');
     document.querySelectorAll('[data-subj]').forEach(card=>{
       const open = ()=>{ S.subj = card.dataset.subj; showList(); };
       card.addEventListener('click', open); card.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } });
