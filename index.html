@@ -33,13 +33,13 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 /* 바깥 .lbl.yell 은 위치만 잡는 투명 상자, 풍선 모양과 '뿅' 애니메이션은 안쪽 b 에 둔다.
    (바깥에 scale 속성을 애니메이션하면 translate 까지 같이 줄어들어 풍선이 화면 구석에서 날아오는 것처럼 보였음) */
 .lbl.yell{background:none;border:0;padding:0;animation:none;backdrop-filter:none;color:#1A1A1A}
-.lbl.yell b{position:relative;display:block;background:#FFF7D6;border:2px solid #1A1A1A;border-radius:14px;padding:6px 13px 7px;font-size:20px;font-weight:700;letter-spacing:-.02em;color:#1A1A1A;line-height:1.15;transform-origin:50% 100%;animation:yellpop .28s cubic-bezier(.2,1.5,.4,1)}
-.lbl.yell.scream b{background:#FFE28A;border-color:#B4471E;color:#B4471E;font-size:23px}
+.lbl.yell b{position:relative;display:block;background:#FFF7D6;border:2px solid #1A1A1A;border-radius:12px;padding:4px 10px 5px;font-size:16px;font-weight:700;letter-spacing:-.02em;color:#1A1A1A;line-height:1.15;transform-origin:50% 100%;animation:yellpop .28s cubic-bezier(.2,1.5,.4,1)}
+.lbl.yell.scream b{background:#FFE28A;border-color:#B4471E;color:#B4471E;font-size:18px}
 .lbl.yell.relief b{background:#DFF6E6;border-color:#2E8B57;color:#1F6B41}
-.lbl.yell.hit b{background:#FFD1C4;border-color:#8A2A12;padding:8px 14px;color:#8A2A12;font-size:26px}
-.lbl.yell.talk b{background:#F3F6FB;border-color:#3B5B8C;padding:5px 11px 6px;font-size:15px;font-weight:600;color:#1F3B66;animation-duration:.32s}
-.lbl.yell.boss b{background:#E3F2E8;border-color:#2E8B57;padding:6px 12px;font-size:16px;color:#1F6B41}
-.lbl.yell.boss-bad b{background:#FFE0D6;border-color:#B4471E;padding:7px 13px;font-size:17px;color:#8A2A12}
+.lbl.yell.hit b{background:#FFD1C4;border-color:#8A2A12;padding:6px 11px;color:#8A2A12;font-size:20px}
+.lbl.yell.talk b{background:#F3F6FB;border-color:#3B5B8C;padding:4px 9px 5px;font-size:13px;font-weight:600;color:#1F3B66;animation-duration:.32s}
+.lbl.yell.boss b{background:#E3F2E8;border-color:#2E8B57;padding:4px 10px;font-size:13.5px;color:#1F6B41}
+.lbl.yell.boss-bad b{background:#FFE0D6;border-color:#B4471E;padding:5px 10px;font-size:14px;color:#8A2A12}
 .lbl.yell b::before{content:'';position:absolute;left:50%;bottom:-8px;width:12px;height:12px;background:inherit;border-right:2px solid;border-bottom:2px solid;border-color:inherit;transform:translateX(-50%) rotate(45deg)}
 .lbl.yell::before,.lbl.yell::after{display:none}
 @keyframes yellpop{0%{transform:scale(.4)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
@@ -664,7 +664,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     const a = {kind:'manager', g, parent, t: 4 + Math.random()*4, point: 0}; AMB.push(a); return a;
   }
   const shortRule = s => s.replace(/\s*\(.*?\)/g, '').split(' · ')[0].split(':')[0].trim().slice(0, 34);
-  const MANAGER_OK = ['규정 엄수 확인, 좋습니다', '안전제일! 이대로 갑시다', '기준대로예요. 통과', '점검 완료, 이상 없음'];
+  const MANAGER_OK = ['규정 엄수 확인', '안전제일!', '기준대로예요', '이상 없음'];
   function managerOf(){ const t = S.topic; return AMB.find(a=> a.kind==='manager' && a.parent.visible); }
   let managerCool = 0, managerLastBad = null;
   function managerSpeak(force){
@@ -681,11 +681,13 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   function managerLine(){
     const t = S.topic, p = S[t], fails = T[t].rules.filter(r=> !r[1](p));
     const lims = T[t].sliders.filter(([k,,,,,,names])=> !names && LIM[t] && LIM[t][k]).map(([k,label,unit])=>{ const lim = LIM[t][k](p); return {label: label.replace(/\s*\(.*?\)/g, ''), unit, lim, j: judge(lim, p[k]), v: p[k]}; });
+    // 항목 이름은 짧게: 8자를 넘으면 마지막 두 단어만 (「붐 끝~전선 이격거리」 → 「전선 이격거리」)
+    const short = s => s.length <= 8 ? s : s.split(/[\s~]+/).slice(-2).join(' ');
     const badS = lims.find(x=> x.j===false);
-    if(badS) return {bad:true, text:`거기! ${badS.label} ${badS.v} ${badS.unit} → 기준 ${badS.lim.t}!`};
-    if(fails.length) return {bad:true, text:`거기! 규정 위반! ${shortRule(fails[0][0])}`};
+    if(badS) return {bad:true, text:`거기! ${short(badS.label)} ${badS.v} ${badS.unit} → ${badS.lim.t}`};
+    if(fails.length) return {bad:true, text:`위반! ${shortRule(fails[0][0]).slice(0, 22)}`};
     const oks = lims.filter(x=> x.j===true); managerIdx++;
-    if(oks.length && managerIdx % 2 === 1){ const x = oks[Math.floor(managerIdx/2) % oks.length]; return {bad:false, text:`${x.label} ${x.lim.t} 확인, 좋습니다`}; }
+    if(oks.length && managerIdx % 2 === 1){ const x = oks[Math.floor(managerIdx/2) % oks.length]; return {bad:false, text:`${short(x.label)} ${x.lim.t} ✓`}; }
     return {bad:false, text: MANAGER_OK[Math.floor(Math.random()*MANAGER_OK.length)]};
   }
   function ambBeacon(parent, pos){ const g = new THREE.Group(); g.position.copy(pos); parent.add(g); g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 0.08, 12), darkSteel)); const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.16, 0.28), new THREE.MeshStandardMaterial({color: col(0xF07056), roughness:.5})); lamp.position.y = 0.14; g.add(lamp); AMB.push({kind:'beacon', g, parent}); return g; }
@@ -792,18 +794,42 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   }
   let dimGroup = null, dimLabels = [];
   function clearDims(){ disposeGroup(dimGroup); dimGroup = new THREE.Group(); scene.add(dimGroup); dimLabels.forEach(removeLabel); dimLabels = []; hazards = []; }
+  /* 치수선은 판정 색을 그대로 입는다(적합 초록·부적합 빨강·판정없음 노랑).
+     예전엔 전부 흰 1px 실선이라 콘크리트·하늘 배경에 묻혔고, 끝이 짧은
+     눈금뿐이라 어디부터 어디까지인지도 안 보였다. 그래서 굵기 있는 관 +
+     양끝 화살촉(<->)으로 바꾼다. MeshBasic 이라 조명과 무관하게 또렷하다. */
+  const DIMHEX = {ok:0x5CC08A, bad:0xF07056, na:0xE3B54D};
+  const dimMat = {};
+  for(const k in DIMHEX){ dimMat[k] = new THREE.MeshBasicMaterial({color: col(DIMHEX[k])}); KEEP.add(dimMat[k]); }
+  function dimKey(ok){ return ok === undefined ? 'na' : (ok ? 'ok' : 'bad'); }
+  function dimBar(a, b, r, mat){ const m = tube(a, b, r, mat, dimGroup); m.castShadow = false; return m; }
+  function arrowHead(at, dir, mat, size){
+    const m = new THREE.Mesh(new THREE.ConeGeometry(size*0.42, size, 12), mat);
+    m.quaternion.setFromUnitVectors(UP, dir.clone().normalize());
+    m.position.copy(at).addScaledVector(dir.clone().normalize(), -size/2);
+    dimGroup.add(m); return m;
+  }
   function dim(a, b, text, ok, offsetDir, tick=0.3){
     const d = b.clone().sub(a).normalize();
     let n = offsetDir ? offsetDir.clone() : new THREE.Vector3(0,0,1).cross(d); if(n.length()<0.05) n = new THREE.Vector3(1,0,0).cross(d); n.normalize();
-    dimGroup.add(lineOf([a, b], 0xE8EEF8));
+    const mat = dimMat[dimKey(ok)], L = a.distanceTo(b);
+    const head = clamp(L*0.18, 0.13, 0.36), rad = clamp(L*0.012, 0.014, 0.032);
+    dimBar(a, b, rad, mat);
+    arrowHead(a, d.clone().negate(), mat, head);
+    arrowHead(b, d, mat, head);
     const t = n.clone().multiplyScalar(tick);
-    dimGroup.add(lineOf([a.clone().add(t), a.clone().sub(t)], 0xE8EEF8)); dimGroup.add(lineOf([b.clone().add(t), b.clone().sub(t)], 0xE8EEF8));
+    dimBar(a.clone().add(t), a.clone().sub(t), rad*0.8, mat);
+    dimBar(b.clone().add(t), b.clone().sub(t), rad*0.8, mat);
     dimLabels.push(addLabel({cls:'dim ' + (ok===undefined?'':ok?'ok':'bad'), anchor: a.clone().add(b).multiplyScalar(.5).add(n.clone().multiplyScalar(tick*1.6)), html:`<b>${text}</b>`}));
   }
   function arcYZ(center, r, a0, a1, text, ok){
-    const pts = []; for(let i=0;i<=24;i++){ const a = a0 + (a1-a0)*i/24; pts.push(P3(center.x, center.y + r*Math.sin(a), center.z + r*Math.cos(a))); }
-    dimGroup.add(lineOf(pts, 0xE8EEF8));
-    const am = (a0+a1)/2; dimLabels.push(addLabel({cls:'dim ' + (ok?'ok':'bad'), anchor: P3(center.x, center.y + (r+0.6)*Math.sin(am), center.z + (r+0.6)*Math.cos(am)), html:`<b>${text}</b>`}));
+    const at = a=> P3(center.x, center.y + r*Math.sin(a), center.z + r*Math.cos(a));
+    const mat = dimMat[dimKey(ok)];
+    const pts = []; for(let i=0;i<=24;i++) pts.push(at(a0 + (a1-a0)*i/24));
+    for(let i=0;i<pts.length-1;i++) dimBar(pts[i], pts[i+1], 0.018, mat);
+    const e = pts[pts.length-1], tan = e.clone().sub(pts[pts.length-2]).normalize();
+    arrowHead(e, tan, mat, 0.2);
+    const am = (a0+a1)/2; dimLabels.push(addLabel({cls:'dim ' + (ok===undefined?'':ok?'ok':'bad'), anchor: P3(center.x, center.y + (r+0.6)*Math.sin(am), center.z + (r+0.6)*Math.cos(am)), html:`<b>${text}</b>`}));
   }
   function nameLabel(pos, title, sub){ dimLabels.push(addLabel({cls:'name', anchor: pos, html:`<b>${title}</b>${sub?`<span>${sub}</span>`:''}`})); }
 
@@ -1521,7 +1547,7 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
     roller:{ok:'멈췄다!', bad:'악!! 손!!'}, grinder:{ok:'덮개가 막아 줬다', bad:'앗, 파편!'}, press:{ok:'휴, 멈췄다', bad:'손!!!'}, wirerope:{ok:'무사히 올렸다', bad:'떨어진다!!'}, chemdist:{ok:'거리 확보!', bad:'너무 가까워!'}, gasweld:{ok:'안전하게 용접 중', bad:'펑!!!'}, lux:{ok:'잘 보인다', bad:'안 보여…'}, vdt:{ok:'편하다~', bad:'허리야…'} };
   function done(o, title, sub, ok, msg){ test.phase = 'done'; test.t = 0; showVerdict(o.position, title, sub, ok); setResult(msg || (title + '. ' + sub), ok);
     const y = test.kind==='faller' ? YELL.fall : (YELL[S.topic] || {}); if(o && o.position && !test.yelled){ yell(o, ok ? (y.ok || '휴, 안전!') : (y.bad || '으악!'), ok ? 'relief' : 'scream', 2.6, o.userData && o.userData.limbs ? P3(0, 1.85, 0) : P3(0, 1.0, 0)); } test.yelled = true;
-    const m = managerOf(); if(m){ chatQueue.push({g: m.g, text: ok ? '좋아요, 규정대로 됐습니다' : '규정 위반입니다! 즉시 시정!', d: 0.9, cls: ok ? 'boss' : 'boss-bad'}); if(!ok) m.point = 2.2; } }
+    const m = managerOf(); if(m){ chatQueue.push({g: m.g, text: ok ? '규정대로 됐습니다' : '위반! 즉시 시정!', d: 0.9, cls: ok ? 'boss' : 'boss-bad'}); if(!ok) m.point = 2.2; } }
   function startFall(o, text='으아아아아악!'){ yell(o, text, 'scream', 2.2); test.yelled = false; }
   function endTest(){
     test = null; brick.visible = false; wC.visible = false; wL.position.set(-6, ROOF, -0.7); wL.rotation.set(0,0,0); wR.position.set(6, ROOF, -0.6); wR.rotation.set(0,0,0); [wL, wR, wC].forEach(w=> walkPose(w, 0, 0));
