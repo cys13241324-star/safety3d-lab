@@ -707,13 +707,18 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
       if(a.kind==='welder'){ a.t += dt; a.g.userData.limbs.arms[1].rotation.x = -1.2 + 0.15*Math.sin(a.t*3);
         if(Math.random() < dt*22){ const s = new THREE.Mesh(new THREE.SphereGeometry(0.025, 5, 4), sparkMat); a.tip.getWorldPosition(s.position); s.position.add(P3(0, -0.15, 0)); s.userData.v = P3((Math.random()-.5)*2.5, 1 + Math.random()*2, (Math.random()-.5)*2.5); s.userData.life = 0.35 + Math.random()*0.35; scene.add(s); a.sparks.push(s); }
         a.sparks = a.sparks.filter(s=>{ s.userData.life -= dt; if(s.userData.life <= 0 || !a.parent.visible){ scene.remove(s); s.geometry.dispose(); return false; } s.userData.v.y -= 9.8*dt; s.position.addScaledVector(s.userData.v, dt); return true; }); continue; }
-      if(a.kind==='walk'){ a.s += a.speed*dt; placeOnPath(a); a.phase += dt*a.speed*3.4; walkPose(a.g, a.phase, 0.55, !a.carry); }
-      else if(a.kind==='hammer'){ a.phase += dt*7; const L = a.g.userData.limbs; L.arms[1].rotation.x = -1.6 + 0.9*Math.max(0, Math.sin(a.phase)); L.arms[0].rotation.x = -0.9; }
-      else if(a.kind==='pick'){ a.t += dt; const c = a.t % 3.4, g = a.g, L = g.userData.limbs;
-        if(c < 1.0){ const k = c; g.rotation.x = 0.85*k; L.arms.forEach(p=> p.rotation.x = -1.5*k); a.ground.visible = true; a.held.visible = false; g.rotation.y = a.ry; a.placed = false; }
-        else if(c < 1.8){ const k = (c-1)/0.8; g.rotation.x = 0.85*(1-k); L.arms.forEach(p=> p.rotation.x = -1.5 + 0.3*k); a.ground.visible = false; a.held.visible = true; }
-        else if(c < 2.6){ const k = (c-1.8)/0.8; g.rotation.y = a.ry + 1.2*k; }
-        else { if(!a.placed){ a.placed = true; a.count = a.count % 6 + 1; if(a.count===1) a.pile.forEach(b=> b.visible = false); a.pile[a.count-1].visible = true; a.held.visible = false; L.arms.forEach(p=> p.rotation.x = -0.4); } const k = (c-2.6)/0.8; g.rotation.y = a.ry + 1.2*(1-k); } }
+      // 걷는 사람은 발걸음마다 살짝 위아래로 튀고 가끔 고개를 돌린다, 망치질은 몸과 고개가 같이 따라간다
+      if(a.kind==='walk'){ a.s += a.speed*dt; placeOnPath(a); a.phase += dt*a.speed*3.4; walkPose(a.g, a.phase, 0.55, !a.carry); a.g.position.y += 0.04*Math.abs(Math.sin(a.phase)); a.g.userData.head.rotation.y = 0.3*Math.sin(a.phase*0.13 + a.speed*7); }
+      else if(a.kind==='hammer'){ a.phase += dt*7; const L = a.g.userData.limbs, s = Math.max(0, Math.sin(a.phase)); L.arms[1].rotation.x = -1.6 + 0.9*s; L.arms[0].rotation.x = -0.9; a.g.rotation.x = 0.06*s; a.g.userData.head.rotation.x = 0.12*s; }
+      else if(a.kind==='pick'){ a.t += dt; const c = a.t % 3.8, g = a.g, L = g.userData.limbs, H = g.userData.head; if(a.y0 === undefined) a.y0 = g.position.y;
+        // 쪼그려 앉아 집고 → 일어나 → 돌아서 쌓고 → 돌아온다 (예전엔 몸 전체를 발목에서 꺾어 판자처럼 넘어가 보였음)
+        const squat = k=>{ L.legs.forEach(l=> l.rotation.x = -1.35*k); g.position.y = a.y0 - 0.42*k; g.rotation.x = 0.3*k; H.rotation.x = 0.55*k; };
+        if(c < 0.9){ const k = c/0.9; squat(k); L.arms.forEach(p=> p.rotation.x = -1.35*k); a.ground.visible = true; a.held.visible = false; g.rotation.y = a.ry; a.placed = false; }
+        else if(c < 1.25){ squat(1); L.arms.forEach(p=> p.rotation.x = -1.35); if(c > 1.05){ a.ground.visible = false; a.held.visible = true; } }
+        else if(c < 2.05){ const k = (c - 1.25)/0.8; squat(1 - k); L.arms.forEach(p=> p.rotation.x = -1.35 + 0.45*k); }
+        else if(c < 2.7){ const k = (c - 2.05)/0.65; g.rotation.y = a.ry + 1.2*k; L.arms.forEach(p=> p.rotation.x = -0.9); }
+        else if(c < 3.1){ const k = (c - 2.7)/0.4; L.arms.forEach(p=> p.rotation.x = -0.9 - 0.5*Math.sin(k*Math.PI)); g.rotation.x = 0.25*Math.sin(k*Math.PI); if(k > 0.5 && !a.placed){ a.placed = true; a.count = a.count % 6 + 1; if(a.count===1) a.pile.forEach(b=> b.visible = false); a.pile[a.count-1].visible = true; a.held.visible = false; } }
+        else { const k = (c - 3.1)/0.7; g.rotation.y = a.ry + 1.2*(1 - k); L.arms.forEach(p=> p.rotation.x = -0.4*(1 - k)); g.rotation.x = 0; H.rotation.x = 0; } }
       else if(a.kind==='crane'){ a.top.rotation.y += dt*0.07; }
       else if(a.kind==='truck'){ a.g.position.x += a.dir*a.speed*dt; if(a.g.position.x > a.x1){ a.dir = -1; a.g.rotation.y = Math.PI; } if(a.g.position.x < a.x0){ a.dir = 1; a.g.rotation.y = 0; } a.g.children.forEach(c=>{ if(c.geometry && c.geometry.type==='CylinderGeometry') c.rotation.y += dt*4*a.dir; }); }
     }
@@ -2332,7 +2337,7 @@ addTopic('const', 'caisson', {
     const top = worker(0x5FA6F5, g); top.position.set(-3.6, D + 0.06, -1.0); top.rotation.y = Math.PI/2 + 0.3; top.userData.limbs.arms[1].rotation.x = -1.4; X.caisson.top = top;
     ambOnce('caisson', a=>{ ambPicker(a, P3(-4.5, 0, 3.5), 1.2); ambWalker(a, [P3(5, 0, -6), P3(12, 0, -6), P3(12, 0, -12), P3(5, 0, -12)], 0.9, 0x5FA6F5, 'box'); });
     // 지표면이 굴착 깊이만큼 위에 있으므로 안전관리자·배경 작업자를 지표면 높이로 올린다 (깊이를 바꿔도 따라감 — 안 그러면 흙 속에 묻혀 말풍선만 보임)
-    AMB.filter(a=> a.parent === ambStages.caisson).forEach(a=>{ a.g.position.y = D + 0.03; if(a.path) a.path.forEach(q=> q.y = D + 0.03); });
+    AMB.filter(a=> a.parent === ambStages.caisson).forEach(a=>{ a.g.position.y = D + 0.03; a.y0 = D + 0.03; if(a.path) a.path.forEach(q=> q.y = D + 0.03); });
     X.caisson.view = {target:P3(0.5, D*0.5, 1.0), theta:0.85, phi:1.1, radius: 8 + D*1.0};
   },
   annotate(){ const p = S.caisson, ok = T.caisson.rules.map(r=> r[1](p)), D = p.depth;
@@ -2391,8 +2396,7 @@ MANAGER_POS.trench = [-4.6, 0, 5.5];
 // 가공전선로: 관리자를 크레인 옆(화면 가운데)으로 — 앞쪽 끝에 두면 하단 카드에 가려 말풍선이 안 보였음
 MANAGER_POS.powerline = [-1.5, 0, 4.0];
 // 작업발판: 외벽 공사 중인 건물 앞에 세운 발판
-dressAfter('plank', (g, p, R)=>{ DRESS.frame(g, -7, 7, -9.5, -3.6, 3, 3.3, {nx:2, nz:1});
-  DRESS.fence(g, -13, 13, -11); DRESS.blocks(g, 5.6, 1.0); DRESS.rebar(g, -6.2, 0.6, 0.15); DRESS.cones(g, [[-2.6, 3.8], [2.6, 3.8]]); DRESS.office(g, 12, 2, -Math.PI/2); DRESS.planks(g, 7.5, 4.2, 0.4); });
+// (작업발판 배경은 아래 재구성 블록에서 새 BUILD.plank 에 붙인다)
 // 강관비계: 벽 뒤로 골조가 이어지고 앞마당엔 자재·사무실·믹서트럭
 dressAfter('scaffold', (g, p, R)=>{ const z1 = R.z1; DRESS.frame(g, -5.5, 5.5, z1 - 9, z1 - 1.6, 4, 3.25, {nx:2, nz:1, rail:false});
   DRESS.fence(g, -15, 15, z1 - 11); DRESS.rebar(g, -9, -1, 0.1); DRESS.blocks(g, -8.6, 2.2); DRESS.planks(g, 8.8, 0.2, 0.3); DRESS.cones(g, [[-3, 6.8], [3, 6.8]]); DRESS.office(g, 13.5, 6, -Math.PI/2); DRESS.mixer(g, -14, 7.5, 0.15); });
@@ -2539,6 +2543,48 @@ EXT_STEP.press = (dt, o, R, p)=>{ const hand = R.hand, travel = R.ramTop - R.ram
 // 굴착면: 벽돌 줍는 사람은 장면에 안 맞으니 뺀다 (사용자 09-03)
 dressAfter('trench', (g, p, R)=>{ AMB.filter(a=> a.parent === ambStages.trench && a.kind==='pick').forEach(a=>{ disposeGroup(a.g); AMB.splice(AMB.indexOf(a), 1); }); });
 MANAGER_POS.plank = [6.0, 0, 1.5]; MANAGER_POS.lux = [-2.6, 0, 2.6];
+
+/* ===== 작업발판 재구성 (사용자 09-03: 「이상한 위치」) =====
+   허공의 다리 같던 독립 골조 대신, 외벽 앞 비계(안쪽·바깥쪽 기둥 2열, 깊이 1.2 m) 위에 벽과 나란히 깐 발판.
+   장선(지지물) 위에 발판 3장이 가로로 놓이고, 작업자는 벽을 따라 x 방향으로 걸으며 바깥쪽에 안전난간이 선다 */
+BUILD.plank = function(){
+  const g = stage('plank'), p = S.plank, w = p.w/100, gap = p.gap/100, total = 3*w + 2*gap, y = 3.0, zi = -0.6, zo = 0.6, L = 2.5;
+  [-2.4, 0, 2.4].forEach(x=>{ [zi, zo].forEach(z=> tube(P3(x, 0, z), P3(x, 4.4, z), 0.045, steel, g)); });
+  [1.2, y, 4.2].forEach(h=>{ [zi, zo].forEach(z=> tube(P3(-L, h, z), P3(L, h, z), 0.04, steel, g)); [-2.4, 0, 2.4].forEach(x=> tube(P3(x, h, zi), P3(x, h, zo), 0.035, steel, g)); });
+  tube(P3(-2.4, 0.2, zo + 0.02), P3(0, 4.2, zo + 0.02), 0.025, darkSteel, g); tube(P3(0, 0.2, zo + 0.02), P3(2.4, 4.2, zo + 0.02), 0.025, darkSteel, g);
+  // 장선(발판 지지물): 1개면 가운데만, 2개면 양끝, 3개면 양끝+가운데
+  const xs = p.sup===1 ? [0] : p.sup===2 ? [-2.2, 2.2] : [-2.2, 0, 2.2];
+  xs.forEach(x=> tube(P3(x, y + 0.02, zi - 0.1), P3(x, y + 0.02, zo + 0.1), 0.04, steel, g));
+  X.plank = {planks:[], y, total, xs, zo};
+  for(let i=0;i<3;i++){ const z = -total/2 + w/2 + i*(w + gap); X.plank.planks.push(box(4.9, 0.05, w, wood, g, 0, y + 0.09, z)); }
+  if(p.rail){ const zr = zo + 0.05; [-2.4, 0, 2.4].forEach(x=> tube(P3(x, y, zr), P3(x, y + 1.0, zr), 0.03, steel, g)); tube(P3(-L, y + 1.0, zr), P3(L, y + 1.0, zr), 0.035, yellowMat, g); tube(P3(-L, y + 0.5, zr), P3(L, y + 0.5, zr), 0.03, yellowMat, g);
+    [-L, L].forEach(x=>{ tube(P3(x, y + 1.0, zi), P3(x, y + 1.0, zr), 0.035, yellowMat, g); tube(P3(x, y + 0.5, zi), P3(x, y + 0.5, zr), 0.03, yellowMat, g); }); }
+  X.plank.w = worker(0xF07056, g); X.plank.w.position.set(-2.2, y + 0.12, 0); X.plank.w.rotation.y = Math.PI/2;
+  // 비계 끝 자재 양중 (두레박) — 템플릿 stepIdle 이 ropeTop·bucket·rope 를 그대로 움직인다
+  X.plank.ropeTop = P3(3.6, y + 1.2, 0); tube(P3(4.0, 0, 0), P3(4.0, y + 1.2, 0), 0.05, steel, g); tube(P3(4.0, y + 1.2, 0), P3(3.6, y + 1.2, 0), 0.04, steel, g);
+  X.plank.bucket = box(0.4, 0.35, 0.4, darkSteel, g, 3.6, 0.3, 0); X.plank.rope = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 1, 6), darkSteel); g.add(X.plank.rope);
+  ambOnce('plank', a=>{ ambHammer(a, P3(5.6, 0, 0.3), Math.PI, 0x5FA6F5); ambPicker(a, P3(-4.6, 0, 2.6), 2.2); });
+  X.plank.view = {target:P3(0, 3.2, 0.2), theta:0.6, phi:1.15, radius:11};
+};
+ANNOT.plank = function(){ const p = S.plank, R = X.plank, ok = T.plank.rules.map(r=> r[1](p)), w = p.w/100, gap = p.gap/100, total = 3*w + 2*gap, y = R.y + 0.14;
+  dim(P3(2.75, y, -total/2), P3(2.75, y, -total/2 + w), `폭 ${p.w} cm`, ok[0], P3(1, 0, 0), 0.12);
+  dim(P3(2.75, y, -total/2 + w), P3(2.75, y, -total/2 + w + gap), `틈 ${fmt(p.gap)} cm`, ok[1], P3(0, 1, 0), 0.1);
+  dimLabels.push(addLabel({cls:'dim ' + (ok[2]?'ok':'bad'), anchor: P3(0, R.y - 0.35, R.zo + 0.3), html:`<b>지지물 ${p.sup}개</b>`}));
+  nameLabel(P3(0, R.y + 1.9, 0), '작업발판 (외벽 비계)', `발판 3장 · ${p.rail ? '바깥쪽 안전난간' : '안전난간 없음'}`); };
+EXT_STEP.plank = (dt, o, R, p)=>{ const sp = 1.0; test.s += sp*dt; const x = -2.2 + test.s; o.position.x = Math.min(2.2, x); walkPose(o, test.s*5, 0.45);
+  const bad = p.sup < 2 ? '지지물 1개 · 발판이 기울어짐' : p.gap > 3 ? `발판 틈 ${fmt(p.gap)} cm에 발이 빠짐` : p.w < 40 ? `발판 폭 ${p.w} cm · 균형을 잃음` : null;
+  if(test.caught){ o.rotation.z = -0.35*Math.min(1, (test.t - test.caughtT)/0.4); if(test.t > test.caughtT + 1.2) done(o, '휘청했지만 난간이 막았습니다', bad + ' · 안전난간 덕분에 추락은 면함', false); return; }
+  if(bad && x > 0){
+    if(p.sup < 2){ R.planks.forEach(pl=>{ pl.rotation.x = 0.35; pl.position.y -= 0.3; }); test.phase = 'fly'; test.vel = P3(0.2, 0.1, 0.4); }
+    else if(p.rail){ test.caught = true; test.caughtT = test.t; yell(o, '휘청!', 'scream', 1.4); setResult(bad + ' → 난간에 걸림', false); return; }
+    else { test.phase = 'fly'; test.vel = P3(0.2, 0.2, 1.2); }
+    test.groundY = 0; test.failTitle = '작업자가 추락했습니다'; test.failSub = bad; setResult(bad + ' → 추락…', false); startFall(o); }
+  else if(x >= 2.2){ const ok = allOk('plank'); done(o, ok ? '안전하게 작업했습니다' : (p.rail ? '작업은 했지만 규정 부적합' : '작업은 했지만 안전난간 없음'), ok ? `폭 ${p.w} cm · 틈 ${fmt(p.gap)} cm · 지지물 ${p.sup}개` : '판정 목록 확인', ok); } };
+// 외벽 골조를 비계 바로 뒤에 (비계 안쪽 기둥과 벽 사이 0.8 m)
+dressAfter('plank', (g, p, R)=>{ DRESS.frame(g, -7, 7, -7.6, -1.4, 3, 3.3, {nx:2, nz:1});
+  [-4.5, 4.5].forEach(x=> box(1.6, 1.5, 0.08, M(0x1A2230, .9), g, x, 5.0, -1.36));
+  DRESS.fence(g, -13, 13, -9); DRESS.blocks(g, 6.4, 3.0); DRESS.rebar(g, -6.6, 1.2, 0.15); DRESS.cones(g, [[-2.6, 3.4], [2.6, 3.4]]); DRESS.office(g, 12.5, 4, -Math.PI/2); DRESS.planks(g, -7.4, 4.0, 0.4); });
+MANAGER_POS.plank = [-4.2, 0, 3.6];
 
 /* ===== 사람 간격 벌리기 (사용자 09-03: 「사람끼리 너무 붙어 있다」) =====
    무대마다 빌드 뒤에 실행: 고정 배우(망치·줍기·용접·관리자)는 시험 배우·서로 간 2.2 m 이상, 순찰 경로는 사람들에게서 2.4 m 이상 떨어지게 z 로 밀어낸다. 이미 떨어져 있으면 아무것도 안 하므로 여러 번 돌아도 같다 */
