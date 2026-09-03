@@ -1456,7 +1456,8 @@ button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
   el('bTut').addEventListener('click', ()=> tutShow(0));
   el('tut').addEventListener('click', e=>{ if(e.target === el('tut')) tutClose(); });
   document.addEventListener('keydown', e=>{ if(el('tut').hidden) return; if(e.key === 'Escape') tutClose(); if(e.key === 'ArrowRight' || e.key === 'Enter') el('tutNext').click(); });
-  { let seen = false; try{ seen = !!localStorage.getItem(TUT_KEY); }catch(e){} if(!seen) tutShow(0); }
+  // 주소에 ?tut 또는 #tut 이 있으면 본 적이 있어도 튜토리얼을 띄운다
+  { let seen = false; try{ seen = !!localStorage.getItem(TUT_KEY); }catch(e){} const force = /[?&#]tut\b/.test(location.search + location.hash); if(!seen || force) tutShow(0); }
   el('bQuiz').addEventListener('click', ()=>{ const w = el('quizWrap'); w.hidden = !w.hidden; el('bQuiz').setAttribute('aria-expanded', String(!w.hidden)); el('bQuiz').textContent = w.hidden ? `문항 보기 (${(Q[S.topic] || []).length})` : '접기'; });
   // 칩 팝오버 바깥을 누르면 닫힘
   document.addEventListener('click', e=>{ if(!e.target.closest('.chip')) document.querySelectorAll('#sliders .chip.open').forEach(x=> x.classList.remove('open')); });
