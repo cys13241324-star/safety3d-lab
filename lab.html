@@ -4,29 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>산업안전 규격 실습장</title>
+<script>(function(){try{var t=localStorage.getItem('safety_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Nanum+Pen+Script&family=Gothic+A1:wght@800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Nanum+Pen+Script&family=Noto+Serif+KR:wght@600;700&display=swap">
 <style>
-:root{
-  color-scheme:dark;
-  --bg:#0A1018; --panel:rgba(14,20,32,.9); --panel2:#182234;
-  --line:#263248; --line-soft:#1B2536;
-  --text:#E8EEF8; --muted:#8C99B0; --dim:#7A88A6;
-  --accent:#7FA6E0; --accent-ink:#0B111C;
-  --ok:#5CC08A; --ok-soft:rgba(92,192,138,.18);
-  --bad:#F07056; --bad-soft:rgba(240,112,86,.18);
-  --warn:#E3B54D;
-  --sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
-  --mono:"IBM Plex Mono","Consolas","D2Coding",monospace;
-}
+:root{--bg:#F3EEE4;--panel:#FAF7F1;--panel2:#ECE5D8;--line:#D3C9B6;--line-soft:#E3DBCC;--text:#22201C;--muted:#5A554C;--dim:#7B7468;--accent:#6B5231;--accent-ink:#FFFFFF;--ok:#2E6B47;--ok-soft:rgba(46,107,71,.12);--bad:#9C3B2A;--bad-soft:rgba(156,59,42,.10);--warn:#8E6A2C;--warn-soft:rgba(142,106,44,.10);--warn-line:rgba(142,106,44,.35);--on-accent:#FFFFFF;--glass:rgba(250,247,241,.92);--tint:rgba(0,0,0,.045);--scrim:rgba(243,238,228,.88);--sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic",sans-serif;--mono:"IBM Plex Mono",Consolas,monospace;--display:"Noto Serif KR","Nanum Myeongjo",serif;}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.5;overflow:hidden}
 #stage{position:fixed;inset:0}
 #c{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 #c:active{cursor:grabbing}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.lbl{position:absolute;left:0;top:0;padding:4px 10px 5px;border-radius:4px;background:rgba(8,13,22,.78);border:1px solid rgba(140,160,190,.25);white-space:nowrap;font-size:15.5px;line-height:1.3;color:var(--text);will-change:transform;animation:lblin .35s ease-out}
+.lbl{position:absolute;left:0;top:0;padding:4px 10px 5px;border-radius:4px;background:var(--glass);border:1px solid rgba(140,160,190,.25);white-space:nowrap;font-size:15.5px;line-height:1.3;color:var(--text);will-change:transform;animation:lblin .35s ease-out}
 @keyframes lblin{from{opacity:0}to{opacity:1}}
 .lbl{transform-origin:50% 100%}
 /* 만화 말풍선 */
@@ -65,13 +55,13 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 .hbtn{display:flex;flex-direction:column;gap:6px} .b.sm{font-size:13px;padding:4px 9px}
 /* 3D 창 위: 같은 과목의 다른 규정 칩 */
 #tabs{position:fixed;left:412px;right:16px;top:16px;display:flex;gap:6px;overflow-x:auto;padding:4px 2px;z-index:3;scrollbar-width:thin}
-#tabs button{flex:0 0 auto;font:inherit;font-size:13.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(8,13,22,.8);color:var(--muted);cursor:pointer;backdrop-filter:blur(8px);white-space:nowrap}
+#tabs button{flex:0 0 auto;font:inherit;font-size:13.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--muted);cursor:pointer;backdrop-filter:blur(8px);white-space:nowrap}
 #tabs button[aria-pressed="true"]{background:#24314A;color:var(--text);border-color:var(--accent);font-weight:500}
 /* 3D 창 아래: 값 조정 칩(누르면 슬라이더 팝오버) + 시험 버튼 바 */
 #dock{position:fixed;left:412px;right:16px;bottom:14px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:3;pointer-events:none}
 #dock > *{pointer-events:auto}
 /* 칩·버튼을 「테스트 항목」 카드로 묶어 바닥(아스팔트)과 구분 */
-#dock .card{display:flex;flex-direction:column;gap:8px;padding:10px 16px 10px;border-radius:12px;border:1px solid rgba(140,160,190,.35);background:rgba(8,13,22,.84);backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:100%}
+#dock .card{display:flex;flex-direction:column;gap:8px;padding:10px 16px 10px;border-radius:12px;border:1px solid rgba(140,160,190,.35);background:var(--glass);backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:100%}
 #dock .dockHd{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap}
 #dock .dockHd .cap{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:2px 10px;white-space:nowrap}
 #dock .dockHd .sub{font-size:12.5px;color:var(--dim)}
@@ -83,17 +73,17 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 #tabs > :first-child{margin-left:auto} #tabs > :last-child{margin-right:auto}
 /* 시점 버튼은 3D 창 오른쪽 가운데 세로로 */
 #viewBox{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:3}
-#viewBox .b{background:rgba(8,13,22,.85);backdrop-filter:blur(8px);min-width:64px}
+#viewBox .b{background:var(--glass);backdrop-filter:blur(8px);min-width:64px}
 /* 배율: ＋ / 세로 드래그 슬라이더 / － (위가 가까이) */
 #viewBox .zoom{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px}
 #viewBox .zb{min-width:0;width:40px;padding:3px 0;font-size:16px;line-height:1.1}
 #zoomR{writing-mode:vertical-lr;direction:rtl;height:150px;width:24px;margin:0;accent-color:var(--accent);cursor:ns-resize;background:rgba(8,13,22,.55);border-radius:999px}
 .chip.flip .pop{left:auto;right:0}
 #dock .act{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-#dock .act .b{background:rgba(8,13,22,.85);backdrop-filter:blur(8px)}
+#dock .act .b{background:var(--glass);backdrop-filter:blur(8px)}
 #dock .hintTxt{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--dim);white-space:nowrap}
 .chip{position:relative}
-.chip .cb{font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(8,13,22,.85);backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;min-width:96px;text-align:left}
+.chip .cb{font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;min-width:96px;text-align:left}
 .chip .cb span{font-size:12px;letter-spacing:-.01em;line-height:1.2} .chip .cb output{font-family:var(--mono);font-size:15px;color:var(--warn);font-variant-numeric:tabular-nums;line-height:1.2}
 .chip .cb:hover{border-color:var(--accent)} .chip .cb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .chip.bad .cb{border-color:var(--bad);box-shadow:inset 0 0 0 1px rgba(240,112,86,.35)} .chip.bad .cb output{color:var(--bad)}
@@ -102,13 +92,13 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 .chip.open .pop{display:block}
 .chip .pop .slider label{font-size:14px} .chip .pop .pick .segc{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
 
-#navBar{position:fixed;left:16px;top:16px;z-index:4;display:flex;gap:6px;align-items:center;padding:6px 10px 6px 6px;border-radius:8px;border:1px solid var(--line);background:rgba(8,13,22,.88);backdrop-filter:blur(10px);max-width:380px;box-sizing:border-box}
+#navBar{position:fixed;left:16px;top:16px;z-index:4;display:flex;gap:6px;align-items:center;padding:6px 10px 6px 6px;border-radius:8px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(10px);max-width:380px;box-sizing:border-box}
 #navBar .b{font-size:14px;padding:6px 11px;white-space:nowrap} #navBar .eyebrow{margin:0 0 0 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.02em;text-transform:none}
 #panel{position:fixed;left:16px;top:72px;width:380px;max-height:calc(100vh - 88px);overflow:auto;box-sizing:border-box;padding:16px 18px 14px;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(12px);display:flex;flex-direction:column;gap:14px}
 #panel header{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
 #panel header .b{white-space:nowrap}
 /* 상위 창 ①과목 나열 · ②법령 리스트 */
-.screen{position:fixed;inset:0;z-index:5;background:rgba(6,10,17,.84);backdrop-filter:blur(8px);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 32px}
+.screen{position:fixed;inset:0;z-index:5;background:var(--scrim);backdrop-filter:blur(8px);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 32px}
 .screen[hidden]{display:none}
 .screenBox{max-width:1080px;width:100%}
 /* 첫 실행 튜토리얼 */
@@ -218,29 +208,29 @@ h2{font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;text-transform:
 .q .sol img{max-width:100%;border-radius:4px;background:#fff}
 .vw{display:flex;gap:6px}
 /* 모바일 전용 손잡이 (PC 에서는 숨김) */
-#panelHandle{display:none;position:fixed;left:0;right:0;bottom:0;height:40px;align-items:center;justify-content:center;gap:8px;font:inherit;font-size:14px;font-weight:500;background:rgba(8,13,22,.96);color:var(--text);border:0;border-top:1px solid var(--line);z-index:7;cursor:pointer}
+#panelHandle{display:none;position:fixed;left:0;right:0;bottom:0;height:40px;align-items:center;justify-content:center;gap:8px;font:inherit;font-size:14px;font-weight:500;background:var(--glass);color:var(--text);border:0;border-top:1px solid var(--line);z-index:7;cursor:pointer}
 /* ---------- 꾸미기 패스(09-03): 과목별 강조색 · 굵은 제목 서체(Gothic A1) · 안전 표지 줄무늬 모티프 · 카드 들림 ---------- */
 .subjCard[data-subj=mgmt],body[data-subj=mgmt]{--acc:#E3B54D} .subjCard[data-subj=ergo],body[data-subj=ergo]{--acc:#5CC9C0} .subjCard[data-subj=mach],body[data-subj=mach]{--acc:#F07056}
 .subjCard[data-subj=elec],body[data-subj=elec]{--acc:#FFD166} .subjCard[data-subj=chem],body[data-subj=chem]{--acc:#B48CFF} .subjCard[data-subj=const],body[data-subj=const]{--acc:#5CC08A}
-.hazard{height:6px;max-width:300px;border-radius:3px;margin:12px 0 16px;background:repeating-linear-gradient(135deg,#E3B54D 0 14px,#141A24 14px 28px)}
-.screenBox h1{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:40px;letter-spacing:-.02em;line-height:1.15}
-.homeStats{display:flex;gap:22px;flex-wrap:wrap;margin:-8px 0 22px;font-family:var(--mono);font-size:14px;color:var(--muted)} .homeStats b{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:22px;color:var(--text);margin-right:5px;letter-spacing:-.02em}
+.hazard{height:6px;max-width:300px;border-radius:3px;margin:12px 0 16px;background:var(--warn-line)}
+.screenBox h1{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.02em;line-height:1.15}
+.homeStats{display:flex;gap:22px;flex-wrap:wrap;margin:-8px 0 22px;font-family:var(--mono);font-size:14px;color:var(--muted)} .homeStats b{font-family:var(--display);font-weight:800;font-size:22px;color:var(--text);margin-right:5px;letter-spacing:-.02em}
 .subjCard{border-left:4px solid var(--acc,var(--accent));background:linear-gradient(180deg,rgba(24,34,52,.92),rgba(14,20,32,.92));transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;overflow:hidden}
 .subjCard:hover,.subjCard:focus-visible{transform:translateY(-2px);border-color:var(--acc,var(--accent));box-shadow:0 10px 26px rgba(0,0,0,.35)}
-.subjCard .n{color:var(--acc,var(--accent))} .subjCard .name{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:23px;letter-spacing:-.01em}
-.subjCard .num{position:absolute;right:14px;bottom:2px;font-family:'Gothic A1',var(--sans);font-weight:800;font-size:56px;line-height:1;color:rgba(255,255,255,.045);letter-spacing:-.05em;pointer-events:none}
+.subjCard .n{color:var(--acc,var(--accent))} .subjCard .name{font-family:var(--display);font-weight:800;font-size:23px;letter-spacing:-.01em}
+.subjCard .num{position:absolute;right:14px;bottom:2px;font-family:var(--display);font-weight:800;font-size:56px;line-height:1;color:rgba(255,255,255,.045);letter-spacing:-.05em;pointer-events:none}
 .subjCard .stat b{color:var(--acc,var(--warn))}
-.lawRow{border-left:4px solid var(--acc,var(--accent));transition:transform .12s ease,border-color .12s ease} .lawRow:hover{transform:translateX(3px)} .lawRow .name{font-family:'Gothic A1',var(--sans);font-weight:800} .lawRow .go{color:var(--acc,var(--accent))}
+.lawRow{border-left:4px solid var(--acc,var(--accent));transition:transform .12s ease,border-color .12s ease} .lawRow:hover{transform:translateX(3px)} .lawRow .name{font-family:var(--display);font-weight:800} .lawRow .go{color:var(--acc,var(--accent))}
 .crumb button:hover{border-color:var(--acc,var(--accent))}
-#panel h1{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:24px;letter-spacing:-.015em}
+#panel h1{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.015em}
 h2::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--acc,var(--accent));margin-right:7px;vertical-align:1px}
 .rtable tbody tr:nth-child(even) td{background:rgba(255,255,255,.025)}
 #navBar .eyebrow{color:var(--acc,var(--accent))}
 #tabs button[aria-pressed="true"]{background:var(--acc,var(--accent));color:#0B1220;border-color:var(--acc,var(--accent));font-weight:600}
-#dock .card{position:relative;padding-top:14px} #dock .card::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;border-radius:12px 12px 0 0;background:repeating-linear-gradient(135deg,#E3B54D 0 12px,#141A24 12px 24px)}
+#dock .card{position:relative;padding-top:14px} #dock .card::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;border-radius:12px 12px 0 0;background:var(--warn-line)}
 #dock .dockHd .cap{color:var(--acc,var(--accent));border-color:var(--acc,var(--accent))}
-.b{border-radius:6px} .b.primary,#dock .act .b.primary{background:var(--warn);color:#1A1200;border-color:var(--warn);font-weight:600} .b.primary:hover,#dock .act .b.primary:hover{background:#F2C660;border-color:#F2C660}
-.tutCard h3{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:21px}
+.b{border-radius:6px} .b.primary,#dock .act .b.primary{background:var(--warn);color:var(--on-accent);border-color:var(--warn);font-weight:600} .b.primary:hover,#dock .act .b.primary:hover{background:#F2C660;border-color:#F2C660}
+.tutCard h3{font-family:var(--display);font-weight:800;font-size:21px}
 /* 조정 슬라이더: 굵은 트랙 + 큰 손잡이 (모바일에서 잘 보이게), −/＋ 한 눈금 버튼 */
 .slider input[type=range]{-webkit-appearance:none;appearance:none;height:34px;background:transparent;margin:0}
 .slider input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:#3A4A66;border:1px solid #4A5B7A}
@@ -251,10 +241,10 @@ h2::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50
 /* ---------- 빈칸(블라인드) 모드: 기준값을 감추고 학습자가 슬라이더로 맞힌다 ---------- */
 body.blind .rules,body.blind #rcOk,body.blind [data-lim],body.blind .slider .marks,body.blind .lbl.name span{display:none!important}
 body.blind .chip.bad .cb{border-color:var(--line);box-shadow:none} body.blind .chip.bad .cb output{color:var(--warn)}
-body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)}
+body.blind #bBlind{background:var(--warn);color:var(--on-accent);border-color:var(--warn)}
 #blindCard{position:fixed;inset:0;z-index:31;background:rgba(4,8,14,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px} #blindCard[hidden]{display:none}
 #blindCard .tutCard{width:min(600px,100%)} #blindCard table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:14px} #blindCard th{text-align:left;color:var(--dim);font-weight:500;padding:4px 6px;font-size:12.5px} #blindCard td{padding:6px;border-top:1px solid var(--line-soft)}
-#blindCard td.ok{color:var(--ok)} #blindCard td.bad{color:var(--bad)} #blindCard .score{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:34px;letter-spacing:-.02em}
+#blindCard td.ok{color:var(--ok)} #blindCard td.bad{color:var(--bad)} #blindCard .score{font-family:var(--display);font-weight:800;font-size:34px;letter-spacing:-.02em}
 /* ---------- 모바일(760px 이하): 최상단 목록·과목 바 → 그 아래 규정 칩 스트립(스와이프) → 3D → 하단 테스트 항목 카드 → 맨 아래 접이식 「규정 수치·판정·기출」 손잡이 ---------- */
 @media (max-width:760px){
   #navBar{left:8px;right:8px;top:8px;max-width:none}
@@ -279,6 +269,12 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   body.panelOpen #panel{transform:translateY(0);visibility:visible;transition:transform .25s ease,visibility 0s}
 }
 #panelHandle.off{display:none!important}
+
+/* ---------- 다크/라이트 ---------- */
+:root{color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#14120F;--panel:#1B1814;--panel2:#262119;--line:#3B3328;--line-soft:#2A241C;--text:#EDE6DA;--muted:#B3A896;--dim:#8B8172;--accent:#C7A264;--accent-ink:#1A1200;--ok:#7CC496;--ok-soft:rgba(124,196,150,.14);--bad:#E5907B;--bad-soft:rgba(229,144,123,.12);--warn:#D2AC63;--warn-soft:rgba(210,172,99,.10);--warn-line:rgba(210,172,99,.35);--on-accent:#1A1200;--glass:rgba(27,24,20,.9);--tint:rgba(255,255,255,.05);--scrim:rgba(10,9,7,.78);}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#14120F;--panel:#1B1814;--panel2:#262119;--line:#3B3328;--line-soft:#2A241C;--text:#EDE6DA;--muted:#B3A896;--dim:#8B8172;--accent:#C7A264;--accent-ink:#1A1200;--ok:#7CC496;--ok-soft:rgba(124,196,150,.14);--bad:#E5907B;--bad-soft:rgba(229,144,123,.12);--warn:#D2AC63;--warn-soft:rgba(210,172,99,.10);--warn-line:rgba(210,172,99,.35);--on-accent:#1A1200;--glass:rgba(27,24,20,.9);--tint:rgba(255,255,255,.05);--scrim:rgba(10,9,7,.78);}
+.bTheme{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -313,7 +309,7 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
     <p class="eyebrow">Three.js · 산업안전기사 · 수치 규정 실습</p>
     <h1>산업안전 규격 실습장</h1>
     <div class="hazard" aria-hidden="true"></div>
-    <p class="lede">높이·거리·각도·간격으로 정해진 안전 규정을 3D로 세워 두고, 값을 바꿔 가며 판정과 시험을 봅니다. 과목을 고르면 그 과목의 법령·규정 목록이 열립니다. <button class="b sm" type="button" id="bTut">사용법 (4단계)</button> <a class="b sm" href="https://cys13241324-star.github.io/safety3d-lab/memo.html" target="_blank" rel="noopener">암기 은행 →</a> <a class="b sm" href="https://cys13241324-star.github.io/safety3d-lab/">← 산업안전기사 홈</a></p>
+    <p class="lede">높이·거리·각도·간격으로 정해진 안전 규정을 3D로 세워 두고, 값을 바꿔 가며 판정과 시험을 봅니다. 과목을 고르면 그 과목의 법령·규정 목록이 열립니다. <button class="b sm" type="button" id="bTut">사용법 (4단계)</button> <button class="b sm bTheme" type="button">어두운 모드</button> <a class="b sm" href="https://cys13241324-star.github.io/safety3d-lab/memo.html" target="_blank" rel="noopener">암기 은행 →</a> <a class="b sm" href="https://cys13241324-star.github.io/safety3d-lab/">← 산업안전기사 홈</a></p>
     <div class="homeStats" id="homeStats"></div>
     <div class="subjGrid" id="homeGrid"></div>
   </div>
@@ -2681,6 +2677,7 @@ buildHome();
 
 })();
 </script>
+<script>(function(){ function cur(){ var a = document.documentElement.getAttribute('data-theme'); return a || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } function sync(){ document.querySelectorAll('.bTheme').forEach(function(b){ var d = cur() === 'dark'; b.textContent = d ? '밝은 모드' : '어두운 모드'; b.setAttribute('aria-pressed', d); }); } document.querySelectorAll('.bTheme').forEach(function(b){ b.addEventListener('click', function(){ var t = cur() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try{ localStorage.setItem('safety_theme', t); }catch(e){} sync(); if(window.__onTheme) window.__onTheme(t); }); }); sync(); }());</script>
 
 </body>
 </html>

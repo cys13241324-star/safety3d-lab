@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0A1018">
 <title>산업안전기사 학습실</title>
+<script>(function(){try{var t=localStorage.getItem('safety_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Gothic+A1:wght@800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+KR:wght@600;700&display=swap">
 <style>
-:root{color-scheme:dark;--bg:#0A1018;--panel:#0F1622;--panel2:#182234;--line:#263248;--text:#E8EEF8;--muted:#8C99B0;--dim:#7683A0;--accent:#7FA6E0;--warn:#E3B54D;--ok:#5CC08A;
-  --sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic",sans-serif;--mono:"IBM Plex Mono",Consolas,monospace;--display:'Gothic A1',var(--sans)}
+:root{--bg:#F3EEE4;--panel:#FAF7F1;--panel2:#ECE5D8;--line:#D3C9B6;--line-soft:#E3DBCC;--text:#22201C;--muted:#5A554C;--dim:#7B7468;--accent:#6B5231;--accent-ink:#FFFFFF;--ok:#2E6B47;--ok-soft:rgba(46,107,71,.12);--bad:#9C3B2A;--bad-soft:rgba(156,59,42,.10);--warn:#8E6A2C;--warn-soft:rgba(142,106,44,.10);--warn-line:rgba(142,106,44,.35);--on-accent:#FFFFFF;--glass:rgba(250,247,241,.92);--tint:rgba(0,0,0,.045);--scrim:rgba(243,238,228,.88);--sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic",sans-serif;--mono:"IBM Plex Mono",Consolas,monospace;--display:"Noto Serif KR","Nanum Myeongjo",serif;}
 *{box-sizing:border-box}
 
 /* 접근성·터치: 보이는 포커스 링, 44px 터치 타깃, 탭 하이라이트, 움직임 줄이기 */
@@ -21,19 +21,19 @@ button,a,select,input,[role=button]{touch-action:manipulation;-webkit-tap-highli
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh}
 .wrap{max-width:960px;margin:0 auto;padding:48px 20px 80px}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
-h1{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.03em;margin:0 0 6px;text-wrap:balance}
-.hazard{height:6px;max-width:300px;border-radius:3px;margin:12px 0 16px;background:repeating-linear-gradient(135deg,#E3B54D 0 14px,#141A24 14px 28px)}
+h1{font-family:var(--display);font-weight:700;font-size:36px;letter-spacing:-.02em;margin:0 0 14px;text-wrap:balance}
+.hazard{height:6px;max-width:300px;border-radius:3px;margin:12px 0 16px;background:var(--warn-line)}
 .lede{color:var(--muted);margin:0 0 30px;max-width:62ch}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
 .tile{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 26px 22px;position:relative;overflow:hidden;transition:border-color .15s,transform .15s}
 .tile:hover,.tile:focus-visible{border-color:var(--warn);transform:translateY(-2px)} .tile{transition:border-color .15s,transform .15s}
-.tile .k{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
-.tile h2{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.02em;margin:0 0 8px}
+.tile .k{display:none}
+.tile h2{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:-.02em;margin:0 0 10px}
 .tile p{margin:0 0 16px;color:var(--muted);max-width:40ch}
-.tile .nums{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-bottom:18px} .tile .nums b{display:block;font-family:var(--display);font-weight:800;font-size:22px;color:var(--text);letter-spacing:-.02em;line-height:1.1}
+.tile .nums{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:18px} .tile .nums b{font-weight:600;color:var(--text);margin-right:3px}
 .tile .go{display:inline-block;font-weight:600;color:var(--warn)}
-.tile.lab::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(127,166,224,.18),transparent 70%)}
-.tile.memo::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(227,181,77,.18),transparent 70%)}
+
+
 .viz{height:84px;margin:0 0 18px;pointer-events:none;border-radius:8px;border:1px solid var(--line);background:var(--panel2);position:relative;overflow:hidden}
 .viz.lab{background:linear-gradient(180deg,#131C2C 0%,#0E1522 60%,#1B2436 60%,#1B2436 100%)}
 .viz.lab i{position:absolute;bottom:34px;width:3px;background:#E3B54D;border-radius:2px} .viz.lab i:nth-child(1){left:18%;height:26px} .viz.lab i:nth-child(2){left:24%;height:26px} .viz.lab i:nth-child(3){left:30%;height:26px} .viz.lab i:nth-child(4){left:18%;width:12.6%;height:3px;bottom:56px} .viz.lab i:nth-child(5){left:18%;width:12.6%;height:3px;bottom:46px}
@@ -41,19 +41,25 @@ h1{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.03
 .viz.lab s{position:absolute;bottom:38px;left:72%;font-family:var(--mono);font-size:11px;color:#E3B54D;text-decoration:none} .viz.lab s::before{content:'90 cm ↕'}
 .viz.memo{display:flex;align-items:center;gap:8px;padding:0 14px;overflow:hidden}
 .viz.memo span{flex:none;font-size:12px;padding:4px 9px;border-radius:5px;background:var(--panel);border:1px solid var(--line);color:var(--muted);white-space:nowrap} .viz.memo span.h{background:rgba(227,181,77,.12);border-color:rgba(227,181,77,.5);color:var(--text)} .viz.memo span.h b{font-family:var(--mono);font-size:10px;color:var(--warn);margin-right:5px;font-weight:500}
-.tile.palace::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(92,192,138,.16),transparent 70%)}
+
 .viz.palace{background:linear-gradient(180deg,#131C2C 0%,#0E1522 55%,#1B2436 55%)} .viz.palace .z{position:absolute;top:10px;width:28%;height:62px;border-radius:4px} .viz.palace .p{position:absolute;bottom:22px;width:8px;height:8px;border-radius:50%;background:#3B4658} .viz.palace .p.on{background:#E3B54D;box-shadow:0 0 10px #E3B54D;width:11px;height:11px;bottom:20px} .viz.palace em{position:absolute;bottom:26px;left:47%;width:10px;height:18px;border-radius:5px 5px 2px 2px;background:#2E8B57} .viz.palace em::before{content:'';position:absolute;top:-8px;left:1px;width:8px;height:8px;border-radius:50%;background:#F2F5F8}
+.topRow{display:flex;justify-content:flex-end;margin-bottom:8px} .b{font:inherit;font-size:13.5px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer} .b:hover{border-color:var(--muted)}
 footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
 @media (max-width:600px){h1{font-size:30px} .wrap{padding:30px 16px 60px} .tile{padding:20px 18px 18px} .tile h2{font-size:22px}}
+
+/* ---------- 다크/라이트 ---------- */
+:root{color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#14120F;--panel:#1B1814;--panel2:#262119;--line:#3B3328;--line-soft:#2A241C;--text:#EDE6DA;--muted:#B3A896;--dim:#8B8172;--accent:#C7A264;--accent-ink:#1A1200;--ok:#7CC496;--ok-soft:rgba(124,196,150,.14);--bad:#E5907B;--bad-soft:rgba(229,144,123,.12);--warn:#D2AC63;--warn-soft:rgba(210,172,99,.10);--warn-line:rgba(210,172,99,.35);--on-accent:#1A1200;--glass:rgba(27,24,20,.9);--tint:rgba(255,255,255,.05);--scrim:rgba(10,9,7,.78);}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#14120F;--panel:#1B1814;--panel2:#262119;--line:#3B3328;--line-soft:#2A241C;--text:#EDE6DA;--muted:#B3A896;--dim:#8B8172;--accent:#C7A264;--accent-ink:#1A1200;--ok:#7CC496;--ok-soft:rgba(124,196,150,.14);--bad:#E5907B;--bad-soft:rgba(229,144,123,.12);--warn:#D2AC63;--warn-soft:rgba(210,172,99,.10);--warn-line:rgba(210,172,99,.35);--on-accent:#1A1200;--glass:rgba(27,24,20,.9);--tint:rgba(255,255,255,.05);--scrim:rgba(10,9,7,.78);}
+.bTheme{white-space:nowrap}
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <p class="eyebrow">ADDTO · 산업안전기사 필기</p>
+  <div class="topRow"><button class="b sm bTheme" type="button">어두운 모드</button></div>
   <h1>산업안전기사 학습실</h1>
-  <div class="hazard" aria-hidden="true"></div>
-  <p class="lede">CBT 24회차 2,880문항에서 뽑아 만든 두 가지 공부 도구입니다. 규정 수치는 3D 현장에서 직접 바꿔 보며 몸으로 익히고, 외워야 할 것은 재밌는 훅으로 붙들어 둡니다.</p>
+  <p class="lede">CBT 24회차 2,880문항으로 만든 세 가지 공부 도구입니다.</p>
   <div class="grid">
     <a class="tile lab" href="lab.html" aria-label="3D 규격 실습장 들어가기">
       <div class="k">01 · 규정 수치</div>
@@ -68,7 +74,7 @@ footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
       <h2>암기 은행</h2>
       <div class="viz memo" aria-hidden="true"><span>모래 1:1.8</span><span>경암 1:0.5</span><span class="h"><b>훅</b>모일팔·흙일이·연일영·경영오</span><span>30 mA</span><span>0.03초</span></div>
       <p>빈출 묶음마다 사실·훅·왜·구분 네 줄로 정리한 노트입니다. 목차로 과목과 챕터를 넘기고, 사실을 가린 채 훅만 보고 떠올리면 자가 시험이 됩니다. 빈칸 카드와 숫자 색인도 들어 있습니다.</p>
-      <div class="nums"><div><b>165</b>묶음</div><div><b>613</b>암기법</div><div><b>282</b>빈칸 카드</div></div>
+      <div class="nums"><div><b>165</b>묶음</div><div><b>613</b>암기법</div><div><b>485</b>빈칸 카드</div></div>
       <span class="go">들어가기 →</span>
     </a>
     <a class="tile palace" href="palace.html" aria-label="암기 순찰로 들어가기">
@@ -82,6 +88,7 @@ footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
   </div>
   <footer>출처: 산업안전기사 CBT 2021년 1회 ~ 2026년 4회 해설 · 법령은 각 문항 원본 시행일 기준</footer>
 </div>
+<script>(function(){ function cur(){ var a = document.documentElement.getAttribute('data-theme'); return a || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } function sync(){ document.querySelectorAll('.bTheme').forEach(function(b){ var d = cur() === 'dark'; b.textContent = d ? '밝은 모드' : '어두운 모드'; b.setAttribute('aria-pressed', d); }); } document.querySelectorAll('.bTheme').forEach(function(b){ b.addEventListener('click', function(){ var t = cur() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try{ localStorage.setItem('safety_theme', t); }catch(e){} sync(); if(window.__onTheme) window.__onTheme(t); }); }); sync(); }());</script>
 
 </body>
 </html>
