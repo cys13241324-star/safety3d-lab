@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Gothic+A1:wght@700;800&display=swap">
 <style>
-:root{--bg:#F3EEE4;--panel:#FAF7F1;--panel2:#ECE5D8;--line:#D3C9B6;--line-soft:#E3DBCC;--text:#22201C;--muted:#5A554C;--dim:#7B7468;--accent:#6B5231;--accent-ink:#FFFFFF;--ok:#2E6B47;--ok-soft:rgba(46,107,71,.12);--bad:#9C3B2A;--bad-soft:rgba(156,59,42,.10);--warn:#8E6A2C;--warn-soft:rgba(142,106,44,.10);--warn-line:rgba(142,106,44,.35);--on-accent:#FFFFFF;--glass:rgba(250,247,241,.92);--tint:rgba(0,0,0,.045);--scrim:rgba(243,238,228,.88);--sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic",sans-serif;--mono:"IBM Plex Mono",Consolas,monospace;--display:"Gothic A1","IBM Plex Sans KR",sans-serif;}
+:root{--bg:#0A1018;--panel:#0F1622;--panel2:#182234;--line:#33425C;--line-soft:#1E2938;--text:#E8EEF8;--muted:#8C99B0;--dim:#8290AC;--accent:#7FA6E0;--accent-ink:#0B111C;--ok:#5CC08A;--ok-soft:rgba(92,192,138,.16);--bad:#F07056;--bad-soft:rgba(240,112,86,.16);--warn:#E3B54D;--warn-soft:rgba(227,181,77,.10);--warn-line:rgba(227,181,77,.45);--on-accent:#1A1200;--glass:rgba(15,22,34,.9);--tint:rgba(255,255,255,.05);--scrim:rgba(6,10,17,.78);--sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic",sans-serif;--mono:"IBM Plex Mono",Consolas,monospace;--display:"Gothic A1","IBM Plex Sans KR",sans-serif;}
 *{box-sizing:border-box}
 
 /* 접근성·터치: 보이는 포커스 링, 44px 터치 타깃, 탭 하이라이트, 움직임 줄이기 */
@@ -48,10 +48,10 @@ footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
 @media (max-width:600px){h1{font-size:30px} .wrap{padding:30px 16px 60px} .tile{padding:20px 18px 18px} .tile h2{font-size:22px}}
 
 /* ---------- 다크/라이트 ---------- */
-:root{color-scheme:light}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#14120F;--panel:#1B1814;--panel2:#262119;--line:#3B3328;--line-soft:#2A241C;--text:#EDE6DA;--muted:#B3A896;--dim:#8B8172;--accent:#C7A264;--accent-ink:#1A1200;--ok:#7CC496;--ok-soft:rgba(124,196,150,.14);--bad:#E5907B;--bad-soft:rgba(229,144,123,.12);--warn:#D2AC63;--warn-soft:rgba(210,172,99,.10);--warn-line:rgba(210,172,99,.35);--on-accent:#1A1200;--glass:rgba(27,24,20,.9);--tint:rgba(255,255,255,.05);--scrim:rgba(10,9,7,.78);}}
-:root[data-theme="dark"]{color-scheme:dark;--bg:#14120F;--panel:#1B1814;--panel2:#262119;--line:#3B3328;--line-soft:#2A241C;--text:#EDE6DA;--muted:#B3A896;--dim:#8B8172;--accent:#C7A264;--accent-ink:#1A1200;--ok:#7CC496;--ok-soft:rgba(124,196,150,.14);--bad:#E5907B;--bad-soft:rgba(229,144,123,.12);--warn:#D2AC63;--warn-soft:rgba(210,172,99,.10);--warn-line:rgba(210,172,99,.35);--on-accent:#1A1200;--glass:rgba(27,24,20,.9);--tint:rgba(255,255,255,.05);--scrim:rgba(10,9,7,.78);}
+:root{color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light;--bg:#F4F6FA;--panel:#FFFFFF;--panel2:#EAEEF5;--line:#C6D0DE;--line-soft:#E0E6EF;--text:#14202E;--muted:#4A5568;--dim:#66738A;--accent:#2F5FA8;--accent-ink:#FFFFFF;--ok:#1F6B45;--ok-soft:rgba(31,107,69,.12);--bad:#A8391F;--bad-soft:rgba(168,57,31,.10);--warn:#8F6512;--warn-soft:rgba(143,101,18,.10);--warn-line:rgba(143,101,18,.35);--on-accent:#FFFFFF;--glass:rgba(255,255,255,.93);--tint:rgba(0,0,0,.04);--scrim:rgba(244,246,250,.88);}
 .bTheme{white-space:nowrap}
+h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
 </style>
 </head>
 <body>
@@ -88,7 +88,7 @@ footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
   </div>
   <footer>출처: 산업안전기사 CBT 2021년 1회 ~ 2026년 4회 해설 · 법령은 각 문항 원본 시행일 기준</footer>
 </div>
-<script>(function(){ function cur(){ var a = document.documentElement.getAttribute('data-theme'); return a || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } function sync(){ document.querySelectorAll('.bTheme').forEach(function(b){ var d = cur() === 'dark'; b.textContent = d ? '밝은 모드' : '어두운 모드'; b.setAttribute('aria-pressed', d); }); } document.querySelectorAll('.bTheme').forEach(function(b){ b.addEventListener('click', function(){ var t = cur() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try{ localStorage.setItem('safety_theme', t); }catch(e){} sync(); if(window.__onTheme) window.__onTheme(t); }); }); sync(); }());</script>
+<script>(function(){ function cur(){ var a = document.documentElement.getAttribute('data-theme'); return a || 'dark'; } function sync(){ document.querySelectorAll('.bTheme').forEach(function(b){ var d = cur() === 'dark'; b.textContent = d ? '밝은 모드' : '어두운 모드'; b.setAttribute('aria-pressed', d); }); } document.querySelectorAll('.bTheme').forEach(function(b){ b.addEventListener('click', function(){ var t = cur() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try{ localStorage.setItem('safety_theme', t); }catch(e){} sync(); if(window.__onTheme) window.__onTheme(t); }); }); sync(); }());</script>
 
 </body>
 </html>
