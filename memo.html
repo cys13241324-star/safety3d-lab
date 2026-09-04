@@ -19,7 +19,7 @@ button,a,select,input,[role=button]{touch-action:manipulation;-webkit-tap-highli
 .mono{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
-body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.65}
 a{color:var(--accent)}
 .app{display:flex;flex-direction:column;min-height:100vh}
 /* 상단 바 */
@@ -32,34 +32,34 @@ a{color:var(--accent)}
 .b:hover{border-color:var(--accent)} .b.primary{background:var(--warn);color:#1A1200;border-color:var(--warn);font-weight:600} .b.sm{font-size:13px;padding:5px 10px} .b[aria-pressed="true"]{border-color:var(--warn);color:var(--warn)} .b.done{border-color:var(--ok);color:var(--ok)}
 /* 본문 2단 */
 .body{display:flex;flex:1;min-height:0}
-#toc{width:300px;flex:none;border-right:1px solid var(--line);background:var(--panel);position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;padding:12px 10px 40px;scrollbar-width:thin;overscroll-behavior:contain}
+#toc{width:320px;flex:none;border-right:1px solid var(--line);background:var(--panel);position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;padding:14px 12px 40px;scrollbar-width:thin;overscroll-behavior:contain}
 #toc .tocHead{display:flex;gap:6px;margin-bottom:8px} #toc .tq{flex:1;min-width:0;font:inherit;font-size:13.5px;padding:7px 10px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text)} #bTocClose{display:none} #toc .tocLinks{display:none;flex-direction:column;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)} #tocBack{position:fixed;inset:0;z-index:39;background:rgba(0,0,0,.55)}
 #toc .sub{margin-bottom:4px} #toc .sub>button{width:100%;text-align:left;font:inherit;font-size:14px;font-weight:600;padding:8px 10px;border:0;border-radius:6px;background:none;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px} #toc .sub>button:hover{background:var(--panel2)} #toc .sub>button .pg{font-family:var(--mono);font-size:11.5px;color:var(--dim);font-weight:400} #toc .sub>button .pg.full{color:var(--ok)}
 #toc .sub>button::before{content:'▸';color:var(--dim);margin-right:6px;font-size:11px} #toc .sub.open>button::before{content:'▾'} #toc .sub>button:focus-visible{outline-offset:-2px}
 #toc .sub .in{display:none;padding:2px 0 6px 6px} #toc .sub.open .in{display:block}
-#toc .ch{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--dim);padding:8px 8px 3px;text-transform:uppercase}
-#toc .g{display:flex;align-items:center;gap:8px;width:100%;text-align:left;font:inherit;font-size:13.5px;padding:6px 8px;border:0;border-radius:5px;background:none;color:var(--muted);cursor:pointer;line-height:1.35} #toc .g>span:nth-child(2){min-width:0;overflow-wrap:anywhere}
+#toc .ch{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim);padding:14px 10px 4px;text-transform:uppercase}
+#toc .g{display:flex;align-items:center;gap:9px;width:100%;text-align:left;font:inherit;font-size:14px;padding:9px 10px;border:0;border-radius:5px;background:none;color:var(--muted);cursor:pointer;line-height:1.35} #toc .g>span:nth-child(2){min-width:0;overflow-wrap:anywhere}
 #toc .g:hover{background:var(--panel2);color:var(--text)} #toc .g[aria-current="true"]{background:var(--panel2);color:var(--text);box-shadow:inset 3px 0 0 var(--warn)}
 #toc .g .tick{flex:none;width:14px;height:14px;border-radius:50%;border:1px solid var(--line);font-size:9px;display:grid;place-items:center;color:transparent} #toc .g.done .tick{background:var(--ok);border-color:var(--ok);color:#06210F}
 #toc .g .cnt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim)}
-#main{flex:1;min-width:0;padding:22px 28px 90px}
-.inner{max-width:900px;margin:0 auto}
+#main{flex:1;min-width:0;padding:36px 48px 120px}
+.inner{max-width:780px;margin:0 auto}
 /* 노트 규격: 묶음 한 장 */
-.pageHead{margin-bottom:14px} .pageHead .path{font-family:var(--mono);font-size:12px;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px}
-.pageHead h2{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:-.02em;margin:0 0 10px;text-wrap:balance}
-.pageTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pageHead{margin-bottom:32px} .pageHead .path{font-family:var(--mono);font-size:12.5px;color:var(--dim);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.pageHead h2{font-family:var(--display);font-weight:800;font-size:34px;line-height:1.25;letter-spacing:-.02em;margin:0 0 18px;text-wrap:balance}
+.pageTools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .spec{list-style:none;margin:0;padding:0}
-.it{display:grid;grid-template-columns:44px 1fr;gap:0 12px;padding:16px 0 18px;border-top:1px solid var(--line)} .it:first-child{border-top:0}
-.it .no{font-family:var(--display);font-weight:800;font-size:22px;color:var(--line);line-height:1;padding-top:2px}
-.it h4{margin:0 0 8px;font-size:16.5px;font-weight:600;letter-spacing:-.01em}
-.r{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:start;margin-top:8px}
-.r .lb{font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:3px 0;border-radius:4px;text-align:center;margin-top:2px;border:1px solid var(--line);color:var(--dim);background:var(--panel)}
+.it{display:grid;grid-template-columns:56px 1fr;gap:0 16px;padding:30px 0 32px;border-top:1px solid var(--line-soft)} .it:first-child{border-top:0;padding-top:8px}
+.it .no{font-family:var(--display);font-weight:800;font-size:28px;color:var(--dim);opacity:.55;line-height:1;padding-top:2px}
+.it h4{margin:0 0 16px;font-size:20px;font-weight:600;letter-spacing:-.015em;line-height:1.35}
+.r{display:grid;grid-template-columns:56px 1fr;gap:14px;align-items:start;margin-top:14px}
+.r .lb{font-family:var(--mono);font-size:11px;letter-spacing:.14em;padding:5px 0 0;text-align:left;color:var(--dim);text-transform:uppercase}
 .r p{margin:0}
-.facts{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px} .rh{font-family:var(--mono);font-size:11.5px;color:var(--warn);margin-bottom:6px} kbd.k{font-family:var(--mono);font-size:10.5px;padding:1px 5px;border-radius:4px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--muted);margin-left:6px} @media (max-width:760px){kbd.k{display:none}} .facts li{font-size:13.5px;padding:4px 9px;border-radius:5px;background:var(--panel2);border:1px solid var(--line-soft)} .facts li .v{color:var(--warn);font-family:var(--mono)}
-.r.hook{margin-top:10px} .r.hook .lb{background:var(--warn);color:#1A1200;border-color:var(--warn);font-weight:600} .r.hook p{padding:10px 14px;border-radius:8px;background:var(--warn-soft);border:1px solid var(--warn-line);font-size:15.5px;line-height:1.55}
-.r.why .lb{color:var(--accent)} .r.mix .lb{color:var(--ok)} .r.why p,.r.mix p{font-size:13.5px;color:var(--muted)}
-body.hide .facts li{color:transparent;background:var(--line-soft);cursor:pointer;user-select:none} body.hide .facts li:hover,body.hide table.ft td:hover{outline:1px solid var(--accent)} body.hide .facts li .v{color:transparent} body.hide .facts li.show{color:inherit;background:var(--panel2)} body.hide .facts li.show .v{color:var(--warn)}
-table.ft{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel2);border:1px solid var(--line-soft);border-radius:6px;overflow:hidden} table.ft th,table.ft td{padding:6px 10px;border-top:1px solid var(--line-soft);text-align:left;vertical-align:top} table.ft tr:first-child th,table.ft tr:first-child td{border-top:0} table.ft th{width:32%;font-weight:600;color:var(--muted);background:rgba(0,0,0,.18)} table.ft td .v{color:var(--warn);font-family:var(--mono)}
+.facts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px} .rh{font-family:var(--mono);font-size:11.5px;color:var(--warn);margin-bottom:8px} kbd.k{font-family:var(--mono);font-size:10.5px;padding:1px 5px;border-radius:4px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--muted);margin-left:6px} @media (max-width:760px){kbd.k{display:none}} .facts li{font-size:15.5px;line-height:1.55;padding:2px 0 2px 20px;position:relative} .facts li::before{content:'';position:absolute;left:2px;top:.78em;width:7px;height:7px;border-radius:50%;background:var(--warn);opacity:.8} .facts li .v{color:var(--warn);font-family:var(--mono)}
+.r.hook{margin-top:20px} .r.hook .lb{color:var(--warn);font-weight:600} .r.hook p{padding:16px 20px;border-radius:10px;background:var(--warn-soft);font-size:17px;line-height:1.65}
+.r.why .lb{color:var(--accent)} .r.mix .lb{color:var(--ok)} .r.why p,.r.mix p{font-size:15px;line-height:1.6;color:var(--muted)}
+body.hide .facts li{color:transparent;background:var(--line-soft);border-radius:6px;padding:6px 12px 6px 20px;cursor:pointer;user-select:none} body.hide .facts li::before{opacity:.35} body.hide .facts li:hover,body.hide table.ft td:hover{outline:1px solid var(--accent)} body.hide .facts li .v{color:transparent} body.hide .facts li.show{color:inherit;background:transparent} body.hide .facts li.show .v{color:var(--warn)}
+table.ft{width:100%;border-collapse:collapse;font-size:15px;line-height:1.5;background:var(--panel);border-radius:8px;overflow:hidden} table.ft th,table.ft td{padding:10px 14px;border-top:1px solid var(--line-soft);text-align:left;vertical-align:top} table.ft tr:first-child th,table.ft tr:first-child td{border-top:0} table.ft th{width:30%;font-weight:600;color:var(--muted);background:rgba(0,0,0,.14)} table.ft td .v{color:var(--warn);font-family:var(--mono)}
 body.hide table.ft td{color:transparent;background:var(--line-soft);cursor:pointer;user-select:none} body.hide table.ft td .v{color:transparent} body.hide table.ft td.show{color:inherit;background:transparent} body.hide table.ft td.show .v{color:var(--warn)}
 /* 기출 풀이기 (팝업) */
 #qModal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(6,10,17,.7);backdrop-filter:blur(5px);padding:16px} #qModal[hidden]{display:none}
@@ -67,11 +67,11 @@ body.hide table.ft td{color:transparent;background:var(--line-soft);cursor:point
 #qModal #qbox{overflow-y:auto;padding:14px 16px;overscroll-behavior:contain} #qModal .qz{border:0;padding:0;background:none}
 @media (max-width:760px){#qModal{padding:0;align-items:end} #qModal .qbox{width:100%;max-height:96vh;border-radius:14px 14px 0 0;padding-bottom:env(safe-area-inset-bottom)}}
 .qsec{margin-top:26px;padding-top:18px;border-top:2px solid var(--line)} .qsec .qhd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px} .qsec .qhd h3{margin:0;font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em} .qsec .qhd .muted{font-size:13px}
-.qz{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px} .qz .tag{margin-bottom:6px} .qz .stem{font-size:16px;font-weight:500;margin:0 0 12px;line-height:1.55} .qz .stem .cond{display:block;margin-top:6px;padding:8px 10px;background:var(--panel2);border-radius:6px;font-weight:400;font-size:14px;color:var(--muted);white-space:pre-wrap}
-.qopts{display:grid;gap:6px;margin-bottom:12px} .qopts button{font:inherit;text-align:left;font-size:14.5px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer;line-height:1.45;display:flex;gap:10px} .qopts button .n{font-family:var(--mono);color:var(--dim);flex:none} .qopts button:not(:disabled):hover{border-color:var(--accent)} .qopts button.ok{background:var(--ok-soft);border-color:var(--ok)} .qopts button.ok .n{color:var(--ok)} .qopts button.bad{background:var(--bad-soft);border-color:var(--bad)} .qopts button:disabled:not(.ok):not(.bad){opacity:.5}
+.qz{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px} .qz .tag{margin-bottom:6px} .qz .stem{font-size:17px;font-weight:500;margin:0 0 16px;line-height:1.6} .qz .stem .cond{display:block;margin-top:6px;padding:8px 10px;background:var(--panel2);border-radius:6px;font-weight:400;font-size:14px;color:var(--muted);white-space:pre-wrap}
+.qopts{display:grid;gap:6px;margin-bottom:12px} .qopts button{font:inherit;text-align:left;font-size:15.5px;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer;line-height:1.45;display:flex;gap:10px} .qopts button .n{font-family:var(--mono);color:var(--dim);flex:none} .qopts button:not(:disabled):hover{border-color:var(--accent)} .qopts button.ok{background:var(--ok-soft);border-color:var(--ok)} .qopts button.ok .n{color:var(--ok)} .qopts button.bad{background:var(--bad-soft);border-color:var(--bad)} .qopts button:disabled:not(.ok):not(.bad){opacity:.5}
 .qz .sol{font-size:13.5px;color:var(--muted);margin:0 0 8px;line-height:1.55} .qz .hookmini{margin:8px 0 10px} .qz .hookmini a{margin-left:8px;font-size:12.5px}
 .qbadge{font:inherit;font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;margin-left:8px;vertical-align:middle} .qbadge:hover{border-color:var(--warn);color:var(--warn)}
-.pager{display:flex;justify-content:space-between;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)} .pager .b{max-width:48%;min-width:0;flex-direction:column;align-items:flex-start;gap:0} .pager .b.r{align-items:flex-end} .pager .b span{color:var(--muted);font-size:12.5px;white-space:nowrap}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:44px;padding-top:24px;border-top:1px solid var(--line)} .pager .b{max-width:48%;min-width:0;flex-direction:column;align-items:flex-start;gap:0} .pager .b.r{align-items:flex-end} .pager .b span{color:var(--muted);font-size:12.5px;white-space:nowrap}
 .pager .b b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 /* 도구 공통 */
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px} .chips[hidden]{display:none}
@@ -80,7 +80,7 @@ body.hide table.ft td{color:transparent;background:var(--line-soft);cursor:point
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:12px}
 .tag{font-family:var(--mono);font-size:12px;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px} .tag .fq{color:var(--warn)}
 .stem{font-size:16px;margin:0 0 10px;font-weight:500}
-.cloze{font-size:18px;margin:0 0 14px;padding:12px 14px;background:var(--panel2);border-left:3px solid var(--warn);border-radius:6px}
+.cloze{font-size:18px;margin:0 0 14px;padding:12px 14px;background:var(--panel2);border-radius:6px}
 .cloze .blank,.blank{display:inline-block;min-width:64px;border-bottom:2px solid var(--warn);color:var(--warn);text-align:center;font-family:var(--mono)}
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
 .opts button{font:inherit;font-family:var(--mono);font-size:17px;padding:12px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
@@ -100,14 +100,48 @@ table.acc{width:100%;border-collapse:collapse;font-size:14px} table.acc td,table
 .empty{color:var(--dim);padding:30px;text-align:center}
 .toolHead{margin:0 0 12px;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em} .toolHead small{display:block;font-family:var(--sans);font-weight:400;font-size:13.5px;color:var(--muted);margin-top:2px}
 @page{margin:15mm}
+
+/* ---------- 조용한 톤: 색은 한 곳에, 위계는 여백과 굵기로 ---------- */
+:root{--warn:#D8B15A;--warn-soft:rgba(216,177,90,.09);--line:#2C3A50;--line-soft:#1E2938}
+body{font-size:16px;line-height:1.7}
+.top{gap:18px;padding:12px 22px} .top .crumb{font-weight:700;font-size:16px} .modes button{font-size:14.5px;color:var(--muted)} .modes button[aria-selected="true"]{background:none;box-shadow:inset 0 -2px 0 var(--text);color:var(--text);font-weight:600}
+.b{background:transparent;border-color:var(--line);color:var(--text);font-weight:500} .b:not(:disabled):hover{background:rgba(255,255,255,.04);border-color:var(--muted)} .b.primary{background:var(--warn);border-color:var(--warn);color:#1A1200;font-weight:600} .b.sm{font-size:13.5px;padding:6px 12px}
+kbd.k{display:none}
+/* 목차: 평범한 목록처럼 */
+#toc{background:var(--bg);border-right:1px solid var(--line-soft)} #toc .tq{background:transparent;border-color:var(--line)} #toc .sub>button{font-weight:600;font-size:14px;color:var(--text)} #toc .sub>button .pg{font-family:var(--sans);font-size:12px} #toc .sub>button::before,#toc .sub.open>button::before{display:none} #toc .sub>button{text-align:left}
+#toc .ch{font-family:var(--sans);font-size:12px;letter-spacing:.02em;text-transform:none;color:var(--dim);padding:16px 10px 4px}
+#toc .g{color:var(--muted);border-radius:6px} #toc .g[aria-current="true"]{background:rgba(255,255,255,.05);box-shadow:inset 2px 0 0 var(--warn);color:var(--text)} #toc .g .tick{width:6px;height:6px;border:0;background:var(--line);color:transparent;font-size:0} #toc .g.done .tick{background:var(--warn)} #toc .g .cnt{font-family:var(--sans);font-size:11.5px;color:var(--dim)}
+/* 묶음 한 장 */
+#main{padding:44px 56px 140px} .inner{max-width:720px}
+.pageHead{margin-bottom:36px} .pageHead .path{font-family:var(--sans);font-size:13px;color:var(--dim);gap:8px} .pageHead .path span+span::before{content:'·';margin-right:8px;color:var(--line)}
+.pageHead h2{font-weight:700;font-size:32px;letter-spacing:-.02em;margin:6px 0 20px}
+.pageTools{gap:8px} .pageTools .muted.mono{font-family:var(--sans);font-size:13px;color:var(--dim)}
+.it{grid-template-columns:1fr;gap:0;padding:34px 0 36px;border-top:1px solid var(--line-soft)} .it:first-child{padding-top:4px} .it .no{display:none}
+.it h4{font-size:19px;font-weight:600;margin:0 0 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.qbadge{font-family:var(--sans);font-size:12px;padding:2px 9px;border-color:var(--line);color:var(--muted);margin:0} .qbadge:hover{border-color:var(--muted);color:var(--text)}
+.r{grid-template-columns:52px 1fr;gap:16px;margin-top:16px} .r .lb{font-family:var(--sans);font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--dim);padding-top:3px}
+.facts li{font-size:16px;line-height:1.65;padding-left:18px} .facts li::before{width:5px;height:5px;background:var(--dim);opacity:.9;top:.85em} .facts li .v{color:var(--text);font-family:var(--sans);font-weight:600;font-variant-numeric:tabular-nums}
+.rh{font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+table.ft{font-size:15px;background:transparent;border-radius:0} table.ft th,table.ft td{padding:9px 12px 9px 0;border-top:1px solid var(--line-soft)} table.ft th{width:34%;background:transparent;color:var(--dim);font-weight:500} table.ft td .v{color:var(--text);font-family:var(--sans);font-weight:600}
+.r.hook{margin-top:22px} .r.hook .lb{color:var(--warn);font-weight:600} .r.hook p{background:var(--warn-soft);border:0;border-radius:12px;padding:18px 22px;font-size:17px;line-height:1.7}
+.r.why .lb,.r.mix .lb{color:var(--dim)} .r.why p,.r.mix p{font-size:15px;line-height:1.7;color:var(--muted)}
+body.hide .facts li{background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px 8px 18px} body.hide .facts li.show{background:transparent}
+.pager{margin-top:52px;padding-top:28px;border-top:1px solid var(--line-soft)} .pager .b{border:0;background:transparent;padding-left:0;padding-right:0} .pager .b:not(:disabled):hover{background:transparent} .pager .b:not(:disabled):hover b{text-decoration:underline;text-underline-offset:4px} .pager .b span{font-size:13px;color:var(--dim)}
+/* 도구 화면·팝업 */
+.toolHead{font-weight:700;font-size:22px} .toolHead small{font-size:14px} .chip{background:transparent} .chip[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.card{background:transparent;border-color:var(--line-soft)} .cloze{background:rgba(255,255,255,.04);border-left:0;border-radius:10px} .cloze .blank,.blank{color:var(--warn);border-bottom-color:var(--warn)}
+#qModal .qbox{border-color:var(--line)} #qModal .qmHd h3{font-weight:600;font-size:16px} .qopts button{background:transparent} .qopts button.ok{background:var(--ok-soft)} .qopts button.bad{background:var(--bad-soft)}
+.tag{font-family:var(--sans);font-size:12.5px} .tag .fq{color:var(--muted)}
+.item{background:transparent;border-color:var(--line-soft)} .item .t .v{color:var(--text);font-family:var(--sans);font-weight:600} .numgrid button{background:transparent;font-family:var(--sans);font-variant-numeric:tabular-nums}
+.prog div{background:transparent} .prog b{font-weight:700}
 @media print{body{background:#fff;color:#111;font-size:11.5px} .top,#toc,.pageTools,.pager{display:none!important} #main{padding:0} .pageHead h2{font-size:18px;color:#111} .pageHead .path{color:#666} .it{border-top:1px solid #ccc;padding:8px 0 10px} .it .no{color:#bbb;font-size:16px} .it h4{font-size:12.5px} .facts li{background:#f3f3f3;border-color:#ddd;color:#111;font-size:11px} .facts li .v{color:#8a5a00} table.ft{background:#fff;border-color:#ccc;color:#111;font-size:11px} table.ft th{background:#f3f3f3;color:#333} table.ft td .v{color:#8a5a00} .r .lb,.r.why .lb,.r.mix .lb{border-color:#ccc;color:#444;background:#fff} .r.hook .lb{background:#d9b24a;color:#111;border-color:#d9b24a} .it{break-inside:avoid} .it .no{color:#777} :root{color-scheme:light} .r.hook p{background:#fff8e1;border-color:#d9b24a;color:#111;font-size:12px} .r.why p,.r.mix p{color:#444;font-size:11px}}
 @media (max-width:760px){
   .top{padding:8px 10px;gap:8px} .top .crumb{font-size:15px} .top .crumb .home{display:none} .top .crumb .sep{display:none} .top .lab{display:none}
   .top{flex-wrap:wrap} .modes{order:9;width:100%;margin:2px 0 -2px;justify-content:space-between;padding:2px 0} .modes button{padding:6px 12px;font-size:13.5px;flex:1;text-align:center}
   #bToc{display:inline-flex} #bTocClose{display:inline-flex;min-width:44px;justify-content:center} #toc .tocLinks{display:flex} #toc .tq{font-size:16px;min-height:44px} #toc .g,#toc .sub>button{min-height:44px} .numgrid button{min-height:44px} .facts li[role=button],table.ft td[role=button]{min-height:44px;display:inline-flex;align-items:center}
   #toc{position:fixed;left:0;top:0;bottom:0;height:auto;width:min(86vw,320px);z-index:40;transform:translateX(-105%);transition:transform .2s} .app.tocOpen #toc{transform:none}
-  #main{padding:14px 14px 110px} .pageHead h2{font-size:22px} .b,.chip,.modes button{min-height:44px} *:focus-visible{scroll-margin-bottom:110px}
-  .it{grid-template-columns:1fr} .it .no{display:none} .r{grid-template-columns:1fr;gap:4px} .r .lb{width:44px}
+  #main{padding:24px 18px 130px} .pageHead h2{font-size:26px} .it{padding:26px 0 28px} .it h4{font-size:18px} .r.hook p{font-size:16px;padding:14px 16px} .pager .b{border:1px solid var(--line);padding:8px 12px} .b,.chip,.modes button{min-height:44px} *:focus-visible{scroll-margin-bottom:110px}
+  .it{grid-template-columns:1fr} .it .no{display:none} .r{grid-template-columns:1fr;gap:6px} .r .lb{width:auto;padding-top:0}
   .pager{position:fixed;left:0;right:0;bottom:0;margin:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--line);z-index:30} .pager .b{flex:1;max-width:none}
   .opts{grid-template-columns:1fr 1fr}
 }
@@ -195,7 +229,7 @@ table.acc{width:100%;border-collapse:collapse;font-size:14px} table.acc td,table
     const i = METHODS.indexOf(g), prev = METHODS[i-1], next = METHODS[i+1];
     document.body.classList.toggle('hide', hideFacts);
     v.innerHTML = `<div class="pageHead"><div class="path"><span>${esc(g.subject)} › ${esc(g.chapter || '기타')} › ${esc(g.big || '종합')}</span><span>${esc(g.id)}</span>${g.n ? `<span>기출 ${g.n}문항 · ${g.rounds}회차</span>` : ''}</div><h2>${esc(g.title)}</h2>
-      <div class="pageTools"><button class="b sm" type="button" id="bHide" aria-pressed="${hideFacts}">${hideFacts ? '사실 보이기' : '사실 가리고 훅으로 떠올리기'}<kbd class="k">H</kbd></button><button class="b sm ${done[g.id] ? 'done' : ''}" type="button" id="bDone">${done[g.id] ? '✓ 학습 완료' : '학습 완료로 표시'}<kbd class="k">D</kbd></button>${(g.qs && g.qs.length) ? `<button class="b sm primary" type="button" id="bQuizOpen" aria-haspopup="dialog">기출 풀기 (${g.qs.length})<kbd class="k">Q</kbd></button>` : ''}${link3d(g.topic3d)}<button class="b sm" type="button" id="bPrint">인쇄<kbd class="k">P</kbd></button><span class="muted mono" style="font-size:12px">${i+1} / ${METHODS.length} · ← → 묶음 이동 · Q 기출</span></div></div>
+      <div class="pageTools"><button class="b sm" type="button" id="bHide" aria-pressed="${hideFacts}">${hideFacts ? '사실 보이기' : '사실 가리고 훅으로 떠올리기'}<kbd class="k">H</kbd></button><button class="b sm ${done[g.id] ? 'done' : ''}" type="button" id="bDone">${done[g.id] ? '✓ 학습 완료' : '학습 완료로 표시'}<kbd class="k">D</kbd></button>${(g.qs && g.qs.length) ? `<button class="b sm primary" type="button" id="bQuizOpen" aria-haspopup="dialog">기출 풀기 (${g.qs.length})<kbd class="k">Q</kbd></button>` : ''}${link3d(g.topic3d)}<button class="b sm" type="button" id="bPrint">인쇄<kbd class="k">P</kbd></button><span class="muted mono" style="font-size:12px">${i+1} / ${METHODS.length}</span></div></div>
       <ol class="spec">${g.items.map((it, k)=> `<li class="it"><div class="no" aria-hidden="true">${String(k+1).padStart(2,'0')}</div><div><h4>${esc(it.name)}${(g.qs || []).some(q=> q.it === k) ? `<button class="qbadge" type="button" data-qi="${k}" title="이 항목에서 나온 기출만 풀기">기출 ${(g.qs || []).filter(q=> q.it === k).length}</button>` : ''}</h4>
         <div class="r"><span class="lb">사실</span><div>${hideFacts ? '<div class="rh">가려진 칸을 누르면 보입니다</div>' : ''}${factsHtml(it.facts)}</div></div>
         <div class="r hook"><span class="lb">훅</span><p>${esc(it.hook)}</p></div>
