@@ -2,15 +2,22 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A1018">
 <title>산업안전기사 학습실</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Gothic+A1:wght@800&display=swap">
 <style>
-:root{color-scheme:dark;--bg:#0A1018;--panel:#0F1622;--panel2:#182234;--line:#263248;--text:#E8EEF8;--muted:#8C99B0;--dim:#5D6A82;--accent:#7FA6E0;--warn:#E3B54D;--ok:#5CC08A;
+:root{color-scheme:dark;--bg:#0A1018;--panel:#0F1622;--panel2:#182234;--line:#263248;--text:#E8EEF8;--muted:#8C99B0;--dim:#7683A0;--accent:#7FA6E0;--warn:#E3B54D;--ok:#5CC08A;
   --sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic",sans-serif;--mono:"IBM Plex Mono",Consolas,monospace;--display:'Gothic A1',var(--sans)}
 *{box-sizing:border-box}
+
+/* 접근성·터치: 보이는 포커스 링, 44px 터치 타깃, 탭 하이라이트, 움직임 줄이기 */
+:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+button,a,select,input,[role=button]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.mono{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh}
 .wrap{max-width:960px;margin:0 auto;padding:48px 20px 80px}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
@@ -19,7 +26,7 @@ h1{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.03
 .lede{color:var(--muted);margin:0 0 30px;max-width:62ch}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
 .tile{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 26px 22px;position:relative;overflow:hidden;transition:border-color .15s,transform .15s}
-.tile:hover{border-color:var(--warn);transform:translateY(-2px)}
+.tile:hover,.tile:focus-visible{border-color:var(--warn);transform:translateY(-2px)} .tile{transition:border-color .15s,transform .15s}
 .tile .k{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
 .tile h2{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.02em;margin:0 0 8px}
 .tile p{margin:0 0 16px;color:var(--muted);max-width:40ch}
