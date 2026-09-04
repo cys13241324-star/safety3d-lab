@@ -12,7 +12,7 @@
   color-scheme:dark;
   --bg:#0A1018; --panel:rgba(14,20,32,.9); --panel2:#182234;
   --line:#263248; --line-soft:#1B2536;
-  --text:#E8EEF8; --muted:#8C99B0; --dim:#5D6A82;
+  --text:#E8EEF8; --muted:#8C99B0; --dim:#7A88A6;
   --accent:#7FA6E0; --accent-ink:#0B111C;
   --ok:#5CC08A; --ok-soft:rgba(92,192,138,.18);
   --bad:#F07056; --bad-soft:rgba(240,112,86,.18);
@@ -62,7 +62,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
 .rtable td.item{color:var(--text);font-family:var(--sans)}
 .rtable td.cur{color:var(--warn)}
 .rtable td.j{text-align:right;white-space:nowrap} .rtable td.j.ok{color:var(--ok)} .rtable td.j.bad{color:var(--bad)} .rtable td.j.na{color:var(--dim)}
-.hbtn{display:flex;flex-direction:column;gap:6px} button.b.sm{font-size:13px;padding:4px 9px}
+.hbtn{display:flex;flex-direction:column;gap:6px} .b.sm{font-size:13px;padding:4px 9px}
 /* 3D 창 위: 같은 과목의 다른 규정 칩 */
 #tabs{position:fixed;left:412px;right:16px;top:16px;display:flex;gap:6px;overflow-x:auto;padding:4px 2px;z-index:3;scrollbar-width:thin}
 #tabs button{flex:0 0 auto;font:inherit;font-size:13.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(8,13,22,.8);color:var(--muted);cursor:pointer;backdrop-filter:blur(8px);white-space:nowrap}
@@ -200,10 +200,10 @@ h2{font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;text-transform:
 .pill.ok{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)} .pill.bad{color:var(--bad);border-color:var(--bad);background:var(--bad-soft)} .pill.na{color:var(--dim);border-color:var(--line)}
 .rules li.ok{border-color:rgba(92,192,138,.35)} .rules li.bad{border-color:rgba(240,112,86,.45)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
-button.b{font:inherit;font-size:14.5px;padding:7px 12px;border-radius:4px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
-button.b:hover{border-color:var(--accent)} button.b:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-button.b.primary{border-color:var(--warn);color:var(--warn);font-weight:500}
-button.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
+.b{font:inherit;font-size:14.5px;padding:7px 12px;border-radius:4px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer} a.b{text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.b:hover{border-color:var(--accent)} .b:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.b.primary{border-color:var(--warn);color:var(--warn);font-weight:500}
+.b[aria-pressed="true"]{background:#24314A;border-color:var(--accent)}
 #result{margin:8px 0 0;font-size:15px;min-height:1.4em}
 #result.ok{color:var(--ok)} #result.bad{color:var(--bad)}
 .q{font-size:15px}
@@ -239,7 +239,7 @@ h2::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50
 #tabs button[aria-pressed="true"]{background:var(--acc,var(--accent));color:#0B1220;border-color:var(--acc,var(--accent));font-weight:600}
 #dock .card{position:relative;padding-top:14px} #dock .card::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;border-radius:12px 12px 0 0;background:repeating-linear-gradient(135deg,#E3B54D 0 12px,#141A24 12px 24px)}
 #dock .dockHd .cap{color:var(--acc,var(--accent));border-color:var(--acc,var(--accent))}
-button.b{border-radius:6px} button.b.primary,#dock .act .b.primary{background:var(--warn);color:#1A1200;border-color:var(--warn);font-weight:600} button.b.primary:hover,#dock .act .b.primary:hover{background:#F2C660;border-color:#F2C660}
+.b{border-radius:6px} .b.primary,#dock .act .b.primary{background:var(--warn);color:#1A1200;border-color:var(--warn);font-weight:600} .b.primary:hover,#dock .act .b.primary:hover{background:#F2C660;border-color:#F2C660}
 .tutCard h3{font-family:'Gothic A1',var(--sans);font-weight:800;font-size:21px}
 /* 조정 슬라이더: 굵은 트랙 + 큰 손잡이 (모바일에서 잘 보이게), −/＋ 한 눈금 버튼 */
 .slider input[type=range]{-webkit-appearance:none;appearance:none;height:34px;background:transparent;margin:0}
@@ -260,7 +260,7 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   #navBar{left:8px;right:8px;top:8px;max-width:none}
   #tabs{top:56px;left:8px;right:8px;padding:4px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none} #tabs::-webkit-scrollbar{display:none}
   #tabs > :first-child{margin-left:0} #tabs > :last-child{margin-right:0} #tabs button{scroll-snap-align:start}
-  #dock{left:8px;right:8px;bottom:46px} #dock .card{padding:8px 10px 8px;width:100%;box-sizing:border-box}
+  #dock{left:8px;right:8px;bottom:54px} #dock .card{padding:8px 10px 8px;width:100%;box-sizing:border-box}
   /* 변수 칩은 가로 스크롤 대신 3열 격자로 전부 보이게 (작아도 한눈에) */
   #dock .ctl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;padding-bottom:0}
   #dock .chip .cb{width:100%;min-width:0;padding:5px 8px;box-sizing:border-box} #dock .chip .cb span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%} #dock .chip .cb output{font-size:13.5px}
@@ -273,9 +273,10 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   .subjCard{padding:14px 14px} .subjCard .name{font-size:18px} .subjCard .stamp{font-size:28px;right:10px;top:6px}
   .lawRow{grid-template-columns:1fr;gap:8px;padding:12px 14px} .lawRow .name{font-size:17px} .lawRow .law{font-size:12.5px;line-height:1.4} .lawRow .sum{font-size:14px}
   .lawRow .go{flex-direction:row;align-items:center;justify-content:space-between;white-space:normal;gap:10px;padding-top:8px;border-top:1px solid var(--line-soft);font-size:13.5px} .lawRow .go small{font-size:12.5px;text-align:right}
-  #panelHandle{display:flex!important}
-  #panel{left:0;right:0;top:auto;bottom:40px;width:auto;max-height:62vh;border-radius:10px 10px 0 0;border-bottom:0;padding:12px 14px;transform:translateY(110%);transition:transform .25s ease;z-index:6}
-  body.panelOpen #panel{transform:translateY(0)}
+  #panelHandle{display:flex!important;height:48px}
+  #tabs button,#navBar .b,#dock .act .b,#viewBox .b,.b.sm,#tut .b,#blindCard .b,.screen .b{min-height:44px} #dock .chip .cb{min-height:44px}
+  #panel{left:0;right:0;top:auto;bottom:48px;width:auto;max-height:62vh;border-radius:10px 10px 0 0;border-bottom:0;padding:12px 14px;transform:translateY(110%);visibility:hidden;transition:transform .25s ease,visibility 0s .25s;z-index:6}
+  body.panelOpen #panel{transform:translateY(0);visibility:visible;transition:transform .25s ease,visibility 0s}
 }
 #panelHandle.off{display:none!important}
 </style>
@@ -1490,7 +1491,7 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
     el('tabs').innerHTML = s.topics.map(k=>`<button type="button" data-topic="${k}" aria-pressed="${k===S.topic}">${T[k].name}</button>`).join('');
     document.querySelectorAll('[data-topic]').forEach(b=> b.addEventListener('click', ()=>{ S.topic = b.dataset.topic; selectTopic(); }));
   }
-  function selectTopic(){ S.reveal = false; if(BLIND){ BLIND = false; document.body.classList.remove('blind'); el('bBlind').setAttribute('aria-pressed', 'false'); el('bBlind').textContent = '빈칸 채우기'; el('bScore').hidden = true; el('dockNote').hidden = true; el('blindCard').hidden = true; } endTest(); buildTabs(); buildTopicUI(); refresh(); goView('wide'); autoT = 0; }
+  function selectTopic(){ setTimeout(()=>{ const tb = document.querySelector('#tabs [aria-selected="true"], #tabs .on'); if(tb && tb.scrollIntoView) tb.scrollIntoView({block: 'nearest', inline: 'center'}); }, 0); S.reveal = false; if(BLIND){ BLIND = false; document.body.classList.remove('blind'); el('bBlind').setAttribute('aria-pressed', 'false'); el('bBlind').textContent = '빈칸 채우기'; el('bScore').hidden = true; el('dockNote').hidden = true; el('blindCard').hidden = true; } endTest(); buildTabs(); buildTopicUI(); refresh(); goView('wide'); autoT = 0; }
   function buildTopicUI(){
     const t = S.topic, def = T[t];
     el('lawRoot').innerHTML = LAW[t].root;
@@ -1552,13 +1553,19 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   let tutI = 0;
   const TUT_KEY = 'safety3d_tut_v1';
   function tutShow(i){ tutI = i; const s = TUT[i]; el('tutStep').textContent = `${i+1} / ${TUT.length}`; el('tutTitle').textContent = s.t; el('tutBody').textContent = s.b; el('tutPic').innerHTML = s.pic;
-    el('tutDots').innerHTML = TUT.map((_, k)=> `<i class="${k===i?'on':''}"></i>`).join(''); el('tutNext').textContent = i === TUT.length - 1 ? '시작하기' : '다음'; el('tut').hidden = false; }
-  function tutClose(){ el('tut').hidden = true; try{ localStorage.setItem(TUT_KEY, '1'); }catch(e){} }
+    el('tutDots').innerHTML = TUT.map((_, k)=> `<i class="${k===i?'on':''}"></i>`).join(''); el('tutNext').textContent = i === TUT.length - 1 ? '시작하기' : '다음'; if(el('tut').hidden){ tutOpener = document.activeElement; } el('tut').hidden = false; el('tutNext').focus(); }
+  let tutOpener = null;
+  function tutClose(){ el('tut').hidden = true; try{ localStorage.setItem(TUT_KEY, '1'); }catch(e){} const back = (tutOpener && tutOpener.isConnected && tutOpener !== document.body) ? tutOpener : el('bTut'); if(back && back.offsetParent) back.focus(); }
+  // 대화상자 안에서 Tab 은 대화상자 안을 돈다
+  function trapTab(e, root){ if(e.key !== 'Tab') return; const f = [...root.querySelectorAll('button,[href],input,select,[tabindex]:not([tabindex="-1"])')].filter(x=> x.offsetParent); if(!f.length) return; const i = f.indexOf(document.activeElement); if(e.shiftKey && (i <= 0)){ e.preventDefault(); f[f.length - 1].focus(); } else if(!e.shiftKey && (i === f.length - 1 || i < 0)){ e.preventDefault(); f[0].focus(); } }
   el('tutNext').addEventListener('click', ()=>{ if(tutI >= TUT.length - 1) tutClose(); else tutShow(tutI + 1); });
   el('tutSkip').addEventListener('click', tutClose);
   el('bTut').addEventListener('click', ()=> tutShow(0));
   el('tut').addEventListener('click', e=>{ if(e.target === el('tut')) tutClose(); });
-  document.addEventListener('keydown', e=>{ if(el('tut').hidden) return; if(e.key === 'Escape') tutClose(); if(e.key === 'ArrowRight' || e.key === 'Enter') el('tutNext').click(); });
+  document.addEventListener('keydown', e=>{ if(el('tut').hidden) return; trapTab(e, el('tut')); if(e.key === 'Escape') tutClose(); else if(e.key === 'ArrowRight') el('tutNext').click(); else if(e.key === 'Enter' && !(e.target.closest && e.target.closest('#tut button'))) el('tutNext').click(); });
+  document.addEventListener('keydown', e=>{ if(el('blindCard').hidden) return; trapTab(e, el('blindCard')); if(e.key === 'Escape') el('blindClose').click(); });
+  // 과목·목록 화면이 덮고 있을 때 아래 HUD 는 탭 순서에서 제외 (inert)
+  { const hud = ['navBar','tabs','dock','viewBox','panel','panelHandle'].map(id=> el(id)).filter(Boolean); const sync = ()=>{ const covered = !home.hidden || !list.hidden; hud.forEach(h=> h.inert = covered); }; [home, list].forEach(s=> new MutationObserver(sync).observe(s, {attributes: true, attributeFilter: ['hidden']})); sync(); }
   // 주소에 ?tut 또는 #tut 이 있으면 본 적이 있어도 튜토리얼을 띄운다
   { let seen = false; try{ seen = !!localStorage.getItem(TUT_KEY); }catch(e){} const force = /[?&#]tut\b/.test(location.search + location.hash); if(!seen || force) tutShow(0); }
   /* ---------- 빈칸(블라인드) 모드: 기준값을 감추고 슬라이더를 규정값에 맞혀 채점 ---------- */
@@ -1569,7 +1576,7 @@ body.blind #bBlind{background:var(--warn);color:#1A1200;border-color:var(--warn)
   function blindEnter(){ BLIND = true; document.body.classList.add('blind'); el('bBlind').setAttribute('aria-pressed', 'true'); el('bBlind').textContent = '빈칸 채우기 끝'; el('bScore').hidden = false; el('dockNote').hidden = false; blindScramble(); }
   function blindExit(){ BLIND = false; document.body.classList.remove('blind'); el('bBlind').setAttribute('aria-pressed', 'false'); el('bBlind').textContent = '빈칸 채우기'; el('bScore').hidden = true; el('dockNote').hidden = true; el('blindCard').hidden = true; const t = S.topic; S[t] = Object.assign({}, DEFAULTS[t]); endTest(); buildTopicUI(); refresh(); setResult('빈칸 모드를 끝내고 규정값으로 돌아왔습니다.', true); }
   function blindScore(){ const t = S.topic, p = S[t]; let n = 0; const rows = blindSliders().map(([k,label,unit,,,step])=>{ const lim = LIM[t][k](p), v = p[k]; const hit = lim.lo !== undefined ? (v >= lim.lo - 1e-9 && v <= lim.hi + 1e-9) : Math.abs(v - lim.v) <= step*1.0001; if(hit) n++; return `<tr><td>${label.replace(/\s*\(.*?\)/g, '')}</td><td class="${hit?'ok':'bad'}">${v} ${unit}</td><td>${lim.t}</td><td class="${hit?'ok':'bad'}">${hit?'정답':'오답'}</td></tr>`; });
-    el('blindTitle').textContent = `${T[t].name} · 기준값 맞히기`; el('blindBody').innerHTML = `<table><thead><tr><th>항목</th><th>내 답</th><th>규정</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table>`; el('blindScore').textContent = `${n} / ${rows.length}`; el('blindScore').style.color = n === rows.length ? 'var(--ok)' : 'var(--warn)'; el('blindCard').hidden = false; }
+    el('blindTitle').textContent = `${T[t].name} · 기준값 맞히기`; el('blindBody').innerHTML = `<table><thead><tr><th>항목</th><th>내 답</th><th>규정</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table>`; el('blindScore').textContent = `${n} / ${rows.length}`; el('blindScore').style.color = n === rows.length ? 'var(--ok)' : 'var(--warn)'; el('blindCard').hidden = false; el('blindClose').focus(); }
   el('bBlind').addEventListener('click', ()=>{ if(BLIND) blindExit(); else blindEnter(); });
   el('bScore').addEventListener('click', blindScore);
   el('blindClose').addEventListener('click', ()=> el('blindCard').hidden = true);

@@ -34,7 +34,7 @@ h1{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.03
 .tile .go{display:inline-block;font-weight:600;color:var(--warn)}
 .tile.lab::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(127,166,224,.18),transparent 70%)}
 .tile.memo::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(227,181,77,.18),transparent 70%)}
-.viz{height:84px;margin:0 0 18px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);position:relative;overflow:hidden}
+.viz{height:84px;margin:0 0 18px;pointer-events:none;border-radius:8px;border:1px solid var(--line);background:var(--panel2);position:relative;overflow:hidden}
 .viz.lab{background:linear-gradient(180deg,#131C2C 0%,#0E1522 60%,#1B2436 60%,#1B2436 100%)}
 .viz.lab i{position:absolute;bottom:34px;width:3px;background:#E3B54D;border-radius:2px} .viz.lab i:nth-child(1){left:18%;height:26px} .viz.lab i:nth-child(2){left:24%;height:26px} .viz.lab i:nth-child(3){left:30%;height:26px} .viz.lab i:nth-child(4){left:18%;width:12.6%;height:3px;bottom:56px} .viz.lab i:nth-child(5){left:18%;width:12.6%;height:3px;bottom:46px}
 .viz.lab em{position:absolute;bottom:34px;left:52%;width:14px;height:24px;border-radius:7px 7px 3px 3px;background:#5B8DEF} .viz.lab em::before{content:'';position:absolute;top:-10px;left:2px;width:10px;height:10px;border-radius:50%;background:#F1C9A5}
@@ -55,26 +55,26 @@ footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
   <div class="hazard" aria-hidden="true"></div>
   <p class="lede">CBT 24회차 2,880문항에서 뽑아 만든 두 가지 공부 도구입니다. 규정 수치는 3D 현장에서 직접 바꿔 보며 몸으로 익히고, 외워야 할 것은 재밌는 훅으로 붙들어 둡니다.</p>
   <div class="grid">
-    <a class="tile lab" href="lab.html">
+    <a class="tile lab" href="lab.html" aria-label="3D 규격 실습장 들어가기">
       <div class="k">01 · 규정 수치</div>
       <h2>3D 규격 실습장</h2>
-      <div class="viz lab"><i></i><i></i><i></i><i></i><i></i><em></em><s></s></div>
+      <div class="viz lab" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><em></em><s></s></div>
       <p>안전난간 높이, 굴착 기울기, 충전전로 이격거리 같은 수치를 슬라이더로 바꾸면 현장이 바뀌고 안전관리자가 판정합니다. 빈칸 채우기로 값을 스스로 맞춰 봅니다.</p>
       <div class="nums"><div><b>34</b>주제</div><div><b>6</b>과목</div><div><b>5</b>문항씩 기출</div></div>
       <span class="go">들어가기 →</span>
     </a>
-    <a class="tile memo" href="memo.html">
+    <a class="tile memo" href="memo.html" aria-label="암기 은행 들어가기">
       <div class="k">02 · 암기</div>
       <h2>암기 은행</h2>
-      <div class="viz memo"><span>모래 1:1.8</span><span>경암 1:0.5</span><span class="h"><b>훅</b>모일팔·흙일이·연일영·경영오</span><span>30 mA</span><span>0.03초</span></div>
+      <div class="viz memo" aria-hidden="true"><span>모래 1:1.8</span><span>경암 1:0.5</span><span class="h"><b>훅</b>모일팔·흙일이·연일영·경영오</span><span>30 mA</span><span>0.03초</span></div>
       <p>빈출 묶음마다 사실·훅·왜·구분 네 줄로 정리한 노트입니다. 목차로 과목과 챕터를 넘기고, 사실을 가린 채 훅만 보고 떠올리면 자가 시험이 됩니다. 빈칸 카드와 숫자 색인도 들어 있습니다.</p>
       <div class="nums"><div><b>165</b>묶음</div><div><b>613</b>암기법</div><div><b>282</b>빈칸 카드</div></div>
       <span class="go">들어가기 →</span>
     </a>
-    <a class="tile palace" href="palace.html">
+    <a class="tile palace" href="palace.html" aria-label="암기 순찰로 들어가기">
       <div class="k">03 · 장소 기억</div>
       <h2>암기 순찰로</h2>
-      <div class="viz palace"><i class="z" style="left:6%;background:rgba(127,166,224,.25)"></i><i class="z" style="left:36%;background:rgba(240,163,91,.25)"></i><i class="z" style="left:66%;background:rgba(92,192,138,.25)"></i><i class="p" style="left:14%"></i><i class="p" style="left:24%"></i><i class="p on" style="left:44%"></i><i class="p" style="left:54%"></i><i class="p" style="left:74%"></i><i class="p" style="left:84%"></i><em></em></div>
+      <div class="viz palace" aria-hidden="true"><i class="z" style="left:6%;background:rgba(127,166,224,.25)"></i><i class="z" style="left:36%;background:rgba(240,163,91,.25)"></i><i class="z" style="left:66%;background:rgba(92,192,138,.25)"></i><i class="p" style="left:14%"></i><i class="p" style="left:24%"></i><i class="p on" style="left:44%"></i><i class="p" style="left:54%"></i><i class="p" style="left:74%"></i><i class="p" style="left:84%"></i><em></em></div>
       <p>같은 165묶음을 3D 현장 순찰 경로 위 정거장으로 세웠습니다. 구역 여섯을 걸으며 안전관리자가 훅을 말하고, 표지판에 사실이 붙습니다. 어디서 들었는지와 함께 외우는 기억의 궁전입니다.</p>
       <div class="nums"><div><b>165</b>정거장</div><div><b>6</b>구역</div><div><b>28</b>종 소품</div></div>
       <span class="go">들어가기 →</span>
