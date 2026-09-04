@@ -188,12 +188,12 @@ html{overscroll-behavior-y:contain}
     </nav>
     <span class="sp"></span>
     <button class="b sm bTheme" type="button">어두운 모드</button>
-    <a class="b sm lab" href="palace.html?v=09041832">암기 순찰로 (3D) →</a>
-    <a class="b sm lab" href="lab.html?v=09041832">3D 규격 실습장 →</a>
+    <a class="b sm lab" href="palace.html?v=09041835">암기 순찰로 (3D) →</a>
+    <a class="b sm lab" href="lab.html?v=09041835">3D 규격 실습장 →</a>
   </header>
   <div class="body">
     <div id="tocBack" hidden></div>
-    <aside id="toc" aria-label="목차"><div class="tocHead"><input class="tq" type="search" id="tq" name="q" placeholder="묶음·소주제 검색…" aria-label="묶음·소주제 검색" autocomplete="off" spellcheck="false"><button class="b sm" id="bTocClose" type="button" aria-label="목차 닫기">✕</button></div><div id="tocBody"></div><div class="tocLinks"><button class="b sm bTheme" type="button">어두운 모드</button><a class="b sm" href="palace.html?v=09041832">암기 순찰로 (3D) →</a><a class="b sm" href="lab.html?v=09041832">3D 규격 실습장 →</a></div></aside>
+    <aside id="toc" aria-label="목차"><div class="tocHead"><input class="tq" type="search" id="tq" name="q" placeholder="묶음·소주제 검색…" aria-label="묶음·소주제 검색" autocomplete="off" spellcheck="false"><button class="b sm" id="bTocClose" type="button" aria-label="목차 닫기">✕</button></div><div id="tocBody"></div><div class="tocLinks"><button class="b sm bTheme" type="button">어두운 모드</button><a class="b sm" href="palace.html?v=09041835">암기 순찰로 (3D) →</a><a class="b sm" href="lab.html?v=09041835">3D 규격 실습장 →</a></div></aside>
     <main id="main"><div class="inner">
       <div id="chipsWrap" class="chips" hidden></div>
       <section id="v_note" role="tabpanel" tabindex="-1"></section>
@@ -209,7 +209,7 @@ html{overscroll-behavior-y:contain}
 (function(){
   let BANK; try{ BANK = JSON.parse(document.getElementById('bank').textContent); }catch(e){ document.body.innerHTML = '<div class="empty" style="padding:60px">데이터를 읽지 못했습니다. 페이지를 새로고침해 주세요.</div>'; return; }
   const el = id => document.getElementById(id);
-  const LAB = 'lab.html?v=09041832', PALACE = 'palace.html?v=09041832';
+  const LAB = 'lab.html?v=09041835', PALACE = 'palace.html?v=09041835';
   const SUBJ_ORDER = ['안전관리론','인간공학 및 시스템안전공학','기계위험방지기술','전기위험방지기술','화학설비위험방지기술','건설안전기술'];
   const SUBJ_SHORT = {'안전관리론':'안전관리론','인간공학 및 시스템안전공학':'인간공학','기계위험방지기술':'기계위험방지','전기위험방지기술':'전기위험방지','화학설비위험방지기술':'화학설비','건설안전기술':'건설안전'};
   const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
