@@ -2807,6 +2807,8 @@ addTopic('const', 'mobscaf', {
     if(s >= 1 && !test.hit){ test.hit = true; test.phase = 'fly'; test.vel = P3(0.8, 0.4, 1.4); test.groundY = 0; test.failTitle = '작업자가 이동식 비계에서 떨어졌습니다'; test.failSub = bad; setResult(bad + ' → 추락…', false); startFall(o); } }
 });
 
+/* 쿵 소리·흙먼지만 (별 없음) — 정상 타격·착지용 */
+function thud(pos, big=false){ yellAt(pos, big ? '쿠웅!' : '쿵!', 'hit', 1.2); for(let i=0;i<8;i++){ const s = new THREE.Mesh(new THREE.SphereGeometry(0.16 + Math.random()*0.12, 7, 6), dustMat.clone()); s.position.copy(pos).add(P3((Math.random()-.5)*0.4, 0.1, (Math.random()-.5)*0.4)); const a = Math.random()*Math.PI*2; s.userData = {v: P3(Math.cos(a)*(1+Math.random()), 0.6+Math.random()*0.8, Math.sin(a)*(1+Math.random())), life: 0.7 + Math.random()*0.3}; scene.add(s); fx.push({kind:'dust', m:s}); } }
 /* ---------- 17. 항타기·항발기 (건설) ---------- */
 const PD_MODE = ['버팀대(스트럿)만으로 세움', '버팀줄(와이어)만으로 세움'];
 addTopic('const', 'pile', {
@@ -2816,7 +2818,7 @@ addTopic('const', 'pile', {
   rules:[['버팀대 또는 버팀줄은 3개 이상', p=> p.n >= 3, p=>`현재 ${p.n}개`],['버팀줄만으로 세울 때는 같은 간격으로 배치', p=> p.mode===0 || p.even===1, p=> p.mode===1 ? ['불균등','같은 간격'][p.even] : '버팀대 방식'],['권상용 와이어로프 안전계수 5 이상', p=> p.sf >= 5, p=>`현재 ${fmt(p.sf)}`],['드럼축과 첫 도르래 축 사이 거리는 드럼폭의 15배 이상', p=> p.dk >= 15, p=>`현재 ${p.dk}배`],['권상 시 드럼에 감김이 2회 이상 남을 것', p=> p.wraps >= 2, p=>`현재 ${p.wraps}회`]],
   lim:{n:p=>({v:3, t:'3개 이상'}), sf:p=>({v:5, t:'5 이상'}), dk:p=>({v:15, t:'15배 이상'}), wraps:p=>({v:2, t:'2회 이상'})},
   law:{root:RULE, art:'제209조(무너짐의 방지) · 제216조(도르래의 부착 등)'}, sum:'버팀 3개 이상·같은 간격 · 와이어로프 안전계수 5 · 도르래 거리 드럼폭 15배 · 감김 2회',
-  yell:{ok:'쿵! 정상 타격', bad:'쓰러진다!'}, mgr:[-5.5, 0, 3.5, Math.atan2(5.5, -3.5)],
+  yell:{ok:'정상 타격!', bad:'쓰러진다!'}, mgr:[-5.5, 0, 3.5, Math.atan2(5.5, -3.5)],
   build(){
     const g = stage('pile'), p = S.pile, H = 11;
     const rig = new THREE.Group(); g.add(rig); X.pile = {rig, H};
@@ -2839,7 +2841,7 @@ addTopic('const', 'pile', {
   idle(dt, T0, free, R, p){ R.hammer.position.y = R.H - 1.2 + 0.15*Math.sin(T0*1.5); },
   step(dt, o, R, p){ const t = test.t; const bad = p.n < 3 ? `버팀 ${p.n}개 < 3개 · 항타기가 쓰러짐` : (p.mode===1 && p.even===0) ? '버팀줄 간격 불균등 · 한쪽으로 쏠려 쓰러짐' : p.sf < 5 ? `안전계수 ${fmt(p.sf)} < 5 · 와이어로프 파단, 해머 낙하` : p.wraps < 2 ? `감김 ${p.wraps}회 < 2회 · 로프 끝이 드럼에서 빠짐` : p.dk < 15 ? `도르래 거리 드럼폭 ${p.dk}배 < 15배 · 로프가 겹쳐 감겨 튐` : null;
     if(t < 1.5){ R.hammer.position.y = R.H - 1.2 - 2.5*Math.min(1, t/1.5); return; }
-    if(!bad){ if(t < 1.7 && !test.hitOnce){ test.hitOnce = true; impact(P3(1.2, 4.2, 0)); R.pileM.position.y -= 0.3; } if(t > 3) done(o, '항타 작업을 안전하게 마쳤습니다', `버팀 ${p.n}개 · 안전계수 ${fmt(p.sf)} · 감김 ${p.wraps}회`, true); return; }
+    if(!bad){ if(t < 1.7 && !test.hitOnce){ test.hitOnce = true; thud(P3(1.2, 0.4, 0)); R.pileM.position.y -= 0.3; } if(t > 3) done(o, '항타 작업을 안전하게 마쳤습니다', `버팀 ${p.n}개 · 안전계수 ${fmt(p.sf)} · 감김 ${p.wraps}회`, true); return; }
     const s = Math.min(1, (t - 1.5)/1.2);
     if(p.sf < 5 || p.wraps < 2 || p.dk < 15){ R.hammer.position.y = Math.max(2.6, R.H - 3.7 - 6*s); if(s >= 1 && !test.hit){ test.hit = true; impact(P3(1.2, 2.6, 0), true); done(o, '해머가 떨어졌습니다', bad, false, bad); } }
     else { R.rig.rotation.z = -0.9*s; R.rig.position.x = 1.2*s; if(s >= 1 && !test.hit){ test.hit = true; impact(P3(-4, 0.5, 0), true); test.phase = 'fly'; test.vel = P3(1.4, 0.5, 0.6); test.groundY = 0; test.failTitle = '항타기가 쓰러졌습니다'; test.failSub = bad; setResult(bad + ' → 전도!', false); startFall(o, '피해!'); } } }
