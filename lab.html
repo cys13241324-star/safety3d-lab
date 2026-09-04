@@ -275,6 +275,14 @@ body.blind #bBlind{background:var(--warn);color:var(--on-accent);border-color:va
 :root[data-theme="light"]{color-scheme:light;--bg:#F4F6FA;--panel:#FFFFFF;--panel2:#EAEEF5;--line:#C6D0DE;--line-soft:#E0E6EF;--text:#14202E;--muted:#4A5568;--dim:#66738A;--accent:#2F5FA8;--accent-ink:#FFFFFF;--ok:#1F6B45;--ok-soft:rgba(31,107,69,.12);--bad:#A8391F;--bad-soft:rgba(168,57,31,.10);--warn:#8F6512;--warn-soft:rgba(143,101,18,.10);--warn-line:rgba(143,101,18,.35);--on-accent:#FFFFFF;--glass:rgba(255,255,255,.93);--tint:rgba(0,0,0,.04);--scrim:rgba(244,246,250,.88);}
 .bTheme{white-space:nowrap} .screenBox .topRow{display:flex;align-items:center;gap:8px;margin-bottom:18px} .screenBox .topRow .sp{flex:1}
 h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
+
+/* ---------- 휴대폰 위험 줄이기 ---------- */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+button,[role=button],.b,.chip,.mi,label,summary{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+canvas{touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+input[type=range]{touch-action:none}
+img{-webkit-touch-callout:none;-webkit-user-drag:none}
+html,body{overscroll-behavior:none}
 </style>
 </head>
 <body>
@@ -2678,6 +2686,7 @@ buildHome();
 })();
 </script>
 <script>(function(){ function cur(){ var a = document.documentElement.getAttribute('data-theme'); return a || 'dark'; } function sync(){ document.querySelectorAll('.bTheme').forEach(function(b){ var d = cur() === 'dark'; b.textContent = d ? '밝은 모드' : '어두운 모드'; b.setAttribute('aria-pressed', d); }); } document.querySelectorAll('.bTheme').forEach(function(b){ b.addEventListener('click', function(){ var t = cur() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try{ localStorage.setItem('safety_theme', t); }catch(e){} sync(); if(window.__onTheme) window.__onTheme(t); }); }); sync(); }());</script>
+<script>(function(){ var isCanvas = function(t){ return t && t.tagName === 'CANVAS'; }; document.addEventListener('contextmenu', function(e){ if(isCanvas(e.target)) e.preventDefault(); }); document.addEventListener('dblclick', function(e){ if(isCanvas(e.target) || (e.target.closest && e.target.closest('button,.b,[role=button]'))) e.preventDefault(); }, {passive:false}); ['gesturestart','gesturechange'].forEach(function(n){ document.addEventListener(n, function(e){ if(isCanvas(e.target)) e.preventDefault(); }, {passive:false}); }); var lastTouch = 0; document.addEventListener('touchend', function(e){ var now = Date.now(); if(now - lastTouch < 320 && e.target.closest && e.target.closest('button,.b,[role=button],canvas') && e.cancelable) e.preventDefault(); lastTouch = now; }, {passive:false}); }());</script>
 
 </body>
 </html>

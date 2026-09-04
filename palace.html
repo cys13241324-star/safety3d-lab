@@ -134,6 +134,14 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
 :root[data-theme="light"]{color-scheme:light;--bg:#F4F6FA;--panel:#FFFFFF;--panel2:#EAEEF5;--line:#C6D0DE;--line-soft:#E0E6EF;--text:#14202E;--muted:#4A5568;--dim:#66738A;--accent:#2F5FA8;--accent-ink:#FFFFFF;--ok:#1F6B45;--ok-soft:rgba(31,107,69,.12);--bad:#A8391F;--bad-soft:rgba(168,57,31,.10);--warn:#8F6512;--warn-soft:rgba(143,101,18,.10);--warn-line:rgba(143,101,18,.35);--on-accent:#FFFFFF;--glass:rgba(255,255,255,.93);--tint:rgba(0,0,0,.04);--scrim:rgba(244,246,250,.88);}
 .bTheme{white-space:nowrap}
 h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
+
+/* ---------- 휴대폰 위험 줄이기 ---------- */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+button,[role=button],.b,.chip,.mi,label,summary{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+canvas{touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+input[type=range]{touch-action:none}
+img{-webkit-touch-callout:none;-webkit-user-drag:none}
+html,body{overscroll-behavior:none}
 </style>
 </head>
 <body>
@@ -273,17 +281,19 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
     g.font = '700 40px "Gothic A1", "IBM Plex Sans KR", sans-serif'; g.fillStyle = '#1A2230'; wrapText(g, g0.title, 348).slice(0, 3).forEach((ln, i)=> g.fillText(ln, 18, 118 + i*50));
     g.fillStyle = '#6B7383'; g.font = '400 20px "IBM Plex Mono", monospace'; g.fillText(`${g0.items.length}항목 · 기출 ${g0.n || '-'}문항`, 18, 236);
     const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
-  const bigC = document.createElement('canvas'); bigC.width = 1024; bigC.height = 683; const bigTex = new THREE.CanvasTexture(bigC); bigTex.encoding = THREE.sRGBEncoding; bigTex.anisotropy = 8;
-  // 표지판: 화면이 좁으면(휴대폰) 글자를 키우고 줄 수를 줄인다 — 표지판 글이 반드시 읽혀야 한다
-  function drawBig(g0, k, quiz){ const g = bigC.getContext('2d'), it = g0.items[k], hex = '#' + SUBJ_HEX[SUBJ.indexOf(g0.subject)].toString(16).padStart(6, '0'); const S = innerWidth < 600 ? 1.45 : 1, FS = Math.round(31*S), LH = Math.round(40*S);
-    g.fillStyle = '#F4F1E6'; g.fillRect(0, 0, 1024, 683); g.fillStyle = hex; g.fillRect(0, 0, 1024, 92);
-    g.fillStyle = '#10161F'; g.font = '700 40px "IBM Plex Mono", monospace'; g.fillText(g0.id, 30, 62); g.font = `700 ${Math.round(44*Math.min(S, 1.2))}px "Gothic A1", "IBM Plex Sans KR", sans-serif`; g.fillText(g0.title.length > 14 ? g0.title.slice(0, 14) + '…' : g0.title, 190, 64);
-    g.fillStyle = '#6B7383'; g.font = '500 26px "IBM Plex Mono", monospace'; g.fillText(`${String(k+1).padStart(2,'0')} / ${String(g0.items.length).padStart(2,'0')}`, 880, 60);
-    g.fillStyle = '#1A2230'; g.font = `700 ${Math.round(40*Math.min(S, 1.25))}px "IBM Plex Sans KR", sans-serif`; g.fillText(it.name.length > 18 ? it.name.slice(0, 18) + '…' : it.name, 30, 152);
-    g.strokeStyle = '#C9C3B3'; g.lineWidth = 2; g.beginPath(); g.moveTo(30, 176); g.lineTo(994, 176); g.stroke();
-    g.font = `500 ${FS}px "IBM Plex Sans KR", sans-serif`; let y = 176 + LH + 8; const facts = quiz ? it.facts.map(maskNums) : it.facts;
-    for(const f of facts){ const lines = wrapText(g, f, 900); if(y + (lines.length - 1)*LH > 650) break; g.fillStyle = '#B4471E'; g.fillRect(30, y - Math.round(FS*0.78), 10, Math.round(FS*0.95)); g.fillStyle = '#1A2230'; lines.forEach((ln, i)=> g.fillText(ln, 56, y + i*LH)); y += lines.length*LH + Math.round(14*S); }
-    if(quiz){ g.fillStyle = '#B4471E'; g.font = '700 26px "IBM Plex Sans KR", sans-serif'; g.fillText('숫자를 떠올려 보세요', 700, 668); }
+  const bigC = document.createElement('canvas'); bigC.width = 2048; bigC.height = 1366; const bigTex = new THREE.CanvasTexture(bigC); bigTex.encoding = THREE.sRGBEncoding; bigTex.anisotropy = 16;
+  // 표지판(2048×1366): 휴대폰은 글자를 더 키우고 줄 수를 줄인다. 규정 숫자는 별색(주황)으로 찍는다
+  const NUMTOK = /(\d+(?:[.,]\d+)?(?:\s*(?:mm|cm|km\/h|km|m\/s|m\/min|㎡|㎥|㎜|㎝|m|kgf|kg|㎏|톤|t|N|kN|kPa|MPa|lux|dB|℃|°|도|%|ppm|kV|V|A|mA|kW|Ω|Hz|ms|초|분|시간|일|주|개월|년|명|인|회|배|개|단|층|세|점))?)(?![A-Za-z가-힣])/g;
+  function drawLineColored(g, line, x, y, font, boldFont, base, hi){ g.font = font; let cx = x; let last = 0; line.replace(NUMTOK, (m, _1, off)=>{ const pre = line.slice(last, off); g.font = font; g.fillStyle = base; g.fillText(pre, cx, y); cx += g.measureText(pre).width; g.font = boldFont; g.fillStyle = hi; g.fillText(m, cx, y); cx += g.measureText(m).width; last = off + m.length; return m; }); const rest = line.slice(last); g.font = font; g.fillStyle = base; g.fillText(rest, cx, y); }
+  function drawBig(g0, k, quiz){ const g = bigC.getContext('2d'), it = g0.items[k], hex = '#' + SUBJ_HEX[SUBJ.indexOf(g0.subject)].toString(16).padStart(6, '0'); const mobile = innerWidth < 600; const S = mobile ? 1.75 : 1.15; const FS = Math.round(62*S), LH = Math.round(80*S), W = 2048, H = 1366;
+    g.fillStyle = '#F4F1E6'; g.fillRect(0, 0, W, H); g.fillStyle = hex; g.fillRect(0, 0, W, 184);
+    g.fillStyle = '#10161F'; g.font = '700 80px "IBM Plex Mono", monospace'; g.fillText(g0.id, 60, 124); g.font = `800 ${Math.round(88*Math.min(S, 1.15))}px "Gothic A1", "IBM Plex Sans KR", sans-serif`; g.fillText(g0.title.length > 14 ? g0.title.slice(0, 14) + '…' : g0.title, 380, 128);
+    g.fillStyle = '#6B7383'; g.font = '500 52px "IBM Plex Mono", monospace'; g.fillText(`${String(k+1).padStart(2,'0')} / ${String(g0.items.length).padStart(2,'0')}`, 1760, 120);
+    g.fillStyle = '#1A2230'; g.font = `700 ${Math.round(80*Math.min(S, 1.3))}px "IBM Plex Sans KR", sans-serif`; g.fillText(it.name.length > 18 ? it.name.slice(0, 18) + '…' : it.name, 60, 304);
+    g.strokeStyle = '#C9C3B3'; g.lineWidth = 4; g.beginPath(); g.moveTo(60, 352); g.lineTo(1988, 352); g.stroke();
+    const font = `500 ${FS}px "IBM Plex Sans KR", sans-serif`, bold = `700 ${FS}px "IBM Plex Sans KR", sans-serif`; g.font = font; let y = 352 + LH + 16; const facts = (quiz ? it.facts.map(maskNums) : it.facts).slice(0, mobile ? 4 : 6);
+    for(const f of facts){ const lines = wrapText(g, f, 1820); if(y + (lines.length - 1)*LH > 1300) break; g.fillStyle = '#B4471E'; g.fillRect(60, y - Math.round(FS*0.78), 20, Math.round(FS*0.95)); lines.forEach((ln, i)=> drawLineColored(g, ln, 112, y + i*LH, font, bold, '#1A2230', quiz ? '#1A2230' : '#B4471E')); y += lines.length*LH + Math.round(28*S); }
+    if(quiz){ g.fillStyle = '#B4471E'; g.font = '700 52px "IBM Plex Sans KR", sans-serif'; g.fillText('숫자를 떠올려 보세요', 1400, 1336); }
     bigTex.needsUpdate = true; }
 
   /* ---------- 배치: 구역 6 · 정거장 165 ---------- */
@@ -359,6 +369,7 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
     tunnel(p){ const arch = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.18, 8, 24, Math.PI), M.concrete); arch.position.y = 0.6; arch.rotation.y = 0; p.add(arch); box(3.6, 0.3, 0.6, M.rock, p, 0, 0.15, -0.6); [-1.5, 1.5].forEach(x=> box(0.36, 0.6, 0.36, M.concrete, p, x, 0.3, 0)); },
     rubble(p){ for(let i=0;i<9;i++){ const a = i*2.3; box(0.5 + (i%3)*0.2, 0.3, 0.4, i%2 ? M.concrete : M.rock, p, Math.cos(a)*0.8, 0.15 + (i%3)*0.28, Math.sin(a)*0.6).rotation.y = a; } cyl(0.04, 0.04, 2.2, M.yellow, p, 1.3, 1.1, 0.8); },
     office(p){ box(2.4, 0.08, 1.2, M.wood, p, 0, 0.9, 0); [-1.1, 1.1].forEach(x=> [-0.5, 0.5].forEach(z=> box(0.08, 0.9, 0.08, M.dark, p, x, 0.45, z))); box(0.6, 0.02, 0.8, M.paper, p, -0.6, 0.95, 0); box(0.6, 0.02, 0.8, M.paper, p, 0.4, 0.96, 0.1).rotation.y = 0.2; box(1.8, 1.2, 0.05, M.white, p, 0, 1.9, -0.9); [-0.8, 0.8].forEach(x=> cyl(0.03, 0.03, 2.5, M.post, p, x, 1.25, -0.9, 6)); box(1.9, 0.06, 0.08, M.dark, p, 0, 1.28, -0.86); },
+    gangway(p){ box(3.2, 1.6, 1.2, M.dark, p, 1.4, 0.8, -1.2); box(3.2, 0.12, 1.3, M.steel, p, 1.4, 1.66, -1.2); const a = P3(-1.6, 0.05, 0.9), b = P3(0.9, 1.72, -0.6); [-0.35, 0.35].forEach(o=>{ const d = b.clone().sub(a).normalize(); const side = P3(-d.z, 0, d.x).multiplyScalar(o); tube(a.clone().add(side), b.clone().add(side), 0.04, M.steel, p); tube(a.clone().add(side).add(P3(0, 0.9, 0)), b.clone().add(side).add(P3(0, 0.9, 0)), 0.03, M.yellow, p); tube(a.clone().add(side).add(P3(0, 0.45, 0)), b.clone().add(side).add(P3(0, 0.45, 0)), 0.025, M.yellow, p); }); for(let i=0;i<=8;i++){ const t2 = i/8; const c = a.clone().lerp(b, t2); box(0.8, 0.04, 0.28, M.wood, p, c.x, c.y + 0.02, c.z).rotation.y = Math.atan2(b.x - a.x, b.z - a.z); } for(let i=0;i<=8;i++){ const t2 = i/8; const c = a.clone().lerp(b, t2); [-0.35, 0.35].forEach(o=>{ const d = b.clone().sub(a).normalize(); const side = P3(-d.z, 0, d.x).multiplyScalar(o); tube(c.clone().add(side), c.clone().add(side).add(P3(0, 0.9, 0)), 0.02, M.yellow, p); }); } const net = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.4), netMat); net.position.set(-0.3, 0.55, 0.2); net.rotation.x = -Math.PI/2 + 0.55; net.rotation.z = 0.5; p.add(net); },
     cones(p){ [-1, 0, 1].forEach(x=>{ cyl(0.05, 0.28, 0.7, M.red, p, x, 0.35, 0); cyl(0.3, 0.3, 0.04, M.dark, p, x, 0.02, 0); }); cyl(0.4, 0.4, 0.9, M.blue, p, 1.6, 0.45, -0.6); },
     signs(p){ cyl(0.04, 0.04, 2.2, M.post, p, 0, 1.1, 0); const c1 = new THREE.Mesh(new THREE.CircleGeometry(0.5, 24), M.red); c1.position.set(-0.7, 1.9, 0.05); p.add(c1); const tri = new THREE.Mesh(new THREE.CircleGeometry(0.55, 3), M.yellow); tri.position.set(0.7, 1.9, 0.05); tri.rotation.z = Math.PI/2; p.add(tri); const sq = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), M.blue); sq.position.set(0, 1.0, 0.05); p.add(sq); },
     ppe(p){ box(2.0, 0.06, 0.8, M.wood, p, 0, 1.2, 0); box(2.0, 0.06, 0.8, M.wood, p, 0, 0.6, 0); [-0.9, 0.9].forEach(x=> box(0.06, 1.5, 0.8, M.wood, p, x, 0.75, 0)); const h1 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 8, 0, Math.PI*2, 0, Math.PI/2), M.yellow); h1.position.set(-0.5, 1.23, 0); p.add(h1); const h2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 8, 0, Math.PI*2, 0, Math.PI/2), M.white); h2.position.set(0.1, 1.23, 0); p.add(h2); cyl(0.12, 0.12, 0.3, M.dark, p, 0.6, 1.38, 0); box(0.35, 0.25, 0.25, M.green, p, -0.5, 0.75, 0); box(0.3, 0.3, 0.3, M.dark, p, 0.3, 0.78, 0); },
@@ -378,7 +389,7 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
   };
   const PROP_RULES = [
     [/굴착|기울기|지반|토질|흙막이|히빙|보일링|비탈/, 'soil'], [/비계|띠장|장선|벽이음|말비계|달비계/, 'scaffold'], [/난간|추락|안전대|발끝막이/, 'rail'], [/사다리|통로|계단|경사로/, 'ladder'],
-    [/방망|방지망|낙하|투하/, 'net'], [/동바리|거푸집|콘크리트|타설|측압/, 'shore'], [/양중|크레인|와이어|리프트|곤돌라|호이스트|달기/, 'hoist'], [/철골|용접|볼트|앵커/, 'steelframe'],
+    [/선박|승강설비|현문|갱웨이/, 'gangway'], [/방망|방지망|낙하|투하/, 'net'], [/동바리|거푸집|콘크리트|타설|측압/, 'shore'], [/양중|크레인|와이어|리프트|곤돌라|호이스트|달기/, 'hoist'], [/철골|용접|볼트|앵커/, 'steelframe'],
     [/건설기계|차량계|굴착기|불도저|지게차|항타|운반/, 'machine'], [/터널|발파|잠함|우물통/, 'tunnel'], [/해체|붕괴|폭발|파괴/, 'rubble'], [/관리비|계획서|계획|개요|설계|도급|입찰/, 'office'],
     [/표지|색채|안전보건표지/, 'signs'], [/보호구|안전모|마스크|장갑|보안경/, 'ppe'], [/VDT|영상표시|작업대|의자|디스플레이|시각|청각|표시장치|조종/, 'vdt'], [/소음|진동|청력/, 'noise'], [/조명|조도|채광/, 'lamp'],
     [/프레스|전단기|양수|광전자/, 'press'], [/롤러|급정지|물림/, 'roller'], [/연삭|숫돌|덮개|절삭|선반|드릴|둥근톱/, 'grinder'], [/보일러|압력용기|압력방출|공기압축/, 'boiler'],
@@ -419,7 +430,7 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
     manager.userData.head.getWorldPosition(tmpV); tmpV.y += 0.42; tmpV.project(camera); if(tmpV.z > 1){ bubble.style.display = 'none'; return; } bubble.style.display = ''; const bw = bubble._w || bubble.offsetWidth, bh = bubble._h || bubble.offsetHeight, x = clamp((tmpV.x + 1)/2*innerWidth, bw/2 + 8, innerWidth - bw/2 - 8), y = (1 - tmpV.y)/2*innerHeight; bubble.style.transform = `translate(${(x - bw/2).toFixed(1)}px, ${(y - bh - 10).toFixed(1)}px)`; }
 
   /* ---------- 카메라: 정거장 둘레 궤도 + 이동 트윈 ---------- */
-  const cam = {target: P3(0, 1.3, 0), az: -0.38, el: 0.34, dist: 10.5, fromT: null, toT: null, t: 1, drag: null};
+  const cam = {target: P3(0, 1.3, 0), az: -0.1, el: 0.26, dist: 10.5, fromT: null, toT: null, t: 1, drag: null};
   function camPos(){ return P3(cam.target.x + cam.dist*Math.cos(cam.el)*Math.sin(cam.az), cam.target.y + cam.dist*Math.sin(cam.el), cam.target.z + cam.dist*Math.cos(cam.el)*Math.cos(cam.az)); }
   function applyCamera(){ camera.position.copy(camPos()); camera.lookAt(cam.target); }
   const dom = renderer.domElement;
@@ -437,7 +448,7 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
   function goStation(i, keepItem){ i = clamp(i, 0, stations.length - 1); const prev = stations[cur]; if(prev && prev.boardMat.map === bigTex){ prev.boardMat.map = prev.titleTex; prev.boardMat.needsUpdate = true; }
     cur = i; if(!keepItem) item = 0; pq = null; const s = stations[cur]; history.replaceState(null, '', '#g=' + s.g.id);
     const portrait = innerHeight > innerWidth;
-    cam.fromT = cam.target.clone(); cam.toT = s.pos.clone().add(portrait ? P3(0.8, 2.1, -0.9) : P3(0.2, 1.4, -0.4)); cam.t = 0; cam.az = portrait ? 0.02 : -0.38; cam.el = portrait ? 0.16 : 0.34; cam.dist = portrait ? 10.5 : Math.min(cam.dist, 12);
+    cam.fromT = cam.target.clone(); cam.toT = s.pos.clone().add(portrait ? P3(1.0, 2.0, -1.0) : P3(0.4, 1.6, -0.6)); cam.t = 0; cam.az = portrait ? 0 : -0.1; cam.el = portrait ? 0.1 : 0.26; cam.dist = portrait ? 11.4 : Math.min(cam.dist, 11);
     sun.target.position.copy(s.pos); sun.position.copy(s.pos).add(P3(20, 40, 30)); spot.position.copy(s.pos).add(P3(-0.5, 4.5, 3.5));
     // 관리자: 앞 정거장 쪽에서 걸어 들어온다
     mgr.from = manager.position.clone(); if(mgr.from.distanceTo(s.pos) > 30) mgr.from = s.pos.clone().add(P3(-4, 0, 3.5)); mgr.to = s.pos.clone().add(portrait ? P3(-0.9, 0.14, 2.6) : P3(-3.9, 0.14, 1.1)); mgr.walkT = 0; if(bubble){ bubble.remove(); bubble = null; }
@@ -625,6 +636,7 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
 })();
 </script>
 <script>(function(){ function cur(){ var a = document.documentElement.getAttribute('data-theme'); return a || 'dark'; } function sync(){ document.querySelectorAll('.bTheme').forEach(function(b){ var d = cur() === 'dark'; b.textContent = d ? '밝은 모드' : '어두운 모드'; b.setAttribute('aria-pressed', d); }); } document.querySelectorAll('.bTheme').forEach(function(b){ b.addEventListener('click', function(){ var t = cur() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try{ localStorage.setItem('safety_theme', t); }catch(e){} sync(); if(window.__onTheme) window.__onTheme(t); }); }); sync(); }());</script>
+<script>(function(){ var isCanvas = function(t){ return t && t.tagName === 'CANVAS'; }; document.addEventListener('contextmenu', function(e){ if(isCanvas(e.target)) e.preventDefault(); }); document.addEventListener('dblclick', function(e){ if(isCanvas(e.target) || (e.target.closest && e.target.closest('button,.b,[role=button]'))) e.preventDefault(); }, {passive:false}); ['gesturestart','gesturechange'].forEach(function(n){ document.addEventListener(n, function(e){ if(isCanvas(e.target)) e.preventDefault(); }, {passive:false}); }); var lastTouch = 0; document.addEventListener('touchend', function(e){ var now = Date.now(); if(now - lastTouch < 320 && e.target.closest && e.target.closest('button,.b,[role=button],canvas') && e.cancelable) e.preventDefault(); lastTouch = now; }, {passive:false}); }());</script>
 
 </body>
 </html>
