@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0A1018">
-<title>산업안전기사 암기 순찰로</title>
+<title>산업안전기사 순찰 게임</title>
 <script>(function(){try{var t=localStorage.getItem('safety_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -539,7 +539,7 @@ html,body{overscroll-behavior:none}
       el('qfb').innerHTML = `<div class="fb ${ok ? 'ok' : 'bad'}">${ok ? '정답' : '오답'} · 정답 ${CIRC[q.ai]}</div>${q.sol ? `<p class="sol">${esc(q.sol)}${q.sol.length >= 260 ? '…' : ''}</p>` : ''}${it ? `<div class="hookmini"><b>이 문제의 훅</b>${esc(it.hook)}</div>` : ''}`; el('qNext').focus(); }));
     el('qPrev').addEventListener('click', ()=>{ pq.idx--; renderQuiz(); }); el('qNext').addEventListener('click', ()=>{ pq.idx++; renderQuiz(); }); el('qClose').addEventListener('click', toggleQuiz); drawMap(); }
   /* ---------- 순찰 게임: 레일 이동 (일직선으로 걸어가 표지판 앞에 선다) ---------- */
-  const GAME = false;
+  const GAME = true;
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const rail = {on:false, at:-1, walk:null, pos:new THREE.Vector3(), yaw:Math.PI, t:0, q:null, score:{ok:0, n:0}, mx:0, my:0, lookB:1, mode:'walk'};
   const portraitNow = ()=> innerHeight > innerWidth;

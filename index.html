@@ -51,6 +51,7 @@ h1{font-family:var(--display);font-weight:700;font-size:36px;letter-spacing:-.02
 @media (prefers-reduced-motion: reduce){.bg img{animation:none}}
 .wrap{position:relative;z-index:1}
 footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
+.viz.game{position:relative;overflow:hidden} .viz.game .road{position:absolute;left:50%;bottom:0;width:78%;height:100%;transform:translateX(-50%);background:var(--line);opacity:.55;clip-path:polygon(44% 0,56% 0,100% 100%,0 100%)} .viz.game .sign{position:absolute;left:50%;top:18%;width:38%;height:44%;transform:translateX(-50%);background:var(--panel);border:1.5px solid var(--warn);border-radius:3px} .viz.game .sign:after{content:"";position:absolute;left:12%;right:30%;top:28%;height:2px;background:var(--line);box-shadow:0 9px 0 var(--line),0 18px 0 var(--line)} .viz.game .lamp{position:absolute;left:calc(50% + 21%);top:10%;width:9px;height:9px;border-radius:50%;background:var(--warn);box-shadow:0 0 10px var(--warn)}
 @media (max-width:600px){h1{font-size:30px} .wrap{padding:30px 16px 60px} .tile{padding:20px 18px 18px} .tile h2{font-size:22px}}
 
 /* ---------- 다크/라이트 ---------- */
@@ -74,9 +75,9 @@ html{overscroll-behavior-y:contain}
 <div class="wrap">
   <div class="topRow"><button class="b sm bTheme" type="button">어두운 모드</button></div>
   <h1>산업안전기사 학습실</h1>
-  <p class="lede">역대 2,880문항을 분석하여 만든 세 가지 공부 도구입니다.</p>
+  <p class="lede">역대 2,880문항을 분석하여 만든 네 가지 공부 도구입니다.</p>
   <div class="grid">
-    <a class="tile lab" href="lab.html?v=09041534" aria-label="3D 규격 실습장 들어가기">
+    <a class="tile lab" href="lab.html?v=09041652" aria-label="3D 규격 실습장 들어가기">
       <div class="k">01 · 규정 수치</div>
       <h2>3D 규격 실습장</h2>
       <div class="viz lab" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><em></em><s></s></div>
@@ -84,7 +85,7 @@ html{overscroll-behavior-y:contain}
       <div class="nums"><div><b>40</b>주제</div><div><b>6</b>과목</div><div><b>5</b>문항씩 기출</div></div>
       <span class="go">들어가기 →</span>
     </a>
-    <a class="tile memo" href="memo.html?v=09041534" aria-label="암기 은행 들어가기">
+    <a class="tile memo" href="memo.html?v=09041652" aria-label="암기 은행 들어가기">
       <div class="k">02 · 암기</div>
       <h2>암기 은행</h2>
       <div class="viz memo" aria-hidden="true"><span>모래 1:1.8</span><span>경암 1:0.5</span><span class="h"><b>훅</b>모일팔·흙일이·연일영·경영오</span><span>30 mA</span><span>0.03초</span></div>
@@ -92,12 +93,20 @@ html{overscroll-behavior-y:contain}
       <div class="nums"><div><b>165</b>묶음</div><div><b>613</b>암기법</div><div><b>485</b>빈칸 카드</div></div>
       <span class="go">들어가기 →</span>
     </a>
-    <a class="tile palace" href="palace.html?v=09041534" aria-label="암기 순찰로 들어가기">
+    <a class="tile palace" href="palace.html?v=09041652" aria-label="암기 순찰로 들어가기">
       <div class="k">03 · 장소 기억</div>
       <h2>암기 순찰로</h2>
       <div class="viz palace" aria-hidden="true"><i class="z" style="left:6%;background:rgba(127,166,224,.25)"></i><i class="z" style="left:36%;background:rgba(240,163,91,.25)"></i><i class="z" style="left:66%;background:rgba(92,192,138,.25)"></i><i class="p" style="left:14%"></i><i class="p" style="left:24%"></i><i class="p on" style="left:44%"></i><i class="p" style="left:54%"></i><i class="p" style="left:74%"></i><i class="p" style="left:84%"></i><em></em></div>
       <p>같은 165묶음을 3D 현장 순찰 경로 위 정거장으로 세웠습니다. 구역 여섯을 걸으며 안전관리자가 훅을 말하고, 표지판에 사실이 붙습니다. 어디서 들었는지와 함께 외우는 기억의 궁전입니다.</p>
       <div class="nums"><div><b>165</b>정거장</div><div><b>6</b>구역</div><div><b>28</b>종 소품</div></div>
+      <span class="go">들어가기 →</span>
+    </a>
+    <a class="tile game" href="game.html?v=09041652" aria-label="순찰 게임 들어가기">
+      <div class="k">04 · 게임</div>
+      <h2>순찰 게임</h2>
+      <div class="viz game" aria-hidden="true"><i class="road"></i><i class="sign"></i><i class="lamp"></i></div>
+      <p>안전관리자가 되어 현장을 걷습니다. 순찰 모드는 표지판 앞에 서서 빈칸을 채우고, 사격 모드는 10초 안에 정답 과녁을 쏩니다. 힌트 수류탄 3개, 안전모 3개.</p>
+      <div class="nums"><div><b>2</b>가지 모드</div><div><b>165</b>정거장</div><div><b>485</b>문제</div></div>
       <span class="go">들어가기 →</span>
     </a>
   </div>
