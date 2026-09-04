@@ -34,6 +34,8 @@ h1{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.03
 .viz.lab s{position:absolute;bottom:38px;left:72%;font-family:var(--mono);font-size:11px;color:#E3B54D;text-decoration:none} .viz.lab s::before{content:'90 cm ↕'}
 .viz.memo{display:flex;align-items:center;gap:8px;padding:0 14px;overflow:hidden}
 .viz.memo span{flex:none;font-size:12px;padding:4px 9px;border-radius:5px;background:var(--panel);border:1px solid var(--line);color:var(--muted);white-space:nowrap} .viz.memo span.h{background:rgba(227,181,77,.12);border-color:rgba(227,181,77,.5);color:var(--text)} .viz.memo span.h b{font-family:var(--mono);font-size:10px;color:var(--warn);margin-right:5px;font-weight:500}
+.tile.palace::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(92,192,138,.16),transparent 70%)}
+.viz.palace{background:linear-gradient(180deg,#131C2C 0%,#0E1522 55%,#1B2436 55%)} .viz.palace .z{position:absolute;top:10px;width:28%;height:62px;border-radius:4px} .viz.palace .p{position:absolute;bottom:22px;width:8px;height:8px;border-radius:50%;background:#3B4658} .viz.palace .p.on{background:#E3B54D;box-shadow:0 0 10px #E3B54D;width:11px;height:11px;bottom:20px} .viz.palace em{position:absolute;bottom:26px;left:47%;width:10px;height:18px;border-radius:5px 5px 2px 2px;background:#2E8B57} .viz.palace em::before{content:'';position:absolute;top:-8px;left:1px;width:8px;height:8px;border-radius:50%;background:#F2F5F8}
 footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
 @media (max-width:600px){h1{font-size:30px} .wrap{padding:30px 16px 60px} .tile{padding:20px 18px 18px} .tile h2{font-size:22px}}
 </style>
@@ -60,6 +62,14 @@ footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
       <div class="viz memo"><span>모래 1:1.8</span><span>경암 1:0.5</span><span class="h"><b>훅</b>모일팔·흙일이·연일영·경영오</span><span>30 mA</span><span>0.03초</span></div>
       <p>빈출 묶음마다 사실·훅·왜·구분 네 줄로 정리한 노트입니다. 목차로 과목과 챕터를 넘기고, 사실을 가린 채 훅만 보고 떠올리면 자가 시험이 됩니다. 빈칸 카드와 숫자 색인도 들어 있습니다.</p>
       <div class="nums"><div><b>165</b>묶음</div><div><b>613</b>암기법</div><div><b>282</b>빈칸 카드</div></div>
+      <span class="go">들어가기 →</span>
+    </a>
+    <a class="tile palace" href="palace.html">
+      <div class="k">03 · 장소 기억</div>
+      <h2>암기 순찰로</h2>
+      <div class="viz palace"><i class="z" style="left:6%;background:rgba(127,166,224,.25)"></i><i class="z" style="left:36%;background:rgba(240,163,91,.25)"></i><i class="z" style="left:66%;background:rgba(92,192,138,.25)"></i><i class="p" style="left:14%"></i><i class="p" style="left:24%"></i><i class="p on" style="left:44%"></i><i class="p" style="left:54%"></i><i class="p" style="left:74%"></i><i class="p" style="left:84%"></i><em></em></div>
+      <p>같은 165묶음을 3D 현장 순찰 경로 위 정거장으로 세웠습니다. 구역 여섯을 걸으며 안전관리자가 훅을 말하고, 표지판에 사실이 붙습니다. 어디서 들었는지와 함께 외우는 기억의 궁전입니다.</p>
+      <div class="nums"><div><b>165</b>정거장</div><div><b>6</b>구역</div><div><b>28</b>종 소품</div></div>
       <span class="go">들어가기 →</span>
     </a>
   </div>

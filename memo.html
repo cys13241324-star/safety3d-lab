@@ -52,6 +52,8 @@ a{color:var(--accent)}
 .r.hook{margin-top:10px} .r.hook .lb{background:var(--warn);color:#1A1200;border-color:var(--warn);font-weight:600} .r.hook p{padding:10px 14px;border-radius:8px;background:var(--warn-soft);border:1px solid var(--warn-line);font-size:15.5px;line-height:1.55}
 .r.why .lb{color:var(--accent)} .r.mix .lb{color:var(--ok)} .r.why p,.r.mix p{font-size:13.5px;color:var(--muted)}
 body.hide .facts li{color:transparent;background:var(--line-soft);cursor:pointer;user-select:none} body.hide .facts li .v{color:transparent} body.hide .facts li.show{color:inherit;background:var(--panel2)} body.hide .facts li.show .v{color:var(--warn)}
+table.ft{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel2);border:1px solid var(--line-soft);border-radius:6px;overflow:hidden} table.ft th,table.ft td{padding:6px 10px;border-top:1px solid var(--line-soft);text-align:left;vertical-align:top} table.ft tr:first-child th,table.ft tr:first-child td{border-top:0} table.ft th{width:32%;font-weight:600;color:var(--muted);background:rgba(0,0,0,.18)} table.ft td .v{color:var(--warn);font-family:var(--mono)}
+body.hide table.ft td{color:transparent;background:var(--line-soft);cursor:pointer;user-select:none} body.hide table.ft td .v{color:transparent} body.hide table.ft td.show{color:inherit;background:transparent} body.hide table.ft td.show .v{color:var(--warn)}
 .pager{display:flex;justify-content:space-between;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)} .pager .b{max-width:48%;flex-direction:column;align-items:flex-start;gap:0} .pager .b.r{align-items:flex-end} .pager .b span{color:var(--muted);font-size:12.5px;white-space:nowrap}
 .pager .b b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 /* 도구 공통 */
@@ -80,7 +82,7 @@ table.acc{width:100%;border-collapse:collapse;font-size:14px} table.acc td,table
 .pair{display:grid;grid-template-columns:1fr;gap:8px} .pair .st{padding:10px 14px;background:var(--panel2);border-radius:6px} .pair .st.ok{border:1px solid var(--ok)}
 .empty{color:var(--dim);padding:30px;text-align:center}
 .toolHead{margin:0 0 12px;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em} .toolHead small{display:block;font-family:var(--sans);font-weight:400;font-size:13.5px;color:var(--muted);margin-top:2px}
-@media print{body{background:#fff;color:#111;font-size:11.5px} .top,#toc,.pageTools,.pager{display:none!important} #main{padding:0} .pageHead h2{font-size:18px;color:#111} .pageHead .path{color:#666} .it{border-top:1px solid #ccc;padding:8px 0 10px} .it .no{color:#bbb;font-size:16px} .it h4{font-size:12.5px} .facts li{background:#f3f3f3;border-color:#ddd;color:#111;font-size:11px} .facts li .v{color:#8a5a00} .r .lb{border-color:#ccc;color:#555;background:#fff} .r.hook .lb{background:#d9b24a;color:#111;border-color:#d9b24a} .r.hook p{background:#fff8e1;border-color:#d9b24a;color:#111;font-size:12px} .r.why p,.r.mix p{color:#444;font-size:11px}}
+@media print{body{background:#fff;color:#111;font-size:11.5px} .top,#toc,.pageTools,.pager{display:none!important} #main{padding:0} .pageHead h2{font-size:18px;color:#111} .pageHead .path{color:#666} .it{border-top:1px solid #ccc;padding:8px 0 10px} .it .no{color:#bbb;font-size:16px} .it h4{font-size:12.5px} .facts li{background:#f3f3f3;border-color:#ddd;color:#111;font-size:11px} .facts li .v{color:#8a5a00} table.ft{background:#fff;border-color:#ccc;color:#111;font-size:11px} table.ft th{background:#f3f3f3;color:#333} table.ft td .v{color:#8a5a00} .r .lb{border-color:#ccc;color:#555;background:#fff} .r.hook .lb{background:#d9b24a;color:#111;border-color:#d9b24a} .r.hook p{background:#fff8e1;border-color:#d9b24a;color:#111;font-size:12px} .r.why p,.r.mix p{color:#444;font-size:11px}}
 @media (max-width:760px){
   .top{padding:8px 10px;gap:8px} .top .crumb{font-size:15px} .top .crumb .home{display:none} .top .crumb .sep{display:none} .top .lab{display:none}
   .modes{margin-left:0} .modes button{padding:6px 9px;font-size:13px}
@@ -108,6 +110,7 @@ table.acc{width:100%;border-collapse:collapse;font-size:14px} table.acc td,table
       <button data-tab="progress" aria-selected="false">진도</button>
     </nav>
     <span class="sp"></span>
+    <a class="b sm lab" href="palace.html">암기 순찰로 (3D) →</a>
     <a class="b sm lab" href="lab.html">3D 규격 실습장 →</a>
   </header>
   <div class="body">
@@ -147,6 +150,11 @@ table.acc{width:100%;border-collapse:collapse;font-size:14px} table.acc td,table
   function bestHook(g, c){ const nums = (c.cloze||'').match(/\d+(?:[.,]\d+)?/g) || [c.answer]; let best = g.items[0], bs = -1; g.items.forEach(it=>{ const txt = it.facts.join(' ') + ' ' + it.name; let sc = 0; if(txt.includes(String(c.answer))) sc += 3; nums.forEach(n=>{ if(txt.includes(n)) sc += 1; }); if(c.stem && it.name && c.stem.includes(it.name.slice(0, 4))) sc += 2; if(sc > bs){ bs = sc; best = it; } }); return best.hook; }
   const hi = s => esc(s).replace(/(\d+(?:[.,]\d+)?(?:\s*(?:mm|cm|km\/h|km|m\/s|m\/min|㎡|㎥|㎜|㎝|m|kgf|kg|㎏|톤|t|N|kN|kPa|MPa|lux|dB|℃|°|도|%|ppm|kV|V|A|mA|kW|Ω|Hz|ms|초|분|시간|일|주|개월|년|명|인|회|배|개|단|층|세|점))?)/g, '<span class="v">$1</span>');
   const link3d = k => k ? `<a class="b sm" href="${LAB}#topic=${k}" target="_blank" rel="noopener">3D 현장에서 보기 →</a>` : '';
+  // 사실이 「항목: 값」 꼴이면 표로, 아니면 칩으로 (위원회 구성·교육 시간처럼 짝지어진 사실은 표가 읽기 쉽다)
+  const KV_RE = /^(.{1,26}?)\s*[:：]\s*(.+)$/;
+  function factsHtml(facts){ const rows = facts.map(f=>{ const m = f.match(KV_RE); return m ? [m[1], m[2]] : null; }); const kv = rows.filter(Boolean).length;
+    if(facts.length >= 2 && kv >= Math.ceil(facts.length*0.6)) return `<table class="ft">${facts.map((f, i)=> rows[i] ? `<tr><th>${esc(rows[i][0])}</th><td>${hi(rows[i][1])}</td></tr>` : `<tr><td colspan="2">${hi(f)}</td></tr>`).join('')}</table>`;
+    return `<ul class="facts">${facts.map(f=> `<li>${hi(f)}</li>`).join('')}</ul>`; }
   let noteId = (location.hash.match(/g=([\d-]+)/) || [])[1]; if(!GBYID[noteId]) noteId = METHODS.length ? METHODS[0].id : null;
   let hideFacts = false, tq = '';
   // ---- 목차 ----
@@ -166,14 +174,14 @@ table.acc{width:100%;border-collapse:collapse;font-size:14px} table.acc td,table
     v.innerHTML = `<div class="pageHead"><div class="path"><span>${esc(g.subject)} › ${esc(g.chapter || '기타')} › ${esc(g.big || '종합')}</span><span>${esc(g.id)}</span>${g.n ? `<span>기출 ${g.n}문항 · ${g.rounds}회차</span>` : ''}</div><h2>${esc(g.title)}</h2>
       <div class="pageTools"><button class="b sm" type="button" id="bHide" aria-pressed="${hideFacts}">${hideFacts ? '사실 보이기' : '사실 가리고 훅으로 떠올리기'}</button><button class="b sm ${done[g.id] ? 'done' : ''}" type="button" id="bDone">${done[g.id] ? '✓ 학습 완료' : '학습 완료로 표시'}</button>${link3d(g.topic3d)}<button class="b sm" type="button" id="bPrint">인쇄</button><span class="muted mono" style="font-size:12px">${i+1} / ${METHODS.length} · ← → 키로 이동</span></div></div>
       <ol class="spec">${g.items.map((it, k)=> `<li class="it"><div class="no">${String(k+1).padStart(2,'0')}</div><div><h4>${esc(it.name)}</h4>
-        <div class="r"><span class="lb">사실</span><ul class="facts">${it.facts.map(f=> `<li>${hi(f)}</li>`).join('')}</ul></div>
+        <div class="r"><span class="lb">사실</span><div>${factsHtml(it.facts)}</div></div>
         <div class="r hook"><span class="lb">훅</span><p>${esc(it.hook)}</p></div>
         ${it.why ? `<div class="r why"><span class="lb">왜</span><p>${esc(it.why)}</p></div>` : ''}${it.mix ? `<div class="r mix"><span class="lb">구분</span><p>${esc(it.mix)}</p></div>` : ''}</div></li>`).join('')}</ol>
       <div class="pager">${prev ? `<button class="b" type="button" data-go="${esc(prev.id)}"><span>← 이전</span><b>${esc(prev.title)}</b></button>` : '<span></span>'}${next ? `<button class="b r" type="button" data-go="${esc(next.id)}"><span>다음 →</span><b>${esc(next.title)}</b></button>` : '<span></span>'}</div>`;
     el('bHide').addEventListener('click', ()=>{ hideFacts = !hideFacts; renderNote(); });
     el('bDone').addEventListener('click', ()=>{ if(done[g.id]) delete done[g.id]; else done[g.id] = Date.now(); saveDone(); renderNote(); renderToc(); });
     el('bPrint').addEventListener('click', ()=> window.print());
-    v.querySelectorAll('.facts li').forEach(li=> li.addEventListener('click', ()=> li.classList.toggle('show')));
+    v.querySelectorAll('.facts li, table.ft td').forEach(li=> li.addEventListener('click', ()=> li.classList.toggle('show')));
     v.querySelectorAll('[data-go]').forEach(b=> b.addEventListener('click', ()=> go(b.dataset.go))); }
   // ---- 공통 ----
   el('modes').querySelectorAll('[data-tab]').forEach(b=> b.addEventListener('click', ()=>{ tab = b.dataset.tab; el('modes').querySelectorAll('[data-tab]').forEach(x=> x.setAttribute('aria-selected', x===b)); render(); }));
