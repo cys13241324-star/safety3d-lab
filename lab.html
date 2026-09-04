@@ -547,7 +547,7 @@ body.blind #bBlind{background:var(--warn);color:var(--on-accent);border-color:va
   const scene = new THREE.Scene();
   scene.background = col(0x0A1018);
   // 하늘: 그라데이션 돔 (광원 효과·블룸 없음, 무광 유지) + 지평선 색과 맞춘 안개로 원근감
-  function skyTexture(){ const c = document.createElement('canvas'); c.width = 4; c.height = 512; const g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 512); gr.addColorStop(0, 'var(--accent-ink)'); gr.addColorStop(0.42, '#1A2740'); gr.addColorStop(0.5, '#33455F'); gr.addColorStop(0.56, '#4E6078'); gr.addColorStop(0.62, '#3B4858'); gr.addColorStop(1, '#2A3340'); g.fillStyle = gr; g.fillRect(0, 0, 4, 512); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t; }
+  function skyTexture(){ const c = document.createElement('canvas'); c.width = 4; c.height = 512; const g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 512); gr.addColorStop(0, '#0B1220'); gr.addColorStop(0.42, '#1A2740'); gr.addColorStop(0.5, '#33455F'); gr.addColorStop(0.56, '#4E6078'); gr.addColorStop(0.62, '#3B4858'); gr.addColorStop(1, '#2A3340'); g.fillStyle = gr; g.fillRect(0, 0, 4, 512); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t; }
   const sky = new THREE.Mesh(new THREE.SphereGeometry(420, 32, 16), new THREE.MeshBasicMaterial({map: skyTexture(), side: THREE.BackSide, fog: false})); scene.add(sky);
   scene.fog = new THREE.Fog(col(0x2C394D), 80, 260);
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
