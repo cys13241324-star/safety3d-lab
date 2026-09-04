@@ -28,6 +28,15 @@ a{color:var(--accent)}
 #top{position:fixed;left:0;right:0;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(15,22,34,.86);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
 #top .crumb{font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:-.01em;white-space:nowrap;display:flex;gap:8px;align-items:center} #top .crumb a{color:var(--muted);text-decoration:none} #top .crumb .sep{color:var(--dim);font-weight:400}
 #top .sp{flex:1}
+select.b{appearance:none;-webkit-appearance:none;padding-right:26px;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 14px) 55%,calc(100% - 9px) 55%;background-size:5px 5px;background-repeat:no-repeat} select.b option{background:var(--panel);color:var(--text)}
+/* 목차 서랍 */
+#toc{position:fixed;left:0;top:46px;bottom:0;width:340px;z-index:30;background:rgba(15,22,34,.96);border-right:1px solid var(--line);padding:10px 10px 40px;overflow-y:auto;scrollbar-width:thin;backdrop-filter:blur(8px)}
+#toc .tq{width:100%;font:inherit;font-size:13.5px;padding:7px 10px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text);margin-bottom:8px}
+#toc .sub{margin-bottom:4px} #toc .sub>button{width:100%;text-align:left;font:inherit;font-size:14px;font-weight:600;padding:8px 10px;border:0;border-radius:6px;background:none;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px} #toc .sub>button:hover{background:var(--panel2)} #toc .sub>button .pg{font-family:var(--mono);font-size:11.5px;color:var(--dim);font-weight:400}
+#toc .sub>button::before{content:'▸';color:var(--dim);margin-right:6px;font-size:11px} #toc .sub.open>button::before{content:'▾'} #toc .sub .in{display:none;padding:2px 0 6px 6px} #toc .sub.open .in{display:block}
+#toc .ch{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--dim);padding:8px 8px 3px}
+#toc .g{display:flex;align-items:center;gap:8px;width:100%;text-align:left;font:inherit;font-size:13.5px;padding:6px 8px;border:0;border-radius:5px;background:none;color:var(--muted);cursor:pointer;line-height:1.35} #toc .g:hover{background:var(--panel2);color:var(--text)} #toc .g[aria-current="true"]{background:var(--panel2);color:var(--text);box-shadow:inset 3px 0 0 var(--warn)}
+#toc .g .no{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:26px} #toc .g .tick{flex:none;width:12px;height:12px;border-radius:50%;border:1px solid var(--line)} #toc .g.done .tick{background:var(--ok);border-color:var(--ok)}
 /* 지도 */
 #map{position:fixed;left:14px;top:56px;z-index:15;background:rgba(15,22,34,.86);border:1px solid var(--line);border-radius:10px;padding:8px;backdrop-filter:blur(6px)}
 #map canvas{display:block;width:250px;height:176px;cursor:pointer} #map .cap{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:4px;display:flex;justify-content:space-between}
@@ -58,7 +67,8 @@ body.quiz table.ft td{color:transparent;background:var(--line-soft);cursor:point
 body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:#F07056;color:#fff}
 #load{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--bg);font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--muted)} #load small{display:block;text-align:center;font-family:var(--mono);font-weight:400;font-size:12px;margin-top:8px;color:var(--dim)}
 @media (max-width:820px){
-  #top{padding:6px 8px;gap:5px} #top .crumb{font-size:14px} #top .crumb .home,#top .crumb .sep1{display:none} #top .lab{display:none} #bMap{display:inline-flex} #bCard{display:none} #top .b{padding:6px 9px;font-size:12.5px}
+  #top{padding:6px 8px;gap:5px} #top .crumb{display:none} #top .lab{display:none} #bMap{display:inline-flex} #bCard{display:none} #top .b{padding:6px 9px;font-size:12.5px} #zoneSel{max-width:110px}
+  #toc{width:min(88vw,340px);top:42px}
   #map{display:none;left:8px;top:46px;padding:6px} #map canvas{width:200px;height:141px} body.showMap #map{display:block}
   .lbl b{font-size:13.5px;padding:5px 10px 6px;max-width:74vw}
   /* 하단 시트: 평소엔 훅 한 줄 띠만, 펼치면 카드 전체 */
@@ -80,15 +90,18 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
 <div id="labels"></div>
 <header id="top">
   <div class="crumb"><a class="home" href="./">산업안전기사</a><span class="sep sep1">›</span><a href="memo.html">암기 은행</a><span class="sep">›</span><span>순찰로</span></div>
+  <button class="b" id="bToc" type="button">☰ 목차</button>
+  <select class="b" id="zoneSel" aria-label="구역 선택"></select>
   <button class="b" id="bMap" type="button">지도</button><button class="b" id="bCard" type="button">카드</button>
   <span class="sp"></span>
   <button class="b" id="bQuiz" type="button" aria-pressed="false">훅 퀴즈</button>
   <button class="b primary" id="bExam" type="button">구역 시험</button>
   <a class="b lab" href="lab.html" target="_blank" rel="noopener">3D 규격 실습장 →</a>
 </header>
+<aside id="toc" hidden><input class="tq" type="search" id="tq" placeholder="정거장·소주제 검색"><div id="tocBody"></div></aside>
 <div id="map"><canvas id="mapC" width="500" height="352"></canvas><div class="cap"><span id="mapZone"></span><span id="mapProg"></span></div></div>
 <aside id="card"><div id="strip"><div class="st"><span class="k" id="sK"></span><span id="sName"></span></div><p id="sHook"></p><div class="sb"><button class="b" id="sPrev" type="button">◀</button><button class="b primary" id="sNext" type="button">다음 ▶</button><button class="b" id="sOpen" type="button">펼치기</button></div></div><div class="hd"><div class="path" id="cPath"></div><h2 id="cTitle"></h2></div><div class="bd" id="cBody"></div><div class="ft" id="cFt"></div></aside>
-<div id="hint">→ 다음 (항목 → 정거장) · ← 이전 · Shift+→ 정거장 건너뛰기 · 드래그 회전 · 휠 줌 · 지도 클릭</div>
+<div id="hint">→ 다음 · ← 이전 · Shift+→ 정거장 건너뛰기 · 드래그 회전 · 휠 줌 · 지도나 표지판 클릭 이동 · 목차 ☰</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
@@ -230,6 +243,37 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
   // 구역 사이 연결 통로
   for(let si=0;si<5;si++){ const a = stations.filter(s=> s.si===si).slice(-1)[0], b = stations.filter(s=> s.si===si+1)[0]; if(a && b){ const ax = a.pos.x + (zoneOf(si).row === 1 ? -3 : 3); strip(ax, a.pos.z, ax, b.pos.z); strip(ax, b.pos.z, b.pos.x, b.pos.z); } }
 
+  /* ---------- 구역 꾸미기: 대형 상징물 · 나무 · 가로등 · 순찰 작업자 ---------- */
+  const treeMat = std({color: col(0x3E6B45), roughness: .95}), treeMat2 = std({color: col(0x4F7A3F), roughness: .95}), glassMat = std({color: col(0x9FC3E8), roughness: .2, metalness: .1, transparent: true, opacity: .45});
+  function tree(x, z, h){ const g = new THREE.Group(); g.position.set(x, 0, z); cyl(0.1, 0.14, h*0.4, M.wood, g, 0, h*0.2, 0, 6); const c = new THREE.Mesh(new THREE.ConeGeometry(h*0.3, h*0.75, 7), Math.random() < .5 ? treeMat : treeMat2); c.position.y = h*0.4 + h*0.36; c.castShadow = true; g.add(c); const c2 = new THREE.Mesh(new THREE.ConeGeometry(h*0.22, h*0.5, 7), treeMat); c2.position.y = h*0.4 + h*0.62; g.add(c2); g.rotation.y = Math.random()*6; scene.add(g); }
+  const lampHeadMat = std({color: col(0xFFF1C0), emissive: col(0xFFE28A), emissiveIntensity: .7});
+  function lampPost(x, z){ cyl(0.05, 0.07, 4.4, M.post, scene, x, 2.2, z, 6); const arm = tube(P3(x, 4.4, z), P3(x, 4.4, z + 0.9), 0.035, M.post, scene); const head = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.12, 0.6), lampHeadMat); head.position.set(x, 4.36, z + 0.9); scene.add(head); }
+  function craneBig(x, z){ const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g); box(2.6, 0.6, 2.6, M.concrete, g, 0, 0.3, 0); const mast = new THREE.Mesh(new THREE.BoxGeometry(1.0, 30, 1.0), M.yellow); mast.position.y = 15; mast.castShadow = true; g.add(mast); const top = new THREE.Group(); top.position.y = 30.4; g.add(top); const jib = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 26), M.yellow); jib.position.z = 11; jib.castShadow = true; top.add(jib); box(0.6, 0.6, 8, M.yellow, top, 0, 0, -5); box(1.6, 1.3, 1.8, M.concrete, top, 0, 0, -8.6); box(1.2, 1.2, 1.4, M.dark, top, 0, 0.9, 1.2); tube(P3(0, 3.2, 0), P3(0, 0, 23), 0.03, M.dark, top); tube(P3(0, 3.2, 0), P3(0, 0, -8.6), 0.03, M.dark, top); cyl(0.05, 0.05, 3.2, M.dark, top, 0, 1.6, 0, 6); tube(P3(0, -0.2, 16), P3(0, -14, 16), 0.025, M.dark, top); const hook = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.07, 8, 16), M.dark); hook.position.set(0, -14.3, 16); top.add(hook); DRESS_ANIM.push({kind: 'crane', top}); }
+  function buildingFrame(x, z){ const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g); for(let f=0; f<3; f++){ const y = f*3.4; [-6, 0, 6].forEach(cx=> [-4, 4].forEach(cz=> box(0.5, 3.4, 0.5, M.concrete, g, cx, y + 1.7, cz))); box(13, 0.3, 9, M.concrete, g, 0, y + 3.4, 0); } [-6.6, 6.6].forEach(cx=> [-4.6, 4.6].forEach(cz=> tube(P3(cx, 0, cz), P3(cx, 10.5, cz), 0.05, M.steel, g))); for(let y=2; y<=10; y+=2){ tube(P3(-6.6, y, -4.6), P3(6.6, y, -4.6), 0.04, M.steel, g); tube(P3(-6.6, y, 4.6), P3(6.6, y, 4.6), 0.04, M.steel, g); } const n = new THREE.Mesh(new THREE.PlaneGeometry(13.4, 10.4), netMat); n.position.set(0, 5.2, 4.7); g.add(n); for(let i=0;i<5;i++) box(1.2, 0.5, 2.4, M.wood, g, -9 + (i%2)*1.4, 0.25 + Math.floor(i/2)*0.55, -3 + (i%3)); }
+  function tanks(x, z){ [0, 5, 10].forEach((dx, i)=>{ const t = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.0, 7 + i, 24), M.tank); t.position.set(x + dx, 3.5 + i*0.5, z); t.castShadow = true; scene.add(t); cyl(0.3, 0.3, 0.6, M.red, scene, x + dx, 7.3 + i, z); const ring = new THREE.Mesh(new THREE.TorusGeometry(2.05, 0.06, 6, 24), M.steel); ring.rotation.x = Math.PI/2; ring.position.set(x + dx, 5 + i*0.5, z); scene.add(ring); }); [-1, 1].forEach(dz=>{ tube(P3(x - 2, 1.2, z + dz*2.6), P3(x + 12, 1.2, z + dz*2.6), 0.14, M.steel, scene); tube(P3(x - 2, 1.7, z + dz*2.6), P3(x + 12, 1.7, z + dz*2.6), 0.1, M.yellow, scene); }); for(let dx=-2; dx<=12; dx+=3.5) box(0.3, 1.9, 5.6, M.dark, scene, x + dx, 0.95, z); }
+  function pylon(x, z){ const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g); const H = 18; [[-2, -2], [2, -2], [-2, 2], [2, 2]].forEach(([dx, dz])=> tube(P3(dx, 0, dz), P3(dx*0.35, H, dz*0.35), 0.06, M.dark, g)); for(let y=3; y<H; y+=3){ const k = 1 - y/H*0.65; [[-2*k, -2*k, 2*k, -2*k], [2*k, -2*k, 2*k, 2*k], [2*k, 2*k, -2*k, 2*k], [-2*k, 2*k, -2*k, -2*k]].forEach(([a,b,c,d])=> tube(P3(a, y, b), P3(c, y, d), 0.03, M.dark, g)); } [12, 15.5].forEach(y=> tube(P3(-4.5, y, 0), P3(4.5, y, 0), 0.06, M.dark, g)); [[-4, 12], [4, 12], [-4, 15.5], [4, 15.5]].forEach(([dx, y])=>{ cyl(0.12, 0.12, 0.9, M.white, g, dx, y - 0.5, 0, 8); tube(P3(dx, y - 1, 0), P3(dx*1.4, y - 4, -40), 0.015, M.dark, g); }); box(2.6, 2.2, 1.6, M.dark, scene, x + 8, 1.1, z); [-0.7, 0, 0.7].forEach(dx=> cyl(0.12, 0.12, 0.8, M.white, scene, x + 8 + dx, 2.6, z, 8)); const fence = new THREE.Group(); scene.add(fence); for(let i=0;i<5;i++){ cyl(0.04, 0.04, 1.8, M.post, fence, x + 5.5 + i*1.4, 0.9, z + 2.2, 6); cyl(0.04, 0.04, 1.8, M.post, fence, x + 5.5 + i*1.4, 0.9, z - 2.2, 6); } }
+  function pressBig(x, z){ box(5, 1.2, 4, M.dark, scene, x, 0.6, z); box(1.2, 6, 3.6, M.dark, scene, x - 2, 3, z); box(5, 1.2, 3.6, M.dark, scene, x, 6.2, z); box(2.2, 1.6, 2.2, M.steel, scene, x + 0.6, 4.4, z); box(3, 0.6, 3, M.steel, scene, x + 0.6, 1.5, z); [-1.2, 1.2].forEach(dz=> tube(P3(x + 3.2, 1.2, z + dz), P3(x + 3.2, 5.6, z + dz), 0.03, M.red, scene)); const belt = new THREE.Group(); belt.position.set(x + 9, 0, z); scene.add(belt); box(9, 0.3, 1.4, M.dark, belt, 0, 1.0, 0); [-4, -2, 0, 2, 4].forEach(dx=>{ cyl(0.1, 0.1, 1.0, M.post, belt, dx, 0.45, -0.5, 6); cyl(0.1, 0.1, 1.0, M.post, belt, dx, 0.45, 0.5, 6); }); for(let i=0;i<4;i++) box(0.8, 0.5, 0.8, M.yellow, belt, -3.5 + i*2.3, 1.4, 0); }
+  function officeBlock(x, z){ const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g); [0, 3.0].forEach(y=>{ box(9, 2.8, 3.2, M.white, g, 0, 1.5 + y, 0); for(let i=-3; i<=3; i+=1.5) box(1.0, 0.9, 0.06, glassMat, g, i, 1.7 + y, 1.63); box(0.9, 1.9, 0.06, M.dark, g, 3.8, 1.05 + y, 1.63); }); box(9.4, 0.2, 3.6, M.dark, g, 0, 5.9, 0); tube(P3(-4.7, 0, 1.9), P3(-4.7, 5.8, 1.9), 0.05, M.steel, g); for(let y=0.4; y<5.8; y+=0.4) tube(P3(-4.7, y, 1.9), P3(-3.6, y + 0.4, 1.9), 0.03, M.steel, g); [-1.5, 0, 1.5].forEach((dx, i)=>{ cyl(0.05, 0.05, 7, M.post, g, 6 + dx, 3.5, 0, 6); const f = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.9), [M.green, M.white, M.yellow][i]); f.position.set(6 + dx + 0.7, 6.4, 0); f.material.side = THREE.DoubleSide; g.add(f); DRESS_ANIM.push({kind: 'flag', m: f, ph: i}); }); }
+  function pavilion(x, z){ const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g); [[-5, -3], [5, -3], [-5, 3], [5, 3]].forEach(([dx, dz])=> cyl(0.12, 0.12, 4, M.steel, g, dx, 2, dz, 8)); box(11, 0.25, 7, M.dark, g, 0, 4.1, 0); const roof = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.08, 6.6), glassMat); roof.position.y = 4.25; g.add(roof); [-3, 0, 3].forEach(dx=>{ box(2.2, 0.06, 1.0, M.wood, g, dx, 0.76, -1); [-1, 1].forEach(s=> box(0.06, 0.76, 0.9, M.dark, g, dx + s*1.0, 0.38, -1)); box(0.9, 0.55, 0.05, M.dark, g, dx, 1.15, -1.3); box(0.5, 0.5, 0.5, M.dark, g, dx, 0.5, 0.2); }); [-4.5, 4.5].forEach(dx=>{ const w = worker(0x5FA6F5, g, 0xE3B54D); w.position.set(dx, 0, 1.5); w.rotation.y = Math.PI; }); }
+  const DRESS_ANIM = [], WALKERS = [];
+  function walker(a, b, vest){ const g = worker(vest, scene, 0xE3B54D); g.position.copy(a); WALKERS.push({g, a, b, t: Math.random(), dir: 1, speed: 0.06 + Math.random()*0.03, ph: Math.random()*6}); }
+  SUBJ.forEach((s, si)=>{ const zc = zoneCenter(si), rev = zoneOf(si).row === 1, back = zc.z + (rev ? 1 : -1)*(ZD/2 + 9);
+    // 구역 뒤편 대형 상징물
+    [officeBlock, pavilion, pressBig, pylon, tanks, buildingFrame][si](zc.x - 8, back);
+    if(si === 5) craneBig(zc.x + 22, back + (rev ? 6 : -6));
+    if(si === 4) tanks(zc.x + 14, back + (rev ? 8 : -8));
+    // 나무: 구역 좌우 바깥
+    for(let z=-18; z<=18; z+=6){ tree(zc.x - ZW/2 - 3 - Math.random()*2, zc.z + z + (Math.random()-.5)*2, 3.5 + Math.random()*2); tree(zc.x + ZW/2 + 3 + Math.random()*2, zc.z + z + (Math.random()-.5)*2, 3.5 + Math.random()*2); }
+    // 가로등: 앞쪽 울타리 안쪽
+    for(let x=-24; x<=24; x+=16) lampPost(zc.x + x, zc.z + (rev ? -1 : 1)*(ZD/2 - 1.2));
+    // 순찰 작업자 2명: 레인 위를 오간다
+    // (정거장 뒤편 z−4.5 를 지나가게 해서 카메라와 표지판 사이를 가로막지 않는다)
+    const lanes = Math.ceil(zoneCounts[si] / PER); walker(P3(zc.x - 28, 0, zc.z - 16.5 - 4.5), P3(zc.x + 28, 0, zc.z - 16.5 - 4.5), 0xF07056); if(lanes > 2) walker(P3(zc.x + 28, 0, zc.z - 16.5 + 22 - 4.5), P3(zc.x - 28, 0, zc.z - 16.5 + 22 - 4.5), 0x5FA6F5); });
+  // 먼 배경: 지평선 쪽 실루엣 건물들
+  for(let i=0;i<26;i++){ const a = i/26*Math.PI*2, r = 175 + Math.random()*30, h = 8 + Math.random()*26; box(8 + Math.random()*10, h, 8 + Math.random()*10, std({color: col(0x1E2736), roughness: 1}), scene, Math.cos(a)*r, h/2, Math.sin(a)*r); }
+  // 현재 정거장을 비추는 따뜻한 빛
+  const spot = new THREE.PointLight(col(0xFFD9A0), 0.9, 20, 1.6); spot.position.set(0, 5, 3); scene.add(spot);
+
   /* ---------- 소품: 키워드 → 상징물 ---------- */
   const PROPS = {
     soil(p){ const s = new THREE.Shape(); s.moveTo(-1.6, 0); s.lineTo(1.6, 0); s.lineTo(1.6, 0.4); s.lineTo(-0.3, 1.7); s.lineTo(-1.6, 1.7); s.closePath(); const m = new THREE.Mesh(new THREE.ExtrudeGeometry(s, {depth: 2.2, bevelEnabled: false}), M.soil); m.position.z = -1.1; m.castShadow = true; m.receiveShadow = true; p.add(m); cyl(0.05, 0.05, 2.4, M.yellow, p, -0.3, 1.2, 1.15); [0.3, 0.9, 1.5].forEach(z=> box(0.3, 0.2, 0.3, M.rock, p, 0.9 + z*0.2, 0.5 + z*0.1, z - 0.9)); },
@@ -322,10 +366,10 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
     cur = i; if(!keepItem) item = 0; const s = stations[cur]; history.replaceState(null, '', '#g=' + s.g.id);
     const portrait = innerHeight > innerWidth;
     cam.fromT = cam.target.clone(); cam.toT = s.pos.clone().add(portrait ? P3(-1.5, 2.0, -0.4) : P3(0.2, 1.4, -0.4)); cam.t = 0; cam.az = portrait ? -0.08 : -0.38; cam.el = portrait ? 0.22 : 0.34; cam.dist = portrait ? 17 : Math.min(cam.dist, 12);
-    sun.target.position.copy(s.pos); sun.position.copy(s.pos).add(P3(20, 40, 30));
+    sun.target.position.copy(s.pos); sun.position.copy(s.pos).add(P3(20, 40, 30)); spot.position.copy(s.pos).add(P3(-0.5, 4.5, 3.5));
     // 관리자: 앞 정거장 쪽에서 걸어 들어온다
     mgr.from = manager.position.clone(); if(mgr.from.distanceTo(s.pos) > 30) mgr.from = s.pos.clone().add(P3(-4, 0, 3.5)); mgr.to = s.pos.clone().add(P3(-3.9, 0.14, 1.1)); mgr.walkT = 0; if(bubble){ bubble.remove(); bubble = null; }
-    s.boardMat.map = bigTex; s.boardMat.needsUpdate = true; showItem(); }
+    s.boardMat.map = bigTex; s.boardMat.needsUpdate = true; showItem(); el('zoneSel').value = String(s.si); if(!el('toc').hidden) renderToc(); }
   // 훅 말풍선은 첫 문장만 (짧은 호흡). 관리자가 이미 서 있으면 바로 말한다
   const firstSentence = s => { const m = s.match(/^(.+?(?:다|요|라|자|것|음|임|기)[.!?]|.+?[.!?])\s/); return m ? m[1] : s; };
   let showMore = false;
@@ -397,9 +441,32 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
   function drawMap(){ mg.clearRect(0, 0, MAPW, MAPH); mg.fillStyle = '#0F1622'; mg.fillRect(0, 0, MAPW, MAPH);
     SUBJ.forEach((s, si)=>{ const zc = zoneCenter(si); mg.fillStyle = '#' + SUBJ_HEX[si].toString(16).padStart(6, '0') + '22'; mg.strokeStyle = '#' + SUBJ_HEX[si].toString(16).padStart(6, '0') + '88'; mg.lineWidth = 1.5; const x = mx(zc.x - ZW/2), y = mz(zc.z - ZD/2), w = mx(zc.x + ZW/2) - x, h = mz(zc.z + ZD/2) - y; mg.fillRect(x, y, w, h); mg.strokeRect(x, y, w, h); mg.fillStyle = '#' + SUBJ_HEX[si].toString(16).padStart(6, '0'); mg.font = '600 15px "IBM Plex Sans KR", sans-serif'; mg.fillText(SUBJ_SHORT[si], x + 6, y + h - 8); });
     mg.strokeStyle = 'rgba(140,160,190,.35)'; mg.lineWidth = 1.2; mg.beginPath(); stations.forEach((s, i)=>{ const x = mx(s.pos.x), y = mz(s.pos.z); if(i === 0) mg.moveTo(x, y); else mg.lineTo(x, y); }); mg.stroke();
-    stations.forEach((s, i)=>{ const x = mx(s.pos.x), y = mz(s.pos.z), d = !!done[s.g.id]; mg.beginPath(); mg.arc(x, y, i === cur ? 6 : 3.2, 0, Math.PI*2); mg.fillStyle = i === cur ? '#E3B54D' : d ? '#5CC08A' : '#3B4658'; mg.fill(); if(i === cur){ mg.strokeStyle = '#FFF'; mg.lineWidth = 1.5; mg.stroke(); } });
+    stations.forEach((s, i)=>{ const x = mx(s.pos.x), y = mz(s.pos.z), d = !!done[s.g.id]; mg.beginPath(); mg.arc(x, y, i === cur ? 7 : 4.2, 0, Math.PI*2); mg.fillStyle = i === cur ? '#E3B54D' : d ? '#5CC08A' : '#3B4658'; mg.fill(); if(i === cur){ mg.strokeStyle = '#FFF'; mg.lineWidth = 1.5; mg.stroke(); } });
     const s = stations[cur]; el('mapZone').textContent = ZONE_NAME[s.si] + ' · ' + s.g.id; const dn = stations.filter(x=> done[x.g.id]).length; el('mapProg').textContent = `완료 ${dn}/${stations.length}`; }
-  mapC.addEventListener('click', e=>{ const r = mapC.getBoundingClientRect(); const px = (e.clientX - r.left)/r.width*MAPW, py = (e.clientY - r.top)/r.height*MAPH; let best = -1, bd = 1e9; stations.forEach((s, i)=>{ const d = Math.hypot(mx(s.pos.x) - px, mz(s.pos.z) - py); if(d < bd){ bd = d; best = i; } }); if(best >= 0 && bd < 14) goStation(best); });
+  // 지도: 점을 찍으면 그 정거장, 빈 칸을 찍으면 그 구역 첫 정거장
+  const firstOfZone = si => stations.findIndex(s=> s.si === si);
+  mapC.addEventListener('click', e=>{ const r = mapC.getBoundingClientRect(); const px = (e.clientX - r.left)/r.width*MAPW, py = (e.clientY - r.top)/r.height*MAPH; let best = -1, bd = 1e9; stations.forEach((s, i)=>{ const d = Math.hypot(mx(s.pos.x) - px, mz(s.pos.z) - py); if(d < bd){ bd = d; best = i; } }); if(best >= 0 && bd < 14){ goStation(best); return; }
+    for(let si=0; si<6; si++){ const zc = zoneCenter(si); if(px >= mx(zc.x - ZW/2) && px <= mx(zc.x + ZW/2) && py >= mz(zc.z - ZD/2) && py <= mz(zc.z + ZD/2)){ goStation(firstOfZone(si)); return; } } });
+  /* ---------- 구역 선택 · 목차 서랍 · 3D 표지판 클릭 ---------- */
+  el('zoneSel').innerHTML = SUBJ.map((s, si)=> `<option value="${si}">${esc(SUBJ_SHORT[si])} · ${esc(ZONE_NAME[si])}</option>`).join('');
+  el('zoneSel').addEventListener('change', ()=> goStation(firstOfZone(+el('zoneSel').value)));
+  let tq = '';
+  function renderToc(){ const q = tq.trim(); const curS = stations[cur];
+    el('tocBody').innerHTML = SUBJ.map((s, si)=>{ const list = stations.map((st, i)=> ({st, i})).filter(x=> x.st.si === si).filter(x=> !q || (x.st.g.title + x.st.g.chapter + x.st.g.items.map(it=> it.name).join(' ')).includes(q)); if(!list.length) return '';
+      const all = stations.filter(st=> st.si === si), dn = all.filter(st=> done[st.g.id]).length; let lastCh = null;
+      return `<div class="sub ${(curS.si === si) || q ? 'open' : ''}"><button type="button">${esc(SUBJ_SHORT[si])} · ${esc(ZONE_NAME[si])}<span class="pg">${dn}/${all.length}</span></button><div class="in">` + list.map(({st, i})=>{ let h = ''; if(st.g.chapter !== lastCh){ lastCh = st.g.chapter; h = `<div class="ch">${esc(st.g.chapter || '기타')}</div>`; } return h + `<button type="button" class="g ${done[st.g.id] ? 'done' : ''}" data-i="${i}" aria-current="${i === cur}"><span class="tick"></span><span class="no">${i + 1}</span><span>${esc(st.g.title)}</span></button>`; }).join('') + '</div></div>'; }).join('');
+    el('tocBody').querySelectorAll('.sub>button').forEach(b=> b.addEventListener('click', ()=> b.parentElement.classList.toggle('open')));
+    el('tocBody').querySelectorAll('.g').forEach(b=> b.addEventListener('click', ()=>{ goStation(+b.dataset.i); el('toc').hidden = true; }));
+    const c = el('tocBody').querySelector('.g[aria-current="true"]'); if(c) c.scrollIntoView({block: 'center'}); }
+  el('bToc').addEventListener('click', ()=>{ el('toc').hidden = !el('toc').hidden; if(!el('toc').hidden){ renderToc(); el('tq').focus(); } });
+  el('tq').addEventListener('input', ()=>{ tq = el('tq').value; renderToc(); });
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape') el('toc').hidden = true; });
+  // 3D: 드래그가 아닌 클릭으로 다른 정거장의 표지판·받침판을 찍으면 그리로 간다
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let pdown = null;
+  const pickables = []; stations.forEach((s, i)=>{ s.group.children.forEach(m=>{ if(m.geometry === boardGeo || m.geometry === padGeo){ m.userData.station = i; pickables.push(m); } }); });
+  dom.addEventListener('pointerdown', e=>{ pdown = {x: e.clientX, y: e.clientY, t: performance.now()}; });
+  dom.addEventListener('pointerup', e=>{ if(!pdown || Math.hypot(e.clientX - pdown.x, e.clientY - pdown.y) > 6 || performance.now() - pdown.t > 600){ pdown = null; return; } pdown = null; if(exam) return;
+    ndc.set(e.clientX/innerWidth*2 - 1, -(e.clientY/innerHeight)*2 + 1); ray.setFromCamera(ndc, camera); const hits = ray.intersectObjects(pickables, false); if(hits.length){ const i = hits[0].object.userData.station; if(i !== cur) goStation(i); } });
 
   /* ---------- 루프 ---------- */
   function resize(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix(); }
@@ -413,6 +480,9 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
     if(mgr.to){ if(mgr.walkT < 1){ mgr.walkT = Math.min(1, mgr.walkT + dt/0.5); manager.position.copy(mgr.from).lerp(mgr.to, ease(mgr.walkT)); const dir = mgr.to.clone().sub(mgr.from); if(dir.length() > 0.01) manager.rotation.y = Math.atan2(dir.x, dir.z); mgr.phase += dt*9; walkPose(manager, mgr.phase, 0.55); manager.userData.limbs.arms[0].rotation.x = -1.1; }
       else { const look = camPos(); manager.rotation.y = Math.atan2(look.x - manager.position.x, look.z - manager.position.z) ; walkPose(manager, 0, 0); manager.userData.limbs.arms[0].rotation.x = -1.1; manager.userData.limbs.arms[1].rotation.x = -0.9 + Math.sin(now*0.004)*0.12; manager.userData.limbs.arms[1].rotation.y = 0.9;
         if(mgr.talkT > 0){ mgr.talkT -= dt; if(mgr.talkT <= 0){ const g = stations[cur].g; say(exam && exam.q ? exam.q.q : firstSentence(g.items[item].hook), 'boss'); } } } }
+    // 배경 생활감: 순찰 작업자·크레인·깃발
+    WALKERS.forEach(w=>{ w.t += dt*w.speed*w.dir; if(w.t >= 1){ w.t = 1; w.dir = -1; } if(w.t <= 0){ w.t = 0; w.dir = 1; } w.g.position.copy(w.a).lerp(w.b, w.t); const d = w.b.clone().sub(w.a).multiplyScalar(w.dir); w.g.rotation.y = Math.atan2(d.x, d.z); w.ph += dt*7; walkPose(w.g, w.ph, 0.5); });
+    DRESS_ANIM.forEach(a=>{ if(a.kind === 'crane') a.top.rotation.y += dt*0.06; else if(a.kind === 'flag'){ a.m.rotation.y = 0.25*Math.sin(now*0.003 + a.ph); a.m.position.y = 6.4 + 0.05*Math.sin(now*0.005 + a.ph); } });
     placeBubble(); renderer.render(scene, camera); requestAnimationFrame(frame); }
   goStation(cur); manager.position.copy(stations[cur].pos).add(P3(-3.9, 0.14, 1.1)); mgr.from = manager.position.clone(); mgr.walkT = 1; cam.t = 1; cam.target.copy(cam.toT);
   addEventListener('hashchange', ()=>{ const id = (location.hash.match(/g=([\d-]+)/) || [])[1]; const i = stations.findIndex(s=> s.g.id === id); if(i >= 0 && i !== cur) goStation(i); });
