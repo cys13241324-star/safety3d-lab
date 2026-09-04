@@ -8,9 +8,9 @@
 <script>(function(){try{var t=localStorage.getItem('safety_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+KR:wght@600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Gothic+A1:wght@700;800&display=swap">
 <style>
-:root{--bg:#F3EEE4;--panel:#FAF7F1;--panel2:#ECE5D8;--line:#D3C9B6;--line-soft:#E3DBCC;--text:#22201C;--muted:#5A554C;--dim:#7B7468;--accent:#6B5231;--accent-ink:#FFFFFF;--ok:#2E6B47;--ok-soft:rgba(46,107,71,.12);--bad:#9C3B2A;--bad-soft:rgba(156,59,42,.10);--warn:#8E6A2C;--warn-soft:rgba(142,106,44,.10);--warn-line:rgba(142,106,44,.35);--on-accent:#FFFFFF;--glass:rgba(250,247,241,.92);--tint:rgba(0,0,0,.045);--scrim:rgba(243,238,228,.88);--sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic",sans-serif;--mono:"IBM Plex Mono",Consolas,monospace;--display:"Noto Serif KR","Nanum Myeongjo",serif;}
+:root{--bg:#F3EEE4;--panel:#FAF7F1;--panel2:#ECE5D8;--line:#D3C9B6;--line-soft:#E3DBCC;--text:#22201C;--muted:#5A554C;--dim:#7B7468;--accent:#6B5231;--accent-ink:#FFFFFF;--ok:#2E6B47;--ok-soft:rgba(46,107,71,.12);--bad:#9C3B2A;--bad-soft:rgba(156,59,42,.10);--warn:#8E6A2C;--warn-soft:rgba(142,106,44,.10);--warn-line:rgba(142,106,44,.35);--on-accent:#FFFFFF;--glass:rgba(250,247,241,.92);--tint:rgba(0,0,0,.045);--scrim:rgba(243,238,228,.88);--sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic",sans-serif;--mono:"IBM Plex Mono",Consolas,monospace;--display:"Gothic A1","IBM Plex Sans KR",sans-serif;}
 *{box-sizing:border-box} [hidden]{display:none!important}
 html,body{height:100%;margin:0;overflow:hidden}
 /* 접근성·터치: 보이는 포커스 링, 44px 터치 타깃, 탭 하이라이트, 움직임 줄이기 */
@@ -270,14 +270,14 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
   function titleBoard(g0){ const c = document.createElement('canvas'); c.width = 384; c.height = 256; const g = c.getContext('2d'); const hex = '#' + SUBJ_HEX[SUBJ.indexOf(g0.subject)].toString(16).padStart(6, '0');
     g.fillStyle = '#F4F1E6'; g.fillRect(0, 0, 384, 256); g.fillStyle = hex; g.fillRect(0, 0, 384, 62); g.fillStyle = '#10161F'; g.font = '700 30px "IBM Plex Mono", monospace'; g.fillText(g0.id, 18, 44);
     g.font = '500 22px "IBM Plex Sans KR", sans-serif'; g.fillStyle = '#10161F'; const chap = g0.chapter || '기타'; g.fillText(chap.length > 14 ? chap.slice(0, 14) + '…' : chap, 120, 42);
-    g.font = '700 40px "Noto Serif KR", "IBM Plex Sans KR", sans-serif'; g.fillStyle = '#1A2230'; wrapText(g, g0.title, 348).slice(0, 3).forEach((ln, i)=> g.fillText(ln, 18, 118 + i*50));
+    g.font = '700 40px "Gothic A1", "IBM Plex Sans KR", sans-serif'; g.fillStyle = '#1A2230'; wrapText(g, g0.title, 348).slice(0, 3).forEach((ln, i)=> g.fillText(ln, 18, 118 + i*50));
     g.fillStyle = '#6B7383'; g.font = '400 20px "IBM Plex Mono", monospace'; g.fillText(`${g0.items.length}항목 · 기출 ${g0.n || '-'}문항`, 18, 236);
     const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
   const bigC = document.createElement('canvas'); bigC.width = 1024; bigC.height = 683; const bigTex = new THREE.CanvasTexture(bigC); bigTex.encoding = THREE.sRGBEncoding; bigTex.anisotropy = 8;
   // 표지판: 화면이 좁으면(휴대폰) 글자를 키우고 줄 수를 줄인다 — 표지판 글이 반드시 읽혀야 한다
   function drawBig(g0, k, quiz){ const g = bigC.getContext('2d'), it = g0.items[k], hex = '#' + SUBJ_HEX[SUBJ.indexOf(g0.subject)].toString(16).padStart(6, '0'); const S = innerWidth < 600 ? 1.45 : 1, FS = Math.round(31*S), LH = Math.round(40*S);
     g.fillStyle = '#F4F1E6'; g.fillRect(0, 0, 1024, 683); g.fillStyle = hex; g.fillRect(0, 0, 1024, 92);
-    g.fillStyle = '#10161F'; g.font = '700 40px "IBM Plex Mono", monospace'; g.fillText(g0.id, 30, 62); g.font = `700 ${Math.round(44*Math.min(S, 1.2))}px "Noto Serif KR", "IBM Plex Sans KR", sans-serif`; g.fillText(g0.title.length > 14 ? g0.title.slice(0, 14) + '…' : g0.title, 190, 64);
+    g.fillStyle = '#10161F'; g.font = '700 40px "IBM Plex Mono", monospace'; g.fillText(g0.id, 30, 62); g.font = `700 ${Math.round(44*Math.min(S, 1.2))}px "Gothic A1", "IBM Plex Sans KR", sans-serif`; g.fillText(g0.title.length > 14 ? g0.title.slice(0, 14) + '…' : g0.title, 190, 64);
     g.fillStyle = '#6B7383'; g.font = '500 26px "IBM Plex Mono", monospace'; g.fillText(`${String(k+1).padStart(2,'0')} / ${String(g0.items.length).padStart(2,'0')}`, 880, 60);
     g.fillStyle = '#1A2230'; g.font = `700 ${Math.round(40*Math.min(S, 1.25))}px "IBM Plex Sans KR", sans-serif`; g.fillText(it.name.length > 18 ? it.name.slice(0, 18) + '…' : it.name, 30, 152);
     g.strokeStyle = '#C9C3B3'; g.lineWidth = 2; g.beginPath(); g.moveTo(30, 176); g.lineTo(994, 176); g.stroke();
@@ -309,7 +309,7 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
     // 게이트 간판 (입구 쪽)
     const gx = zc.x + (rev ? 33 : -33), gz = zc.z - 16.5; const gate = new THREE.Group(); gate.position.set(gx, 0, gz); gate.rotation.y = rev ? -Math.PI/2 : Math.PI/2; scene.add(gate);
     cyl(0.12, 0.12, 5.2, M.dark, gate, -3.2, 2.6, 0); cyl(0.12, 0.12, 5.2, M.dark, gate, 3.2, 2.6, 0);
-    const c = document.createElement('canvas'); c.width = 768; c.height = 192; const g2 = c.getContext('2d'); g2.fillStyle = '#' + SUBJ_HEX[si].toString(16).padStart(6, '0'); g2.fillRect(0, 0, 768, 192); g2.fillStyle = '#10161F'; g2.font = '800 64px "Noto Serif KR", "IBM Plex Sans KR", sans-serif'; g2.fillText(ZONE_NAME[si], 28, 88); g2.font = '500 34px "IBM Plex Sans KR", sans-serif'; g2.fillText(`제${si+1}과목 ${s} · 정거장 ${n}`, 28, 150);
+    const c = document.createElement('canvas'); c.width = 768; c.height = 192; const g2 = c.getContext('2d'); g2.fillStyle = '#' + SUBJ_HEX[si].toString(16).padStart(6, '0'); g2.fillRect(0, 0, 768, 192); g2.fillStyle = '#10161F'; g2.font = '800 64px "Gothic A1", "IBM Plex Sans KR", sans-serif'; g2.fillText(ZONE_NAME[si], 28, 88); g2.font = '500 34px "IBM Plex Sans KR", sans-serif'; g2.fillText(`제${si+1}과목 ${s} · 정거장 ${n}`, 28, 150);
     const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; const sign = new THREE.Mesh(new THREE.PlaneGeometry(6.6, 1.65), std({map: t, roughness: .8, side: THREE.DoubleSide})); sign.position.set(0, 4.6, 0); gate.add(sign); });
   // 구역 사이 연결 통로
   for(let si=0;si<5;si++){ const a = stations.filter(s=> s.si===si).slice(-1)[0], b = stations.filter(s=> s.si===si+1)[0]; if(a && b){ const ax = a.pos.x + (zoneOf(si).row === 1 ? -3 : 3); strip(ax, a.pos.z, ax, b.pos.z); strip(ax, b.pos.z, b.pos.x, b.pos.z); } }
