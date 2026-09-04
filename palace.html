@@ -59,7 +59,7 @@ body.quiz table.ft td{color:transparent;background:var(--line-soft);cursor:point
 #hint{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:12;font-family:var(--mono);font-size:11.5px;color:var(--dim);background:rgba(15,22,34,.7);padding:4px 10px;border-radius:6px;white-space:nowrap}
 #bMap,#bCard{display:none} #strip{display:none}
 /* 시작 화면: 구역 고르기 */
-#intro{position:fixed;inset:0;z-index:45;display:grid;place-items:center;background:rgba(10,16,24,.72);backdrop-filter:blur(6px);padding:16px}
+#intro{position:fixed;inset:0;z-index:45;display:grid;place-items:center;background:rgba(10,16,24,.72);backdrop-filter:blur(6px);padding:16px} #intro[hidden]{display:none} #toc[hidden]{display:none}
 #intro .box{width:min(760px,96vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 28px 22px;max-height:94vh;overflow-y:auto}
 #intro .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--accent);margin:0 0 4px} #intro h1{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:-.02em;margin:0 0 10px}
 #intro .how{color:var(--muted);margin:0 0 16px;line-height:1.7;font-size:14px} #intro .how b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--warn);color:#1A1200;font-size:12px;margin:0 4px 0 6px} #intro .how em{font-style:normal;color:var(--warn)} #intro kbd{font-family:var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:12px}
@@ -89,7 +89,7 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
   #strip{display:block;padding:8px 12px 8px;border-bottom:1px solid var(--line)} #strip .st{display:flex;gap:8px;align-items:baseline;font-size:13.5px;font-weight:600} #strip .st .k{font-family:var(--display);font-weight:800;color:var(--warn);font-size:16px} #strip p{margin:4px 0 8px;font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:6px 10px;border-radius:6px;background:var(--warn-soft);border:1px solid var(--warn-line)}
   #strip .sb{display:grid;grid-template-columns:1fr 2fr 1fr;gap:6px} #strip .sb .b{justify-content:center;padding:8px 6px;font-size:14px}
   #card .hd,#card .bd,#card .ft{display:none} body.sheet #card .hd,body.sheet #card .bd,body.sheet #card .ft{display:block} body.sheet #card .ft{display:grid} body.sheet #card .bd{max-height:38vh}
-  body.sheet #strip p{display:none} body.sheet #strip .sb{display:none} body.sheet #strip{padding-bottom:6px}
+  body.sheet #strip p{display:none} body.sheet #strip{padding-bottom:8px} body.sheet #strip .sb{grid-template-columns:1fr 1fr 1fr}
   #card .ft{grid-template-columns:1fr 1fr} #card .ft .b{padding:9px 6px;font-size:13.5px}
   #hint{display:none}
 }
@@ -225,15 +225,16 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
     g.fillStyle = '#6B7383'; g.font = '400 20px "IBM Plex Mono", monospace'; g.fillText(`${g0.items.length}항목 · 기출 ${g0.n || '-'}문항`, 18, 236);
     const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
   const bigC = document.createElement('canvas'); bigC.width = 1024; bigC.height = 683; const bigTex = new THREE.CanvasTexture(bigC); bigTex.encoding = THREE.sRGBEncoding; bigTex.anisotropy = 8;
-  function drawBig(g0, k, quiz){ const g = bigC.getContext('2d'), it = g0.items[k], hex = '#' + SUBJ_HEX[SUBJ.indexOf(g0.subject)].toString(16).padStart(6, '0');
+  // 표지판: 화면이 좁으면(휴대폰) 글자를 키우고 줄 수를 줄인다 — 표지판 글이 반드시 읽혀야 한다
+  function drawBig(g0, k, quiz){ const g = bigC.getContext('2d'), it = g0.items[k], hex = '#' + SUBJ_HEX[SUBJ.indexOf(g0.subject)].toString(16).padStart(6, '0'); const S = innerWidth < 600 ? 1.45 : 1, FS = Math.round(31*S), LH = Math.round(40*S);
     g.fillStyle = '#F4F1E6'; g.fillRect(0, 0, 1024, 683); g.fillStyle = hex; g.fillRect(0, 0, 1024, 92);
-    g.fillStyle = '#10161F'; g.font = '700 40px "IBM Plex Mono", monospace'; g.fillText(g0.id, 30, 62); g.font = '700 44px "Gothic A1", "IBM Plex Sans KR", sans-serif'; g.fillText(g0.title.length > 16 ? g0.title.slice(0, 16) + '…' : g0.title, 190, 63);
+    g.fillStyle = '#10161F'; g.font = '700 40px "IBM Plex Mono", monospace'; g.fillText(g0.id, 30, 62); g.font = `700 ${Math.round(44*Math.min(S, 1.2))}px "Gothic A1", "IBM Plex Sans KR", sans-serif`; g.fillText(g0.title.length > 14 ? g0.title.slice(0, 14) + '…' : g0.title, 190, 64);
     g.fillStyle = '#6B7383'; g.font = '500 26px "IBM Plex Mono", monospace'; g.fillText(`${String(k+1).padStart(2,'0')} / ${String(g0.items.length).padStart(2,'0')}`, 880, 60);
-    g.fillStyle = '#1A2230'; g.font = '700 40px "IBM Plex Sans KR", sans-serif'; g.fillText(it.name.length > 22 ? it.name.slice(0, 22) + '…' : it.name, 30, 150);
-    g.strokeStyle = '#C9C3B3'; g.lineWidth = 2; g.beginPath(); g.moveTo(30, 172); g.lineTo(994, 172); g.stroke();
-    g.font = '500 31px "IBM Plex Sans KR", sans-serif'; let y = 222; const facts = quiz ? it.facts.map(maskNums) : it.facts;
-    for(const f of facts){ const lines = wrapText(g, f, 900); if(y + lines.length*40 > 660) break; g.fillStyle = '#B4471E'; g.fillRect(30, y - 24, 10, 30); g.fillStyle = '#1A2230'; lines.forEach((ln, i)=> g.fillText(ln, 56, y + i*40)); y += lines.length*40 + 16; }
-    if(quiz){ g.fillStyle = '#B4471E'; g.font = '700 26px "IBM Plex Sans KR", sans-serif'; g.fillText('훅 퀴즈: 숫자를 떠올려 보세요', 620, 660); }
+    g.fillStyle = '#1A2230'; g.font = `700 ${Math.round(40*Math.min(S, 1.25))}px "IBM Plex Sans KR", sans-serif`; g.fillText(it.name.length > 18 ? it.name.slice(0, 18) + '…' : it.name, 30, 152);
+    g.strokeStyle = '#C9C3B3'; g.lineWidth = 2; g.beginPath(); g.moveTo(30, 176); g.lineTo(994, 176); g.stroke();
+    g.font = `500 ${FS}px "IBM Plex Sans KR", sans-serif`; let y = 176 + LH + 8; const facts = quiz ? it.facts.map(maskNums) : it.facts;
+    for(const f of facts){ const lines = wrapText(g, f, 900); if(y + (lines.length - 1)*LH > 650) break; g.fillStyle = '#B4471E'; g.fillRect(30, y - Math.round(FS*0.78), 10, Math.round(FS*0.95)); g.fillStyle = '#1A2230'; lines.forEach((ln, i)=> g.fillText(ln, 56, y + i*LH)); y += lines.length*LH + Math.round(14*S); }
+    if(quiz){ g.fillStyle = '#B4471E'; g.font = '700 26px "IBM Plex Sans KR", sans-serif'; g.fillText('숫자를 떠올려 보세요', 700, 668); }
     bigTex.needsUpdate = true; }
 
   /* ---------- 배치: 구역 6 · 정거장 165 ---------- */
@@ -346,7 +347,7 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
     // 표지판: 기둥 2 + 판 (카메라가 서는 +z 쪽을 본다)
     [-1.7, 1.7].forEach(x=> cyl(0.05, 0.05, 2.9, M.post, grp, x + 1.0, 1.45, -1.2, 8));
     s.titleTex = titleBoard(s.g); s.boardMat = std({map: s.titleTex, roughness: .85}); const board = new THREE.Mesh(boardGeo, s.boardMat); board.position.set(1.0, 2.0, -1.15); board.castShadow = true; grp.add(board); s.board = board;
-    const back = new THREE.Mesh(boardGeo, M.dark); back.position.set(1.0, 2.0, -1.17); back.rotation.y = Math.PI; grp.add(back);
+    const back = new THREE.Mesh(boardGeo, M.dark); back.position.set(1.0, 2.0, -1.17); back.rotation.y = Math.PI; grp.add(back); s.back = back; s.boardMat.transparent = true;
     // 소품 (왼쪽)
     const prop = new THREE.Group(); prop.position.set(-1.9, 0.14, -0.2); prop.scale.setScalar(0.8); grp.add(prop); s.propKey = propFor(s.g); PROPS[s.propKey](prop);
     // 램프 (완료 표시)
@@ -386,10 +387,10 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
   function goStation(i, keepItem){ i = clamp(i, 0, stations.length - 1); const prev = stations[cur]; if(prev && prev.boardMat.map === bigTex){ prev.boardMat.map = prev.titleTex; prev.boardMat.needsUpdate = true; }
     cur = i; if(!keepItem) item = 0; const s = stations[cur]; history.replaceState(null, '', '#g=' + s.g.id);
     const portrait = innerHeight > innerWidth;
-    cam.fromT = cam.target.clone(); cam.toT = s.pos.clone().add(portrait ? P3(-1.5, 2.0, -0.4) : P3(0.2, 1.4, -0.4)); cam.t = 0; cam.az = portrait ? -0.08 : -0.38; cam.el = portrait ? 0.22 : 0.34; cam.dist = portrait ? 17 : Math.min(cam.dist, 12);
+    cam.fromT = cam.target.clone(); cam.toT = s.pos.clone().add(portrait ? P3(0.8, 2.1, -0.9) : P3(0.2, 1.4, -0.4)); cam.t = 0; cam.az = portrait ? 0.02 : -0.38; cam.el = portrait ? 0.16 : 0.34; cam.dist = portrait ? 10.5 : Math.min(cam.dist, 12);
     sun.target.position.copy(s.pos); sun.position.copy(s.pos).add(P3(20, 40, 30)); spot.position.copy(s.pos).add(P3(-0.5, 4.5, 3.5));
     // 관리자: 앞 정거장 쪽에서 걸어 들어온다
-    mgr.from = manager.position.clone(); if(mgr.from.distanceTo(s.pos) > 30) mgr.from = s.pos.clone().add(P3(-4, 0, 3.5)); mgr.to = s.pos.clone().add(P3(-3.9, 0.14, 1.1)); mgr.walkT = 0; if(bubble){ bubble.remove(); bubble = null; }
+    mgr.from = manager.position.clone(); if(mgr.from.distanceTo(s.pos) > 30) mgr.from = s.pos.clone().add(P3(-4, 0, 3.5)); mgr.to = s.pos.clone().add(portrait ? P3(-1.5, 0.14, 1.6) : P3(-3.9, 0.14, 1.1)); mgr.walkT = 0; if(bubble){ bubble.remove(); bubble = null; }
     s.boardMat.map = bigTex; s.boardMat.needsUpdate = true; showItem(); el('zoneSel').value = String(s.si); if(!el('toc').hidden) renderToc(); try{ localStorage.setItem('memo_palace_last', s.g.id); }catch(e){} }
   // 훅 말풍선은 첫 문장만 (짧은 호흡). 관리자가 이미 서 있으면 바로 말한다
   const firstSentence = s => { const m = s.match(/^(.+?(?:다|요|라|자|것|음|임|기)[.!?]|.+?[.!?])\s/); return m ? m[1] : s; };
@@ -415,8 +416,10 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
     drawMap(); }
   function nextItem(){ if(exam) return; const g = stations[cur].g; if(item < g.items.length - 1){ item++; showItem(); } else goStation(cur + 1); }
   function prevItem(){ if(exam) return; if(item > 0){ item--; showItem(); } else goStation(cur - 1); }
-  el('sPrev').addEventListener('click', prevItem); el('sNext').addEventListener('click', ()=>{ if(exam) return; nextItem(); }); el('sOpen').addEventListener('click', ()=> document.body.classList.toggle('sheet'));
-  el('strip').addEventListener('click', e=>{ if(e.target.closest('.b')) return; document.body.classList.toggle('sheet'); });
+  function syncSheet(){ const open = document.body.classList.contains('sheet'); el('sOpen').textContent = open ? '접기 ⌄' : '펼치기 ⌃'; }
+  function toggleSheet(force){ document.body.classList.toggle('sheet', force); syncSheet(); }
+  el('sPrev').addEventListener('click', prevItem); el('sNext').addEventListener('click', ()=>{ if(exam) return; nextItem(); }); el('sOpen').addEventListener('click', ()=> toggleSheet());
+  el('strip').addEventListener('click', e=>{ if(e.target.closest('.b')) return; toggleSheet(); }); syncSheet();
   /* ---------- 구역 시험: 정거장을 돌며 빈칸 문제 ---------- */
   const CARDS = BANK.cards || [], cardsOf = {}; CARDS.forEach(c=>{ const k = c.subject + '|' + c.chapter + '|' + c.big; (cardsOf[k] = cardsOf[k] || []).push(c); });
   const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
@@ -429,8 +432,8 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
     const pool = [fmt(v*0.5), fmt(v*2), fmt(v*1.5), fmt(v + (v >= 10 ? 10 : 1)), fmt(Math.max(0, v - (v >= 10 ? 10 : 1)))].filter((x, i, a)=> x !== fmt(v) && a.indexOf(x) === i);
     return {q: c.f.replace(c.m[0], '▢ ' + c.m[2]), stem: c.it.name, unit: c.m[2], opts: shuffle([fmt(v), ...pool.slice(0, 3)]), answer: fmt(v), full: c.f, hook: c.it.hook, src: '사실에서 출제'}; }
   let exam = null;
-  function startExam(){ const si = stations[cur].si; const list = stations.map((s, i)=> i).filter(i=> stations[i].si === si); exam = {list, i: 0, score: 0, wrong: [], q: null, answered: false, si}; document.body.classList.add('exam'); document.body.classList.add('sheet'); el('bExam').textContent = '시험 그만'; askNext(); }
-  function stopExam(){ exam = null; document.body.classList.remove('exam'); document.body.classList.remove('sheet'); el('bExam').textContent = '구역 시험'; stations.forEach(s=> setDone(s, !!done[s.g.id], true)); drawMap(); showItem(); }
+  function startExam(){ const si = stations[cur].si; const list = stations.map((s, i)=> i).filter(i=> stations[i].si === si); exam = {list, i: 0, score: 0, wrong: [], q: null, answered: false, si}; document.body.classList.add('exam'); toggleSheet(true); el('bExam').textContent = '시험 그만'; askNext(); }
+  function stopExam(){ exam = null; document.body.classList.remove('exam'); toggleSheet(false); el('bExam').textContent = '구역 시험'; stations.forEach(s=> setDone(s, !!done[s.g.id], true)); drawMap(); showItem(); }
   function askNext(){ while(exam.i < exam.list.length){ const idx = exam.list[exam.i]; const q = questionFor(stations[idx].g); if(q){ exam.q = q; exam.answered = false; goStation(idx); return; } exam.i++; } finishExam(); }
   function renderExam(){ const s = stations[cur], g = s.g, q = exam.q; if(!q) return;
     if(mgr.walkT >= 1) say(q.q, 'boss'); else mgr.talkT = 0.15;
@@ -525,6 +528,8 @@ body.exam #bQuiz{display:none} body.exam #bExam{background:#F07056;border-color:
     // 배경 생활감: 순찰 작업자·크레인·깃발
     WALKERS.forEach(w=>{ w.t += dt*w.speed*w.dir; if(w.t >= 1){ w.t = 1; w.dir = -1; } if(w.t <= 0){ w.t = 0; w.dir = 1; } w.g.position.copy(w.a).lerp(w.b, w.t); const d = w.b.clone().sub(w.a).multiplyScalar(w.dir); w.g.rotation.y = Math.atan2(d.x, d.z); w.ph += dt*7; walkPose(w.g, w.ph, 0.5); });
     DRESS_ANIM.forEach(a=>{ if(a.kind === 'crane') a.top.rotation.y += dt*0.06; else if(a.kind === 'flag'){ a.m.rotation.y = 0.25*Math.sin(now*0.003 + a.ph); a.m.position.y = 6.4 + 0.05*Math.sin(now*0.005 + a.ph); } });
+    // 카메라와 현재 표지판 사이에 끼는 이웃 표지판은 반투명하게 (화면을 돌릴 때 앞 정거장이 가리는 문제)
+    { const cp = camera.position, curS = stations[cur], dCur = cp.distanceTo(curS.pos); stations.forEach(s=>{ if(s === curS){ if(s.boardMat.opacity !== 1){ s.boardMat.opacity = 1; s.back.visible = true; } return; } const near = s.pos.distanceTo(curS.pos) < 18; const fade = near && cp.distanceTo(s.pos) < dCur - 0.5; const want = fade ? 0.1 : 1; if(s.boardMat.opacity !== want){ s.boardMat.opacity = want; s.boardMat.depthWrite = !fade; s.back.visible = !fade; } }); }
     placeBubble(); placeNav(); renderer.render(scene, camera); requestAnimationFrame(frame); }
   goStation(cur); manager.position.copy(stations[cur].pos).add(P3(-3.9, 0.14, 1.1)); mgr.from = manager.position.clone(); mgr.walkT = 1; cam.t = 1; cam.target.copy(cam.toT);
   addEventListener('hashchange', ()=>{ const id = (location.hash.match(/g=([\d-]+)/) || [])[1]; const i = stations.findIndex(s=> s.g.id === id); if(i >= 0 && i !== cur) goStation(i); });
