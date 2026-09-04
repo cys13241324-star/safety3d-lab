@@ -238,8 +238,8 @@ html{overscroll-behavior-y:contain}
     if(facts.length >= 2 && kv >= Math.ceil(facts.length*0.6)) return `<table class="ft">${facts.map((f, i)=> rows[i] ? `<tr><th>${esc(rows[i][0])}</th><td>${hi(rows[i][1])}</td></tr>` : `<tr><td colspan="2">${hi(f)}</td></tr>`).join('')}</table>`;
     return `<ul class="facts">${facts.map(f=> `<li>${hi(f)}</li>`).join('')}</ul>`; }
   // 그림 경로: 사이트/바탕화면은 파일, 아티팩트는 내장 데이터
-  const IMGMAP = null; const IMGBASE = 'img/';
-  const IMGLIST = ["approach", "boiler", "caisson", "chemdist", "confined", "elcb", "fall", "forklift", "gangway", "gasweld", "grinder", "horse", "ladder", "lux", "net", "noise", "panelspace", "plank", "powerline", "press", "rail", "ramp", "robot", "roller", "rotor", "sawblade", "scaffold", "shore", "stairs", "staticflow", "trench", "vdt", "weather", "welder", "wirerope"];
+  const IMGMAP = null; const IMGBASE = '';
+  const IMGLIST = [];
   function IMG(k){ if(IMGMAP && IMGMAP[k]) return IMGMAP[k]; if(IMGMAP) return ''; return (IMGBASE && IMGLIST.includes(k)) ? IMGBASE + k + '.webp' : ''; }
   // 숫자 막대 도해: 같은 단위 숫자가 둘 이상이면 비교 막대
   const BAR_RE = /(\d+(?:[.,]\d+)?)\s*(mm|cm|m\/s|m\/min|m|%|°|초|분|시간|일|개월|년|명|회|배|kV|V|mA|A|dB|lux|ppm|MPa|kPa|kg|t|℃)(?![A-Za-z가-힣\/])/;
@@ -270,7 +270,6 @@ html{overscroll-behavior-y:contain}
     document.body.classList.toggle('hide', hideFacts);
     v.innerHTML = `<div class="pageHead"><div class="path"><span>${esc(g.subject)} › ${esc(g.chapter || '기타')} › ${esc(g.big || '종합')}</span><span>${esc(g.id)}</span>${g.n ? `<span>기출 ${g.n}문항 · ${g.rounds}회차</span>` : ''}</div><h2>${esc(g.title)}</h2>
       <div class="pageTools"><button class="b sm" type="button" id="bHide" aria-pressed="${hideFacts}">${hideFacts ? '사실 보이기' : '사실 가리고 훅으로 떠올리기'}<kbd class="k">H</kbd></button><button class="b sm ${done[g.id] ? 'done' : ''}" type="button" id="bDone">${done[g.id] ? '✓ 학습 완료' : '학습 완료로 표시'}<kbd class="k">D</kbd></button>${(g.qs && g.qs.length) ? `<button class="b sm primary" type="button" id="bQuizOpen" aria-haspopup="dialog">기출 풀기 (${g.qs.length})<kbd class="k">Q</kbd></button>` : ''}${link3d(g.topic3d)}<button class="b sm" type="button" id="bPrint">인쇄<kbd class="k">P</kbd></button><span class="navMini">${prev ? `<button class="b sm" type="button" data-go="${esc(prev.id)}" title="이전 묶음: ${esc(prev.title)}">‹ 이전</button>` : ''}<span class="muted mono" style="font-size:12px">${i+1} / ${METHODS.length}</span>${next ? `<button class="b sm" type="button" data-go="${esc(next.id)}" title="다음 묶음: ${esc(next.title)}">다음 ›</button>` : ''}</span></div></div>
-      ${g.topic3d && IMG(g.topic3d) ? `<figure class="hero"><a href="${LAB}#topic=${esc(g.topic3d)}" target="_blank" rel="noopener" title="3D 실습장에서 값을 바꿔 보기"><img src="${IMG(g.topic3d)}" alt="3D 실습장 장면: ${esc(g.title)}" width="880" height="544" loading="lazy"></a><figcaption><b>3D 실습장 장면</b> · 누르면 실습장에서 값을 바꿔 볼 수 있습니다</figcaption></figure>` : ''}
       <ol class="spec">${g.items.map((it, k)=> `<li class="it"><div class="no" aria-hidden="true">${String(k+1).padStart(2,'0')}</div><div><h4><span class="num">${String(k+1).padStart(2,'0')}</span>${esc(it.name)}</h4>
         <div class="r"><span class="lb">사실</span><div>${hideFacts ? '<div class="rh">가려진 칸을 누르면 보입니다</div>' : ''}${factsHtml(it.facts)}</div></div>
         ${diagramHtml(it)}
