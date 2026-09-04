@@ -68,6 +68,15 @@ body.quiz table.ft td{color:transparent;background:var(--line-soft);cursor:point
 #strip{display:none} #bCard{display:none}
 .more{position:relative} #moreMenu{position:absolute;right:0;top:calc(100% + 6px);min-width:200px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:2px;z-index:30} #moreMenu[hidden]{display:none}
 #moreMenu .mi{font:inherit;font-size:14px;text-align:left;padding:9px 12px;border:0;border-radius:6px;background:none;color:var(--text);cursor:pointer;text-decoration:none;display:flex;justify-content:space-between;align-items:center;gap:12px} #moreMenu .mi:hover{background:var(--tint)} #moreMenu .mi[aria-pressed="true"]::after{content:'켜짐';font-size:12px;color:var(--warn)} #moreMenu .mk{font-family:var(--mono);font-size:11px;color:var(--dim)}
+#fps{position:fixed;inset:0;z-index:25;pointer-events:none} #fps[hidden]{display:none}
+#fps .fx{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid rgba(255,255,255,.85);border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.35)}
+#fps .fhud{position:absolute;left:12px;right:12px;top:calc(var(--topH) + 8px);display:flex;gap:10px;align-items:center;font-family:var(--mono);font-size:13px;color:var(--text);pointer-events:auto} #fps .fhud span{background:var(--glass);padding:6px 10px;border-radius:6px;border:1px solid var(--line)} #fps .fhud .b{margin-left:auto}
+#fps .fhelp{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:var(--glass);border:1px solid var(--line);padding:8px 14px;border-radius:8px;font-size:13.5px;color:var(--muted);white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis} #fps .fhelp b{color:var(--warn)}
+#fps .fprompt{position:absolute;left:50%;bottom:78px;transform:translateX(-50%);pointer-events:auto} #fps .fprompt .b{font-size:15px;padding:10px 18px;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+#fps .fquiz{position:absolute;inset:0;display:grid;place-items:center;background:var(--scrim);pointer-events:auto} #fps .fquiz[hidden]{display:none} #fps .fquiz .box{width:min(560px,94vw);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px} #fps .fquiz h3{margin:4px 0 8px;font-family:var(--display);font-weight:800;font-size:19px} #fps .fquiz .stem{font-size:16px;line-height:1.5;margin:0 0 12px}
+#fps .joy{display:none;position:absolute;bottom:26px;left:26px;width:110px;height:110px;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.18)} #fps .joy i{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(255,255,255,.55)} #fps .joy.r{left:auto;right:26px;border-style:dashed}
+body.fps #card,body.fps #map,body.fps #hint,body.fps .lbl.nav,body.fps #strip{display:none!important} body.fps #stage canvas{cursor:crosshair}
+@media (max-width:820px){#fps .joy{display:block} #fps .fhelp{bottom:150px;font-size:12.5px} #fps .fprompt{bottom:196px} #fps .fhud{font-size:12px} #fps .fprompt .b kbd{display:none}}
 #bMap{display:none} .m-only{display:none} @media (max-width:820px){.m-only{display:inline-flex}}
 /* 조용한 톤 */
 .b{background:transparent;font-weight:500} .b.primary{background:var(--warn);color:var(--on-accent);font-weight:600} kbd.k{display:none}
@@ -157,21 +166,23 @@ html,body{overscroll-behavior:none}
 </div></div>
 <div id="stage"></div>
 <header id="top">
-  <div class="crumb"><a class="home" href="./">산업안전기사</a><span class="sep sep1">›</span><a href="memo.html?v=09041534">암기 은행</a><span class="sep">›</span><span>순찰로</span></div>
+  <div class="crumb"><a class="home" href="./">산업안전기사</a><span class="sep sep1">›</span><a href="memo.html?v=09041623">암기 은행</a><span class="sep">›</span><span>순찰로</span></div>
   <button class="b" id="bToc" type="button" aria-expanded="false" aria-controls="toc"><span aria-hidden="true">☰</span> 목차<kbd class="k">T</kbd></button>
   <select class="b" id="zoneSel" aria-label="구역 선택"></select>
   <span class="sp"></span>
+  <button class="b m-only" id="bFpsM" type="button">순찰 게임</button>
   <button class="b bTheme m-only" type="button">어두운 모드</button>
   <button class="b primary m-hide" id="bExam" type="button" title="이 구역 정거장을 돌며 빈칸 문제를 풉니다 (E)">구역 시험</button>
   <div class="more m-hide"><button class="b" id="bMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="더 보기">⋯</button>
     <div id="moreMenu" role="menu" hidden>
       <button class="mi" id="bQuiz" type="button" role="menuitemcheckbox" aria-pressed="false" aria-checked="false">숫자 가리기 <span class="mk">H</span></button>
+      <button class="mi" id="bFps" type="button" role="menuitem">1인칭 순찰 게임 <span class="mk">F</span></button>
       <button class="mi" id="bLite" type="button" role="menuitemcheckbox" aria-pressed="false" aria-checked="false">가벼운 모드 (휴대폰 자동)</button>
       <button class="mi" id="bMap" type="button" role="menuitem">지도</button>
       <button class="mi bTheme" type="button" role="menuitem">어두운 모드</button>
       <button class="mi" id="bHelp" type="button" role="menuitem">단축키 <span class="mk">?</span></button>
-      <a class="mi" role="menuitem" href="memo.html?v=09041534">암기 은행 노트</a>
-      <a class="mi lab" role="menuitem" href="lab.html?v=09041534" target="_blank" rel="noopener">3D 규격 실습장</a>
+      <a class="mi" role="menuitem" href="memo.html?v=09041623">암기 은행 노트</a>
+      <a class="mi lab" role="menuitem" href="lab.html?v=09041623" target="_blank" rel="noopener">3D 규격 실습장</a>
     </div></div>
   <button class="b" id="bCard" type="button" hidden>카드</button>
 </header>
@@ -179,14 +190,22 @@ html,body{overscroll-behavior:none}
 <div id="map"><canvas id="mapC" width="500" height="352"></canvas><div class="cap"><span id="mapZone"></span><span id="mapProg"></span></div></div>
 <main id="card"><div id="strip"><div class="st"><span class="k" id="sK"></span><span id="sName"></span></div><div class="hookWrap"><p id="sHook" aria-live="polite"></p></div><div class="sb"><button class="b" id="sPrev" type="button" aria-label="이전 항목">◀</button><button class="b primary" id="sNext" type="button">다음 ▶</button><button class="b" id="sOpen" type="button">펼치기</button></div></div><div class="hd"><div class="path" id="cPath"></div><h2 id="cTitle"></h2></div><div class="bd" id="cBody"></div><div class="ft" id="cFt"></div></main>
 <div id="labels"></div>
-<div id="help" hidden><div class="box" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><h2 id="helpTitle">단축키</h2><table><tr><td>→ / Space</td><td>다음 항목, 마지막이면 다음 정거장</td></tr><tr><td>←</td><td>이전 항목·정거장</td></tr><tr><td>Shift + → / ←</td><td>정거장 건너뛰기</td></tr><tr><td>1 ~ 4</td><td>시험·기출 보기 고르기</td></tr><tr><td>H</td><td>숫자 가리기 켜고 끄기</td></tr><tr><td>Q</td><td>이 정거장 기출 풀기</td></tr><tr><td>E</td><td>구역 시험 시작·그만</td></tr><tr><td>D</td><td>외웠다 표시</td></tr><tr><td>T</td><td>목차</td></tr><tr><td>M</td><td>지도 (휴대폰)</td></tr><tr><td>Esc</td><td>열린 창 닫기</td></tr><tr><td>?</td><td>이 도움말</td></tr></table><p class="row" style="margin:12px 0 0"><button class="b primary" type="button" id="bHelpClose">닫기</button></p></div></div>
+<div id="help" hidden><div class="box" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><h2 id="helpTitle">단축키</h2><table><tr><td>→ / Space</td><td>다음 항목, 마지막이면 다음 정거장</td></tr><tr><td>←</td><td>이전 항목·정거장</td></tr><tr><td>Shift + → / ←</td><td>정거장 건너뛰기</td></tr><tr><td>1 ~ 4</td><td>시험·기출 보기 고르기</td></tr><tr><td>F</td><td>1인칭 순찰 게임 (WASD 이동 · E 빈칸 채우기)</td></tr><tr><td>H</td><td>숫자 가리기 켜고 끄기</td></tr><tr><td>Q</td><td>이 정거장 기출 풀기</td></tr><tr><td>E</td><td>구역 시험 시작·그만</td></tr><tr><td>D</td><td>외웠다 표시</td></tr><tr><td>T</td><td>목차</td></tr><tr><td>M</td><td>지도 (휴대폰)</td></tr><tr><td>Esc</td><td>열린 창 닫기</td></tr><tr><td>?</td><td>이 도움말</td></tr></table><p class="row" style="margin:12px 0 0"><button class="b primary" type="button" id="bHelpClose">닫기</button></p></div></div>
+<div id="fps" hidden>
+  <div class="fx" aria-hidden="true"></div>
+  <div class="fhud"><span id="fScore">정답 0 · 시도 0</span><span id="fLeft"></span><button class="b" id="fExit" type="button">나가기<kbd class="k">Esc</kbd></button></div>
+  <div class="fhelp" id="fHelp">W A S D 이동 · 마우스로 둘러보기 · 표지판 앞에서 <b>E</b> 빈칸 채우기 · 화면을 클릭하면 시작</div>
+  <div class="fprompt" id="fPrompt" hidden><button class="b primary" id="fAsk" type="button"></button></div>
+  <div class="fquiz" id="fQuiz" hidden role="dialog" aria-modal="true" aria-labelledby="fqTitle"><div class="box"><div class="tag" id="fqTag"></div><h3 id="fqTitle"></h3><p class="stem" id="fqStem"></p><div class="qopts" id="fqOpts"></div><div id="fqFb"></div><div class="row"><button class="b primary" id="fqNext" type="button" hidden>계속 순찰 →</button><button class="b" id="fqClose" type="button">닫기</button></div></div></div>
+  <div class="joy" id="joyL" aria-hidden="true"><i></i></div><div class="joy r" id="joyR" aria-hidden="true"><i></i></div>
+</div>
 <div id="hint">→ 다음 · ← 이전 · H 숫자 가리기 · Q 기출 · E 시험 · D 외웠다 · ? 단축키 전체</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
   const BANK = JSON.parse(document.getElementById('bank').textContent);
   const el = id => document.getElementById(id);
-  const LAB = 'lab.html?v=09041534', MEMO = 'memo.html?v=09041534';
+  const LAB = 'lab.html?v=09041623', MEMO = 'memo.html?v=09041623';
   const SUBJ = ['안전관리론','인간공학 및 시스템안전공학','기계위험방지기술','전기위험방지기술','화학설비위험방지기술','건설안전기술'];
   const SUBJ_SHORT = ['안전관리론','인간공학','기계위험방지','전기위험방지','화학설비','건설안전'];
   const SUBJ_HEX = [0x7FA6E0, 0xB58FE0, 0xF0A35B, 0xE3B54D, 0x6BC3C9, 0x5CC08A];
@@ -439,10 +458,10 @@ html,body{overscroll-behavior:none}
   function camPos(){ return P3(cam.target.x + cam.dist*Math.cos(cam.el)*Math.sin(cam.az), cam.target.y + cam.dist*Math.sin(cam.el), cam.target.z + cam.dist*Math.cos(cam.el)*Math.cos(cam.az)); }
   function applyCamera(){ camera.position.copy(camPos()); camera.lookAt(cam.target); }
   const dom = renderer.domElement;
-  dom.addEventListener('pointerdown', e=>{ cam.drag = {x: e.clientX, y: e.clientY, az: cam.az, el: cam.el}; dom.setPointerCapture(e.pointerId); });
+  dom.addEventListener('pointerdown', e=>{ if(fps.on) return; cam.drag = {x: e.clientX, y: e.clientY, az: cam.az, el: cam.el}; dom.setPointerCapture(e.pointerId); });
   dom.addEventListener('pointermove', e=>{ if(!cam.drag) return; cam.az = cam.drag.az - (e.clientX - cam.drag.x)*0.006; cam.el = clamp(cam.drag.el + (e.clientY - cam.drag.y)*0.004, 0.08, 1.2); });
   dom.addEventListener('pointerup', ()=>{ cam.drag = null; }); dom.addEventListener('pointercancel', ()=>{ cam.drag = null; });
-  dom.addEventListener('wheel', e=>{ cam.dist = clamp(cam.dist*(1 + Math.sign(e.deltaY)*0.12), 5, 30); e.preventDefault(); }, {passive: false});
+  dom.addEventListener('wheel', e=>{ if(fps.on){ e.preventDefault(); return; } cam.dist = clamp(cam.dist*(1 + Math.sign(e.deltaY)*0.12), 5, 30); e.preventDefault(); }, {passive: false});
   let pinch = null; dom.addEventListener('touchstart', e=>{ if(e.touches.length === 2){ pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); cam.drag = null; } }, {passive: true});
   dom.addEventListener('touchmove', e=>{ if(e.touches.length === 2 && pinch){ const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); cam.dist = clamp(cam.dist*pinch/d, 5, 30); pinch = d; } }, {passive: true});
   dom.addEventListener('touchend', ()=>{ pinch = null; });
@@ -512,12 +531,50 @@ html,body{overscroll-behavior:none}
       say(ok ? '정답! ' + (it ? firstSentence(it.hook) : '') : '정답은 ' + CIRC[q.ai] + '. ' + (it ? firstSentence(it.hook) : ''), ok ? 'boss' : 'boss bad');
       el('qfb').innerHTML = `<div class="fb ${ok ? 'ok' : 'bad'}">${ok ? '정답' : '오답'} · 정답 ${CIRC[q.ai]}</div>${q.sol ? `<p class="sol">${esc(q.sol)}${q.sol.length >= 260 ? '…' : ''}</p>` : ''}${it ? `<div class="hookmini"><b>이 문제의 훅</b>${esc(it.hook)}</div>` : ''}`; el('qNext').focus(); }));
     el('qPrev').addEventListener('click', ()=>{ pq.idx--; renderQuiz(); }); el('qNext').addEventListener('click', ()=>{ pq.idx++; renderQuiz(); }); el('qClose').addEventListener('click', toggleQuiz); drawMap(); }
+  /* ---------- 1인칭 순찰 게임 ---------- */
+  const fps = {on:false, pos:new THREE.Vector3(), yaw:0, pitch:0, keys:{}, move:{x:0, y:0}, look:{dx:0, dy:0}, bob:0, near:-1, score:{ok:0, n:0}, q:null, touches:{}, locked:false};
+  const fdir = ()=> P3(Math.sin(fps.yaw), 0, Math.cos(fps.yaw));
+  function fpsEnter(){ if(fps.on) return; if(exam) stopExam(); if(pq){ pq = null; } fps.on = true; document.body.classList.add('fps'); el('fps').hidden = false; el('help').hidden = true; setMore(false);
+    const s = stations[cur]; fps.pos.copy(s.pos).add(P3(1.0, 0, 5.5)); fps.yaw = Math.PI; fps.pitch = -0.02; fps.score = {ok:0, n:0}; manager.visible = false; camera.fov = innerWidth < 820 ? 80 : 66; camera.updateProjectionMatrix(); if(bubble){ bubble.remove(); bubble = null; }
+    el('fHelp').textContent = (innerWidth < 820) ? '왼쪽 화면을 끌어 이동 · 오른쪽 화면을 끌어 둘러보기 · 표지판 앞에서 「빈칸 채우기」' : 'W A S D 이동 · 마우스로 둘러보기 · 표지판 앞에서 E 빈칸 채우기 · 화면을 클릭하면 시작'; fpsHud(); }
+  function fpsExit(){ if(!fps.on) return; fps.on = false; document.body.classList.remove('fps'); el('fps').hidden = true; el('fQuiz').hidden = true; fps.q = null; manager.visible = true; camera.fov = 40; camera.updateProjectionMatrix(); if(document.pointerLockElement) document.exitPointerLock(); goStation(cur, true); }
+  function fpsHud(){ el('fScore').textContent = `정답 ${fps.score.ok} · 시도 ${fps.score.n}`; const dn = stations.filter(x=> done[x.g.id]).length; el('fLeft').textContent = `외운 정거장 ${dn} / ${stations.length}`; }
+  el('bFps').addEventListener('click', fpsEnter); el('bFpsM').addEventListener('click', fpsEnter); el('fExit').addEventListener('click', fpsExit);
+  dom.addEventListener('click', ()=>{ if(fps.on && !fps.q && innerWidth >= 820 && !document.pointerLockElement) dom.requestPointerLock(); });
+  document.addEventListener('pointerlockchange', ()=>{ fps.locked = document.pointerLockElement === dom; if(fps.on) el('fHelp').hidden = fps.locked; });
+  document.addEventListener('mousemove', e=>{ if(!fps.on || !fps.locked || fps.q) return; fps.yaw -= e.movementX*0.0022; fps.pitch = clamp(fps.pitch - e.movementY*0.0018, -0.9, 0.9); });
+  document.addEventListener('keydown', e=>{ if(!fps.on) return; fps.keys[e.key.toLowerCase()] = true; if(e.key === 'Escape' && fps.q){ fpsQuizClose(); } else if(e.key === 'Escape' && !document.pointerLockElement){ fpsExit(); } else if((e.key === 'e' || e.key === 'E' || e.key === 'Enter') && !fps.q && fps.near >= 0){ fpsAsk(); } });
+  document.addEventListener('keyup', e=>{ fps.keys[e.key.toLowerCase()] = false; });
+  // 휴대폰: 왼쪽 반 = 조이스틱, 오른쪽 반 = 시선
+  dom.addEventListener('pointerdown', e=>{ if(!fps.on || fps.q) return; fps.touches[e.pointerId] = {x0:e.clientX, y0:e.clientY, x:e.clientX, y:e.clientY, side: e.clientX < innerWidth/2 ? 'L' : 'R'}; });
+  dom.addEventListener('pointermove', e=>{ const tch = fps.touches[e.pointerId]; if(!fps.on || !tch) return; if(tch.side === 'L'){ fps.move.x = clamp((e.clientX - tch.x0)/50, -1, 1); fps.move.y = clamp((e.clientY - tch.y0)/50, -1, 1); const k = el('joyL').firstElementChild; k.style.transform = `translate(${fps.move.x*30}px, ${fps.move.y*30}px)`; } else { fps.yaw -= (e.clientX - tch.x)*0.006; fps.pitch = clamp(fps.pitch - (e.clientY - tch.y)*0.004, -0.9, 0.9); tch.x = e.clientX; tch.y = e.clientY; } });
+  const fpsUp = e=>{ const tch = fps.touches[e.pointerId]; if(!tch) return; if(tch.side === 'L'){ fps.move.x = 0; fps.move.y = 0; el('joyL').firstElementChild.style.transform = ''; } delete fps.touches[e.pointerId]; };
+  dom.addEventListener('pointerup', fpsUp); dom.addEventListener('pointercancel', fpsUp);
+  function fpsStep(dt){ if(!fps.on) return; const spd = (fps.keys['shift'] ? 7 : 4.2)*dt; let mx = 0, mz = 0; if(fps.keys['w'] || fps.keys['arrowup']) mz += 1; if(fps.keys['s'] || fps.keys['arrowdown']) mz -= 1; if(fps.keys['a'] || fps.keys['arrowleft']) mx -= 1; if(fps.keys['d'] || fps.keys['arrowright']) mx += 1; mz -= fps.move.y; mx += fps.move.x;
+    if(!fps.q && (mx || mz)){ const d = fdir(), r = P3(d.z, 0, -d.x); const v = d.multiplyScalar(mz).add(r.multiplyScalar(mx)); if(v.length() > 1) v.normalize(); fps.pos.addScaledVector(v, spd); fps.pos.x = clamp(fps.pos.x, -150, 150); fps.pos.z = clamp(fps.pos.z, -95, 95); const cs = stations[cur]; if(cs && Math.abs(cs.pos.x + 1.0 - fps.pos.x) < 3.2 && fps.pos.z < cs.pos.z - 1.15 + 1.2 && fps.pos.z > cs.pos.z - 1.15 - 0.6) fps.pos.z = cs.pos.z - 1.15 + 1.2; fps.bob += dt*9; }
+    const bob = 0.04*Math.sin(fps.bob); camera.position.set(fps.pos.x, 1.62 + bob, fps.pos.z); const d = fdir(); camera.lookAt(fps.pos.x + d.x, 1.62 + bob + Math.tan(fps.pitch), fps.pos.z + d.z);
+    // 가장 가까운 정거장(표지판 앞 4 m 안, 앞쪽) → 그 정거장을 현재로
+    let best = -1, bd = 1e9; stations.forEach((s, i)=>{ const dx = s.pos.x + 1.0 - fps.pos.x, dz = s.pos.z - 1.15 - fps.pos.z; if(dz > -0.3 || dz < -12 || Math.abs(dx) > 6) return; const dist = Math.hypot(dx, dz); if(dist < bd){ bd = dist; best = i; } });
+    if(best >= 0 && best !== cur && bd < 12){ const keep = cam.target.clone(); goStation(best, false); cam.target.copy(keep); cam.t = 1; manager.visible = false; if(bubble){ bubble.remove(); bubble = null; } }
+    const s = stations[cur]; const dx = s.pos.x + 1.0 - fps.pos.x, dz = s.pos.z - 1.15 - fps.pos.z, dist = Math.hypot(dx, dz), facing = (dx*d.x + dz*d.z)/Math.max(0.01, dist);
+    const nearD = innerWidth < 820 ? 7.5 : 4.8; const near = (dist < nearD && facing > 0.35) ? cur : -1;
+    if(near !== fps.near){ fps.near = near; el('fPrompt').hidden = near < 0; if(near >= 0) el('fAsk').innerHTML = `${done[s.g.id] ? '한 번 더' : '빈칸 채우기'} · ${esc(s.g.title)}<kbd class="k">E</kbd>`; } }
+  el('fAsk').addEventListener('click', fpsAsk);
+  function fpsAsk(){ const s = stations[cur], g = s.g; const q = questionFor(g); if(!q) return; fps.q = q; if(document.pointerLockElement) document.exitPointerLock();
+    el('fqTag').textContent = `${SUBJ_SHORT[s.si]} · ${g.id} · ${q.stem}`; el('fqTitle').textContent = g.title; el('fqStem').textContent = q.q; el('fqOpts').innerHTML = q.opts.map((o, i)=> `<button type="button" data-v="${esc(o)}">${i + 1}. ${esc(o)} ${esc(q.unit)}</button>`).join(''); el('fqFb').innerHTML = ''; el('fqNext').hidden = true; el('fQuiz').hidden = false; el('fqOpts').querySelector('button').focus();
+    el('fqOpts').querySelectorAll('button').forEach(b=> b.addEventListener('click', ()=>{ if(!fps.q) return; const ok = b.dataset.v === q.answer; el('fqOpts').querySelectorAll('button').forEach(x=>{ x.disabled = true; if(x.dataset.v === q.answer) x.classList.add('ok'); }); if(!ok) b.classList.add('bad'); fps.score.n++; if(ok){ fps.score.ok++; done[g.id] = Date.now(); saveDone(); setDone(s, true); } else flashLamp(s, false);
+      el('fqFb').innerHTML = `<div class="fb ${ok ? 'ok' : 'bad'}">${ok ? '정답! 램프가 켜졌습니다' : '오답'} · <b>${esc(q.full)}</b></div>${q.hook ? `<div class="hookmini"><b>이렇게 외운다</b>${esc(q.hook)}</div>` : ''}`; el('fqNext').hidden = false; el('fqNext').focus(); fpsHud(); })); }
+  function fpsQuizClose(){ fps.q = null; el('fQuiz').hidden = true; fps.near = -1; if(innerWidth >= 820) dom.requestPointerLock(); }
+  window.__fps = fps; window.__fpsInfo = ()=>({cur, id: stations[cur].g.id, big: stations[cur].boardMat && stations[cur].boardMat.map === bigTex, pos: [fps.pos.x, fps.pos.z], board: [stations[cur].pos.x + 1, stations[cur].pos.z - 1.15], near: fps.near});
+  el('fqNext').addEventListener('click', fpsQuizClose); el('fqClose').addEventListener('click', fpsQuizClose);
+  document.addEventListener('keydown', e=>{ if(!fps.on || !fps.q) return; if(/^[1-4]$/.test(e.key)){ const b = el('fqOpts').querySelectorAll('button')[+e.key - 1]; if(b && !b.disabled) b.click(); } else if(e.key === 'Enter' && !el('fqNext').hidden) fpsQuizClose(); });
   /* ---------- 단축키 ---------- */
   function toggleHelp(force){ const h = el('help'); const open = force !== undefined ? force : h.hidden; h.hidden = !open; if(open) el('bHelpClose').focus(); }
   el('bHelp').addEventListener('click', ()=> toggleHelp(true)); el('bHelpClose').addEventListener('click', ()=> toggleHelp(false)); el('help').addEventListener('click', e=>{ if(e.target === el('help')) toggleHelp(false); });
   document.addEventListener('keydown', e=>{ if(e.ctrlKey || e.metaKey || e.altKey) return; if(/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return; if(!el('intro').hidden) return;
     if(!el('help').hidden){ if(e.key === 'Escape' || e.key === '?') toggleHelp(false); return; }
     const k = e.key.toLowerCase();
+    if(k === 'f' && !fps.on){ fpsEnter(); return; } if(fps.on) return;
     if(e.key === '?'){ e.preventDefault(); toggleHelp(true); }
     else if(k === 'h'){ el('bQuiz').click(); } else if(k === 't'){ el('bToc').click(); } else if(k === 'm'){ document.body.classList.toggle('showMap'); }
     else if(k === 'e'){ el('bExam').click(); } else if(k === 'd'){ const b = el('bDone'); if(b) b.click(); } else if(k === 'q'){ toggleQuiz(); }
@@ -558,7 +615,7 @@ html,body{overscroll-behavior:none}
   el('bExam').addEventListener('click', ()=>{ if(exam) stopExam(); else startExam(); });
   // → 는 한 흐름(항목 → 다음 정거장), Shift+→ 는 정거장 건너뛰기
   document.addEventListener('keydown', e=>{ if(/^(INPUT|SELECT|TEXTAREA|A|BUTTON)$/.test(e.target.tagName) || (e.target.getAttribute && e.target.getAttribute('role') === 'button')){ if(e.key === ' ' || e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return; }
-    if(pq || !el('help').hidden) return;
+    if(pq || fps.on || !el('help').hidden) return;
     if(e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' '){ e.preventDefault(); if(e.shiftKey) goStation(cur + 1); else nextItem(); }
     else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ e.preventDefault(); if(e.shiftKey) goStation(cur - 1); else if(item > 0){ item--; showItem(); } else goStation(cur - 1); } });
   el('bQuiz').addEventListener('click', ()=>{ quiz = !quiz; document.body.classList.toggle('quiz', quiz); el('bQuiz').setAttribute('aria-pressed', quiz); el('bQuiz').setAttribute('aria-checked', quiz); showItem(); });
@@ -624,7 +681,7 @@ html,body{overscroll-behavior:none}
   // 3D: 드래그가 아닌 클릭으로 다른 정거장의 표지판·받침판을 찍으면 그리로 간다
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let pdown = null;
   dom.addEventListener('pointerdown', e=>{ pdown = {x: e.clientX, y: e.clientY, t: performance.now()}; });
-  dom.addEventListener('pointerup', e=>{ if(!pdown || Math.hypot(e.clientX - pdown.x, e.clientY - pdown.y) > 6 || performance.now() - pdown.t > 600){ pdown = null; return; } pdown = null; if(exam) return;
+  dom.addEventListener('pointerup', e=>{ if(!pdown || Math.hypot(e.clientX - pdown.x, e.clientY - pdown.y) > 6 || performance.now() - pdown.t > 600){ pdown = null; return; } pdown = null; if(exam || fps.on) return;
     ndc.set(e.clientX/innerWidth*2 - 1, -(e.clientY/innerHeight)*2 + 1); ray.setFromCamera(ndc, camera); const hits = ray.intersectObjects(pickables, false); if(hits.length){ const i = hits[0].object.userData.station; if(i !== cur) goStation(i); } });
 
   /* ---------- 루프 ---------- */
@@ -634,7 +691,7 @@ html,body{overscroll-behavior:none}
   let last = performance.now(), frameNo = 0;
   function frame(now){ const dt = Math.min(0.05, (now - last)/1000); last = now; frameNo++;
     if(cam.t < 1){ cam.t = Math.min(1, cam.t + dt/0.45); cam.target.copy(cam.fromT).lerp(cam.toT, ease(cam.t)); }
-    applyCamera();
+    if(fps.on) fpsStep(dt); else applyCamera();
     // 관리자 걸어오기 → 도착하면 카메라 쪽을 보고 훅을 말한다
     if(mgr.to){ if(mgr.walkT < 1){ mgr.walkT = Math.min(1, mgr.walkT + dt/0.5); manager.position.copy(mgr.from).lerp(mgr.to, ease(mgr.walkT)); const dir = mgr.to.clone().sub(mgr.from); if(dir.length() > 0.01) manager.rotation.y = Math.atan2(dir.x, dir.z); mgr.phase += dt*9; walkPose(manager, mgr.phase, 0.55); manager.userData.limbs.arms[0].rotation.x = -1.1; }
       else { const look = camPos(); manager.rotation.y = Math.atan2(look.x - manager.position.x, look.z - manager.position.z) ; walkPose(manager, 0, 0); manager.userData.limbs.arms[0].rotation.x = -1.1; manager.userData.limbs.arms[1].rotation.x = -0.9 + Math.sin(now*0.004)*0.12; manager.userData.limbs.arms[1].rotation.y = 0.9;
