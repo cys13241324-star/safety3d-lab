@@ -273,7 +273,7 @@ body.blind #bBlind{background:var(--warn);color:var(--on-accent);border-color:va
 /* ---------- 다크/라이트 ---------- */
 :root{color-scheme:dark}
 :root[data-theme="light"]{color-scheme:light;--bg:#F4F6FA;--panel:#FFFFFF;--panel2:#EAEEF5;--line:#C6D0DE;--line-soft:#E0E6EF;--text:#14202E;--muted:#4A5568;--dim:#66738A;--accent:#2F5FA8;--accent-ink:#FFFFFF;--ok:#1F6B45;--ok-soft:rgba(31,107,69,.12);--bad:#A8391F;--bad-soft:rgba(168,57,31,.10);--warn:#8F6512;--warn-soft:rgba(143,101,18,.10);--warn-line:rgba(143,101,18,.35);--on-accent:#FFFFFF;--glass:rgba(255,255,255,.93);--tint:rgba(0,0,0,.04);--scrim:rgba(244,246,250,.88);}
-.bTheme{white-space:nowrap}
+.bTheme{white-space:nowrap} .screenBox .topRow{display:flex;align-items:center;gap:8px;margin-bottom:18px} .screenBox .topRow .sp{flex:1}
 h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
 </style>
 </head>
@@ -306,10 +306,10 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
 
 <div id="home" class="screen">
   <div class="screenBox">
-    <p class="eyebrow">Three.js · 산업안전기사 · 수치 규정 실습</p>
+    <div class="topRow"><a class="b sm" href="https://cys13241324-star.github.io/safety3d-lab/">← 산업안전기사 홈</a><span class="sp"></span><button class="b sm bTheme" type="button">어두운 모드</button></div>
     <h1>산업안전 규격 실습장</h1>
     <div class="hazard" aria-hidden="true"></div>
-    <p class="lede">높이·거리·각도·간격으로 정해진 안전 규정을 3D로 세워 두고, 값을 바꿔 가며 판정과 시험을 봅니다. 과목을 고르면 그 과목의 법령·규정 목록이 열립니다. <button class="b sm" type="button" id="bTut">사용법 (4단계)</button> <button class="b sm bTheme" type="button">어두운 모드</button> <a class="b sm" href="https://cys13241324-star.github.io/safety3d-lab/memo.html" target="_blank" rel="noopener">암기 은행 →</a> <a class="b sm" href="https://cys13241324-star.github.io/safety3d-lab/">← 산업안전기사 홈</a></p>
+    <p class="lede">높이·거리·각도·간격으로 정해진 안전 규정을 3D로 세워 두고, 값을 바꿔 가며 판정과 시험을 봅니다. 과목을 고르면 그 과목의 법령·규정 목록이 열립니다. <button class="b sm" type="button" id="bTut">사용법 (4단계)</button> <a class="b sm" href="https://cys13241324-star.github.io/safety3d-lab/memo.html" target="_blank" rel="noopener">암기 은행 →</a></p>
     <div class="homeStats" id="homeStats"></div>
     <div class="subjGrid" id="homeGrid"></div>
   </div>

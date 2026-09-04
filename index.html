@@ -44,6 +44,12 @@ h1{font-family:var(--display);font-weight:700;font-size:36px;letter-spacing:-.02
 
 .viz.palace{background:linear-gradient(180deg,#131C2C 0%,#0E1522 55%,#1B2436 55%)} .viz.palace .z{position:absolute;top:10px;width:28%;height:62px;border-radius:4px} .viz.palace .p{position:absolute;bottom:22px;width:8px;height:8px;border-radius:50%;background:#3B4658} .viz.palace .p.on{background:#E3B54D;box-shadow:0 0 10px #E3B54D;width:11px;height:11px;bottom:20px} .viz.palace em{position:absolute;bottom:26px;left:47%;width:10px;height:18px;border-radius:5px 5px 2px 2px;background:#2E8B57} .viz.palace em::before{content:'';position:absolute;top:-8px;left:1px;width:8px;height:8px;border-radius:50%;background:#F2F5F8}
 .topRow{display:flex;justify-content:flex-end;margin-bottom:8px} .b{font:inherit;font-size:13.5px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer} .b:hover{border-color:var(--muted)}
+/* 반투명 3D 현장 배경 */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden} .bg img{width:100%;height:100%;object-fit:cover;opacity:.22;filter:saturate(.85);transform:scale(1.04);animation:bgdrift 60s ease-in-out infinite alternate} .bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,var(--bg) 0%,transparent 35%,transparent 70%,var(--bg) 100%)}
+:root[data-theme="light"] .bg img{opacity:.16}
+@keyframes bgdrift{from{transform:scale(1.04) translateX(0)}to{transform:scale(1.1) translateX(-1.5%)}}
+@media (prefers-reduced-motion: reduce){.bg img{animation:none}}
+.wrap{position:relative;z-index:1}
 footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
 @media (max-width:600px){h1{font-size:30px} .wrap{padding:30px 16px 60px} .tile{padding:20px 18px 18px} .tile h2{font-size:22px}}
 
@@ -56,10 +62,11 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
 </head>
 <body>
 
+<div class="bg" aria-hidden="true"><img src="img/site_bg.webp" alt="" width="1600" height="900" fetchpriority="high"></div>
 <div class="wrap">
   <div class="topRow"><button class="b sm bTheme" type="button">어두운 모드</button></div>
   <h1>산업안전기사 학습실</h1>
-  <p class="lede">CBT 24회차 2,880문항으로 만든 세 가지 공부 도구입니다.</p>
+  <p class="lede">역대 2,880문항을 분석하여 만든 세 가지 공부 도구입니다.</p>
   <div class="grid">
     <a class="tile lab" href="lab.html" aria-label="3D 규격 실습장 들어가기">
       <div class="k">01 · 규정 수치</div>
@@ -86,7 +93,6 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
       <span class="go">들어가기 →</span>
     </a>
   </div>
-  <footer>출처: 산업안전기사 CBT 2021년 1회 ~ 2026년 4회 해설 · 법령은 각 문항 원본 시행일 기준</footer>
 </div>
 <script>(function(){ function cur(){ var a = document.documentElement.getAttribute('data-theme'); return a || 'dark'; } function sync(){ document.querySelectorAll('.bTheme').forEach(function(b){ var d = cur() === 'dark'; b.textContent = d ? '밝은 모드' : '어두운 모드'; b.setAttribute('aria-pressed', d); }); } document.querySelectorAll('.bTheme').forEach(function(b){ b.addEventListener('click', function(){ var t = cur() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try{ localStorage.setItem('safety_theme', t); }catch(e){} sync(); if(window.__onTheme) window.__onTheme(t); }); }); sync(); }());</script>
 
