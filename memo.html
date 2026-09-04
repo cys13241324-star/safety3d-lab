@@ -71,7 +71,7 @@ body.hide table.ft td{color:transparent;background:var(--line-soft);cursor:point
 .qopts{display:grid;gap:6px;margin-bottom:12px} .qopts button{font:inherit;text-align:left;font-size:15.5px;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer;line-height:1.45;display:flex;gap:10px} .qopts button .n{font-family:var(--mono);color:var(--dim);flex:none} .qopts button:not(:disabled):hover{border-color:var(--accent)} .qopts button.ok{background:var(--ok-soft);border-color:var(--ok)} .qopts button.ok .n{color:var(--ok)} .qopts button.bad{background:var(--bad-soft);border-color:var(--bad)} .qopts button:disabled:not(.ok):not(.bad){opacity:.5}
 .qz .sol{font-size:13.5px;color:var(--muted);margin:0 0 8px;line-height:1.55} .qz .hookmini{margin:8px 0 10px} .qz .hookmini a{margin-left:8px;font-size:12.5px}
 .qbadge{font:inherit;font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;margin-left:8px;vertical-align:middle} .qbadge:hover{border-color:var(--warn);color:var(--warn)}
-.pager{display:flex;justify-content:space-between;gap:12px;margin-top:44px;padding-top:24px;border-top:1px solid var(--line)} .pager .b{max-width:48%;min-width:0;flex-direction:column;align-items:flex-start;gap:0} .pager .b.r{align-items:flex-end} .pager .b span{color:var(--muted);font-size:12.5px;white-space:nowrap}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:44px;padding-top:24px;border-top:1px solid var(--line)} .pager .b{flex:1;max-width:48%;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 16px;border:1px solid var(--line);border-radius:8px} .pager .b.nx{align-items:flex-end;text-align:right} .pager .b span{color:var(--muted);font-size:12.5px;white-space:nowrap}
 .pager .b b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 /* 도구 공통 */
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px} .chips[hidden]{display:none}
@@ -114,7 +114,7 @@ kbd.k{display:none}
 #main{padding:44px 56px 140px} .inner{max-width:720px}
 .pageHead{margin-bottom:36px} .pageHead .path{font-family:var(--sans);font-size:13px;color:var(--dim);gap:8px} .pageHead .path span+span::before{content:'·';margin-right:8px;color:var(--line)}
 .pageHead h2{font-weight:700;font-size:32px;letter-spacing:-.02em;margin:6px 0 20px}
-.pageTools{gap:8px} .pageTools .muted.mono{font-family:var(--sans);font-size:13px;color:var(--dim)}
+.pageTools{gap:8px} .navMini{display:inline-flex;align-items:center;gap:8px;margin-left:auto} .pageTools .muted.mono{font-family:var(--sans);font-size:13px;color:var(--dim)}
 .it{grid-template-columns:1fr;gap:0;padding:34px 0 36px;border-top:1px solid var(--line-soft)} .it:first-child{padding-top:4px} .it .no{display:none}
 .it h4{font-size:19px;font-weight:600;margin:0 0 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .r.qrow .lb{color:var(--dim)} .qbadge{font:inherit;font-size:14.5px;padding:0;border:0;background:none;color:var(--text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;margin:0} .qbadge:hover{text-decoration-color:var(--text)}
@@ -125,7 +125,7 @@ table.ft{font-size:15px;background:transparent;border-radius:0} table.ft th,tabl
 .r.hook{margin-top:22px} .r.hook .lb{color:var(--warn);font-weight:600} .r.hook p{background:var(--warn-soft);border:0;border-radius:12px;padding:18px 22px;font-size:17px;line-height:1.7}
 .r.why .lb,.r.mix .lb{color:var(--dim)} .r.why p,.r.mix p{font-size:15px;line-height:1.7;color:var(--muted)}
 body.hide .facts li{background:var(--tint);border-radius:8px;padding:8px 12px 8px 18px} body.hide .facts li.show{background:transparent} body.hide .facts li:not(.show)::after,body.hide table.ft td:not(.show)::after{content:'▢ 눌러서 확인';position:absolute;left:18px;top:8px;color:var(--dim);font-size:13px} body.hide table.ft td{position:relative}
-.pager{margin-top:52px;padding-top:28px;border-top:1px solid var(--line-soft)} .pager .b{border:0;background:transparent;padding-left:0;padding-right:0} .pager .b:not(:disabled):hover{background:transparent} .pager .b:not(:disabled):hover b{text-decoration:underline;text-underline-offset:4px} .pager .b span{font-size:13px;color:var(--dim)}
+.pager{margin-top:52px;padding-top:28px;border-top:1px solid var(--line-soft)} .pager .b:not(:disabled):hover{border-color:var(--muted);background:var(--tint)} .pager .b span{font-size:12.5px;color:var(--dim)} .pager .b b{font-size:15px}
 /* 도구 화면·팝업 */
 .toolHead{font-weight:700;font-size:22px} .toolHead small{font-size:14px} .chip{background:transparent} .chip[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
 .card{background:transparent;border-color:var(--line-soft)} .cloze{background:var(--tint);border-left:0;border-radius:10px} .cloze .blank,.blank{color:var(--warn);border-bottom-color:var(--warn)}
@@ -141,7 +141,7 @@ body.hide .facts li{background:var(--tint);border-radius:8px;padding:8px 12px 8p
   #toc{position:fixed;left:0;top:0;bottom:0;height:auto;width:min(86vw,320px);z-index:40;transform:translateX(-105%);transition:transform .2s} .app.tocOpen #toc{transform:none}
   #main{padding:24px 18px 130px} .pageHead h2{font-size:26px} .it{padding:26px 0 28px} .it h4{font-size:18px} .r.hook p{font-size:16px;padding:14px 16px} .pager .b{border:1px solid var(--line);padding:8px 12px} .b,.chip,.modes button{min-height:44px} *:focus-visible{scroll-margin-bottom:110px}
   .it{grid-template-columns:1fr} .it .no{display:none} .r{grid-template-columns:1fr;gap:6px} .r .lb{width:auto;padding-top:0}
-  .pager{position:fixed;left:0;right:0;bottom:0;margin:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--line);z-index:30} .pager .b{flex:1;max-width:none}
+  .pager{position:fixed;left:0;right:0;bottom:0;margin:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--line);z-index:30} .pager .b{flex:1;max-width:none;padding:8px 12px} .navMini{display:none}
   .opts{grid-template-columns:1fr 1fr}
 }
 
@@ -236,13 +236,13 @@ h1,h2,.pageHead h2,#card h2,.subjCard .name,.tile h2,#intro h1{font-weight:800}
     const i = METHODS.indexOf(g), prev = METHODS[i-1], next = METHODS[i+1];
     document.body.classList.toggle('hide', hideFacts);
     v.innerHTML = `<div class="pageHead"><div class="path"><span>${esc(g.subject)} › ${esc(g.chapter || '기타')} › ${esc(g.big || '종합')}</span><span>${esc(g.id)}</span>${g.n ? `<span>기출 ${g.n}문항 · ${g.rounds}회차</span>` : ''}</div><h2>${esc(g.title)}</h2>
-      <div class="pageTools"><button class="b sm" type="button" id="bHide" aria-pressed="${hideFacts}">${hideFacts ? '사실 보이기' : '사실 가리고 훅으로 떠올리기'}<kbd class="k">H</kbd></button><button class="b sm ${done[g.id] ? 'done' : ''}" type="button" id="bDone">${done[g.id] ? '✓ 학습 완료' : '학습 완료로 표시'}<kbd class="k">D</kbd></button>${(g.qs && g.qs.length) ? `<button class="b sm primary" type="button" id="bQuizOpen" aria-haspopup="dialog">기출 풀기 (${g.qs.length})<kbd class="k">Q</kbd></button>` : ''}${link3d(g.topic3d)}<button class="b sm" type="button" id="bPrint">인쇄<kbd class="k">P</kbd></button><span class="muted mono" style="font-size:12px">${i+1} / ${METHODS.length}</span></div></div>
+      <div class="pageTools"><button class="b sm" type="button" id="bHide" aria-pressed="${hideFacts}">${hideFacts ? '사실 보이기' : '사실 가리고 훅으로 떠올리기'}<kbd class="k">H</kbd></button><button class="b sm ${done[g.id] ? 'done' : ''}" type="button" id="bDone">${done[g.id] ? '✓ 학습 완료' : '학습 완료로 표시'}<kbd class="k">D</kbd></button>${(g.qs && g.qs.length) ? `<button class="b sm primary" type="button" id="bQuizOpen" aria-haspopup="dialog">기출 풀기 (${g.qs.length})<kbd class="k">Q</kbd></button>` : ''}${link3d(g.topic3d)}<button class="b sm" type="button" id="bPrint">인쇄<kbd class="k">P</kbd></button><span class="navMini">${prev ? `<button class="b sm" type="button" data-go="${esc(prev.id)}" title="이전 묶음: ${esc(prev.title)}">‹ 이전</button>` : ''}<span class="muted mono" style="font-size:12px">${i+1} / ${METHODS.length}</span>${next ? `<button class="b sm" type="button" data-go="${esc(next.id)}" title="다음 묶음: ${esc(next.title)}">다음 ›</button>` : ''}</span></div></div>
       <ol class="spec">${g.items.map((it, k)=> `<li class="it"><div class="no" aria-hidden="true">${String(k+1).padStart(2,'0')}</div><div><h4>${esc(it.name)}</h4>
         <div class="r"><span class="lb">사실</span><div>${hideFacts ? '<div class="rh">가려진 칸을 누르면 보입니다</div>' : ''}${factsHtml(it.facts)}</div></div>
         <div class="r hook"><span class="lb">훅</span><p>${esc(it.hook)}</p></div>
         ${(g.qs || []).some(q=> q.it === k) ? `<div class="r qrow"><span class="lb">기출</span><p><button class="qbadge" type="button" data-qi="${k}" aria-haspopup="dialog">이 항목에서 나온 기출 ${(g.qs || []).filter(q=> q.it === k).length}문항 풀기 →</button></p></div>` : ''}
         ${it.why ? `<div class="r why"><span class="lb">왜</span><p>${esc(it.why)}</p></div>` : ''}${it.mix ? `<div class="r mix"><span class="lb">구분</span><p>${esc(it.mix)}</p></div>` : ''}</div></li>`).join('')}</ol>
-      <div class="pager">${prev ? `<button class="b" type="button" data-go="${esc(prev.id)}"><span>← 이전</span><b>${esc(prev.title)}</b></button>` : '<span></span>'}${next ? `<button class="b r" type="button" data-go="${esc(next.id)}"><span>다음 →</span><b>${esc(next.title)}</b></button>` : '<span></span>'}</div>`;
+      <div class="pager">${prev ? `<button class="b" type="button" data-go="${esc(prev.id)}"><span>← 이전 묶음</span><b>${esc(prev.title)}</b></button>` : '<span></span>'}${next ? `<button class="b nx" type="button" data-go="${esc(next.id)}"><span>다음 묶음 →</span><b>${esc(next.title)}</b></button>` : '<span></span>'}</div>`;
     el('bHide').addEventListener('click', ()=>{ hideFacts = !hideFacts; renderNote(); });
     el('bDone').addEventListener('click', ()=>{ if(done[g.id]) delete done[g.id]; else done[g.id] = Date.now(); saveDone(); renderNote(); renderToc(); });
     el('bPrint').addEventListener('click', ()=> window.print());
