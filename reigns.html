@@ -67,6 +67,7 @@ button{font:inherit;color:inherit}
 #gear .fund .v{font-size:15.5px;font-weight:700;color:var(--text);margin-left:auto;
   white-space:nowrap}
 #gear .fund .v u{text-decoration:none;font-size:10.5px;font-weight:500;color:var(--muted);margin-left:3px}
+#gear .fund .fdlt.up{color:var(--ok)}
 #gear .fund .fdlt{font-family:var(--mono);font-size:11.5px;color:var(--bad);opacity:0;
   transform:translateY(3px);transition:.28s;white-space:nowrap}
 #gear .fund .fdlt.on{opacity:1;transform:none}
@@ -311,6 +312,10 @@ button{font:inherit;color:inherit}
 #over #oLesson{margin:10px 0 0;padding:10px 12px;border-left:2px solid var(--warn);
   background:rgba(227,181,77,.07);border-radius:0 8px 8px 0;font-size:13px;line-height:1.6;color:var(--text)}
 #over .viol{margin-top:16px}
+#over .seen{margin:12px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--dim);
+  letter-spacing:.04em}
+#over .seen b{color:var(--text);font-weight:700}
+#over .seen em{font-style:normal;color:var(--warn);font-weight:700}
 #over .viol ul{max-height:min(34dvh,260px);overflow-y:auto;padding-right:4px;
   overscroll-behavior:contain}
 #over #oTally{margin:10px 0 0;font-size:12px;line-height:1.6;color:var(--dim)}
@@ -607,6 +612,7 @@ button{font:inherit;color:inherit}
     <div class="stat"><div class="k">점수</div><div class="v" id="oScore"></div></div>
     <div class="stat"><div class="k">랭크</div><div class="v"><span id="oRank"></span><small id="oRankName"></small></div></div>
   </div>
+  <p class="seen" id="oSeen"></p>
   <div class="viol"><div class="h">놓친 규정</div><ul id="oList"></ul></div>
   <button class="again" id="oAgain" type="button">다시 부임한다</button>
 </div></div>
@@ -3010,6 +3016,19 @@ button{font:inherit;color:inherit}
      한 판이 60일이라 새로고침 한 번에 판이 날아가면 종료 화면까지 가는 사람이 없다.
      날이 넘어갈 때마다 저장하고, 끝나면 지운다. 놓친 조문은 판을 넘어 쌓아 둔다. */
   var RUN = 'reigns_run_v1', MISS = 'reigns_miss_v1', BRIEFED = 'reigns_briefed_v1';
+  var SEEN = 'reigns_seen_v1';        // 판을 넘어 남는 것 — 본 결말
+
+  /* 결말을 하나 적고, 지금까지 몇 개를 봤는지 돌려준다. 무엇이 남았는지는
+     말하지 않는다 — 남은 결말의 이름을 알려 주면 그게 곧 공략이 된다. */
+  function noteEnd(k){
+    try{
+      var m = JSON.parse(localStorage.getItem(SEEN) || '{}');
+      var fresh = !m[k];
+      m[k] = 1;
+      localStorage.setItem(SEEN, JSON.stringify(m));
+      return {n:Object.keys(m).length, fresh:fresh};
+    }catch(e){ return {n:0, fresh:false}; }
+  }
 
   function save(){
     if(!st || st.dead) return;
@@ -3281,11 +3300,26 @@ button{font:inherit;color:inherit}
     if(f){
       if(!spent){ f.className = 'fdlt'; f.textContent = ''; }
       else {
-        f.textContent = '−' + mny(spent) + '만';
-        f.className = 'fdlt on';
+        /* 음수면 들어온 돈이다 — 무재해 실적으로 얹힌 관리비. */
+        f.textContent = (spent > 0 ? '−' : '+') + mny(Math.abs(spent)) + '만';
+        f.className = 'fdlt on' + (spent < 0 ? ' up' : '');
         setTimeout(function(){ f.className = 'fdlt'; }, 2200);
       }
     }
+  }
+
+  /* 게이지가 높을수록 더 올리기 어렵다. 90 을 95 로 만드는 것은 60 을 65 로
+     만드는 것과 같은 일이 아니다. 실측해 보니 준수 위주로 가면 열흘 만에 안전과
+     감독기관이 100 에 붙어 남은 오십 일 동안 아무 말도 하지 않았다 —
+     게이지 넷 중 둘이 죽은 칸이었다.
+
+     내려가는 몫은 손대지 않는다. 올라가는 것만 어렵고 떨어지는 것은 그대로여야
+     한 번 넘긴 것이 계속 아프다. 84 아래에서는 아무것도 달라지지 않는다. */
+  function gainAt(v, amt){
+    if(amt <= 0) return amt;
+    var room = (100 - v) / 16;
+    if(room >= 1) return amt;
+    return Math.max(1, Math.round(amt * room));
   }
 
   /* ===== 그날의 변수 ======================================================
@@ -3293,20 +3327,51 @@ button{font:inherit;color:inherit}
      준수 쪽에서는 이미 오르던 것이 더 오르고, 위반 쪽에서는 이미 깎이던 것이
      더 깎인다 — 방향을 뒤집지는 않는다. 도박이 아니라 날씨 같은 것이어야 한다. */
   var TWIST_P = 0.12;
+  /* 판당 일곱 번쯤 뜨는데 게이지마다 문장이 하나뿐이면 두 판이면 다 본다.
+     게이지별로 셋씩 두어 스물넷으로 늘렸다. 게이지에 묶어 두는 것은 그대로다 —
+     「무엇이 두 배가 되는지」를 문장이 말해 줘야 하기 때문이다. */
   var TWIST = [
-    {ok:'옆 조에서도 같은 자리를 따라 고쳤습니다', no:'하필 그날 비가 내렸습니다'},
-    {ok:'앞 공정이 하루 일찍 끝나 있었습니다',     no:'결국 뜯고 다시 했습니다'},
-    {ok:'옆 현장에서 자재를 빌려 왔습니다',        no:'그 자리에서 과태료가 나왔습니다'},
-    {ok:'최윤 감독관이 마침 그 자리에 있었습니다', no:'본사 안전감사와 겹쳤습니다'}
+    {ok:['옆 조에서도 같은 자리를 따라 고쳤습니다',
+         '고치는 걸 본 신입이 자기 공구도 점검했습니다',
+         '작업 전 회의에서 그 자리가 먼저 나왔습니다'],
+     no:['하필 그날 비가 내렸습니다',
+         '넘긴 자리 바로 아래로 야간조가 지나갔습니다',
+         '같은 자리에서 지난주에도 아찔한 일이 있었습니다']},
+    {ok:['앞 공정이 하루 일찍 끝나 있었습니다',
+         '자재가 예정보다 이틀 먼저 들어왔습니다',
+         '옆 동 타설이 미뤄져 장비가 하루 비었습니다'],
+     no:['결국 뜯고 다시 했습니다',
+         '되돌리는 데 이틀이 더 걸렸습니다',
+         '후속 공정이 그 앞에서 멈춰 섰습니다']},
+    {ok:['옆 현장에서 자재를 빌려 왔습니다',
+         '반품 예정이던 자재를 그대로 썼습니다',
+         '임대 장비 반납일이 겹쳐 하루치가 굳었습니다'],
+     no:['그 자리에서 과태료가 나왔습니다',
+         '재시공 견적이 예상의 두 배였습니다',
+         '보험 할증이 이번 분기부터 붙었습니다']},
+    {ok:['최윤 감독관이 마침 그 자리에 있었습니다',
+         '원청 점검단이 그 조치를 사례로 적어 갔습니다',
+         '지난 지적 사항이 그 자리에서 함께 풀렸습니다'],
+     no:['본사 안전감사와 겹쳤습니다',
+         '민원인이 그 장면을 찍어 올렸습니다',
+         '같은 항목이 두 번째 지적으로 올라갔습니다']}
   ];
+  function pick1(a){ return a[Math.floor(Math.random() * a.length)]; }
   function rollTwist(d, ok){
     if(Math.random() >= TWIST_P) return null;
     var cand = [], i;
-    for(i = 0; i < 4; i++) if(ok ? d[i] > 0 : d[i] < 0) cand.push(i);
+    for(i = 0; i < 4; i++){
+      if(!(ok ? d[i] > 0 : d[i] < 0)) continue;
+      /* 천장이나 바닥에 붙은 게이지는 두 배로 만들어도 0 이 움직인다.
+         「×2」라고 띄워 놓고 아무 일도 안 일어나면 거짓말이 된다. */
+      if(ok && st.g[i] >= 100) continue;
+      if(!ok && st.g[i] <= 0) continue;
+      cand.push(i);
+    }
     if(!cand.length) return null;
     var k = cand[Math.floor(Math.random() * cand.length)];
     d[k] = d[k] * 2;
-    return {i:k, t:(ok ? TWIST[k].ok : TWIST[k].no), g:G[k].n};
+    return {i:k, t:pick1(ok ? TWIST[k].ok : TWIST[k].no), g:G[k].n};
   }
 
   /* ===== 씨앗은 반드시 돌아온다 =====
@@ -3423,19 +3488,19 @@ button{font:inherit;color:inherit}
      pool:'trench net ramp ladder stairs lux carry carry2 panelspace elcb powerline pile pile2 '
           + 'caisson edu tbm risk permit harness vdt walkway workplan ppe chief jobedu '
           + 'loadmark officeair caissondig hpvolume divecrew'},
-    {n:2, till:32, name:'골조기', mul:[1.0, 1.2, 1.0, 1.0], drift:[0, 0, 0, 0], fo:1.0,
+    {n:2, till:32, name:'골조기', mul:[1.0, 1.2, 1.0, 1.0], drift:[0, -1, 0, 0], fo:1.0,
      lead:'물량 전쟁입니다. 공정이 매일 저절로 깎입니다.',
      pool:'scaffold frame frame2 shore plank rail fall weather weather2 wirerope mobscaf horse '
           + 'welder approach approach2 forklift forklift2 sawblade sawblade2 contractor serious '
           + 'scafwork gondola twsupport craneway girdergap hookring overwind stopright '
           + 'hotwork msdprog hpcheck divecheck airsupply'},
-    {n:3, till:48, name:'마감기', mul:[1.2, 1.0, 1.0, 1.0], drift:[0, 0, 0, 0], fo:1.35,
+    {n:3, till:48, name:'마감기', mul:[1.2, 1.0, 1.0, 1.0], drift:[-1, 0, 0, 0], fo:1.35,
      lead:'심어 둔 것이 몰려 터집니다. 공장 설비와 우리 공사가 뒤엉킵니다.',
      pool:'confined confined2 gasweld staticflow staticflow2 chemdist exgap exgap2 noise roller '
           + 'grinder press robot boiler boiler2 rotor msds gangway gangway2 reliefvalve valveset '
           + 'flamearr fireproof dryer genroom acetylene firewatch alarmset airvol gasdig stopduty '
           + 'dustclean ventspec co2ext pittemp'},
-    {n:4, till:60, name:'준공기', mul:[1.0, 1.0, 1.0, 1.3], drift:[0, 0, 0, 0], fo:1.35,
+    {n:4, till:60, name:'준공기', mul:[1.0, 1.0, 1.0, 1.3], drift:[0, 0, 0, -1], fo:1.35,
      audit:0.3, lead:'넘긴 것들이 서류로 돌아옵니다. 새 위험보다 과거 위반이 무섭습니다.',
      pool:'*'}
   ];
@@ -4074,6 +4139,10 @@ button{font:inherit;color:inherit}
     for(mi = 0; mi < 4; mi++) if(chap.mul[mi] !== 1) d[mi] = Math.round(d[mi] * chap.mul[mi]);
     var twist = c.report ? null : rollTwist(d, ch.ok);
     if(twist) fx('tw', 500);
+    /* 위로 갈수록 올리기 어렵다. 깎이는 몫은 그대로 둔다 —
+       그래야 천장에 붙지 않으면서 한 번 넘긴 것이 여전히 아프다. */
+    var mi2;
+    for(mi2 = 0; mi2 < 4; mi2++) d[mi2] = gainAt(st.g[mi2], d[mi2]);
     d.forEach(function(v, i){ st.g[i] = Math.max(0, Math.min(100, st.g[i] + v)); });
     flashDelta(d, twist, spent);
 
@@ -4163,7 +4232,11 @@ button{font:inherit;color:inherit}
     st.day++;
     /* 하루가 넘어갈 때 그 장의 자연 증감과, 준공기의 누적 위반 감시가 걸린다 */
     var ch2 = chapOf(st.day), k;
-    for(k = 0; k < 4; k++) if(ch2.drift[k]) st.g[k] = Math.max(0, Math.min(100, st.g[k] + ch2.drift[k]));
+    /* 매일 걸면 국면 하나가 게이지를 열여덟 칸씩 먹는다 — 실측에서 완주율이
+       52 %에서 41 %로 내려갔다. 이틀에 한 번으로 낮춘다. 하방 압력은 「있다」는
+       것이 중요하지 크기가 중요한 것이 아니다. */
+    if(st.day % 2 === 0)
+      for(k = 0; k < 4; k++) if(ch2.drift[k]) st.g[k] = Math.max(0, Math.min(100, st.g[k] + ch2.drift[k]));
     /* 걸린 상황이 하루치를 민다. 대비했으면 절반이고, 날이 다 가면 풀린다. */
     if(st.cond && !COND[st.cond.k]) st.cond = null;   // 옛 저장본에 없어진 상황
     if(st.cond){
@@ -4200,7 +4273,7 @@ button{font:inherit;color:inherit}
   });
 
   /* ===== 종료 ===== */
-  /* ===== 엔딩 12종 =========================================================
+  /* ===== 엔딩 19종 =========================================================
      같은 죽음이라도 무엇을 넘겨서 그렇게 됐는지가 다르다. 마지막 화면이
      그것을 짚어 주지 않으면 판이 끝나도 배운 것이 남지 않는다.
      위에서부터 먼저 맞는 것 하나만 발동한다. */
@@ -4300,27 +4373,38 @@ button{font:inherit;color:inherit}
     }
     var lo = g[0];
     for(i = 1; i < 4; i++) if(g[i] < lo) lo = g[i];
+    /* 조건을 실측에 맞춰 열었다. 250판 × 3정책을 돌려 보니 무재해 준공과
+       「아무 일도 없었다」는 한 번도 뜨지 않았다 — 60일을 버티면 공사비가 늘
+       40 아래로 내려가는데 「최소 게이지 50 이상」을 걸어 두었기 때문이다.
+       넘긴 기준 0건이라는 조건 하나만으로도 충분히 드물다. */
     if(V === 0 && R === 0 && st.forced === 0 && st.near === 0 && st.hurt === 0 &&
-       st.money > 0 && lo >= 55) return E.master;
-    if(V === 0 && R === 0 && st.forced === 0 && lo >= 50) return E.clean;
+       st.money > 0 && lo >= 25) return E.master;
+    if(V === 0 && R === 0 && st.forced === 0) return E.clean;
     if(st.illegal >= 5) return E.diverted;
-    if(st.near >= 12) return E.warned;
+    if(st.near >= 8) return E.warned;
     if(R >= 5) return E.handover;
-    if(g[1] >= 85 && V >= 6) return E.onTime;
+    if(g[1] >= 70 && V >= 6) return E.onTime;
     if(g[0] <= 30 || (st.stop === 0 && has('mgmt', 3))) return E.worn;
     return E.record;
   }
 
   /* 미달 한 건(-25)이 충족 두 건 반(+25)을 지운다. 오래 버티는 것보다 제대로 아는 것이
      점수를 지배하게 만든 배치다. systems.md ⑤ 그대로. */
+  /* 준공한 판이 거의 전부 S 였다. 까닭은 상수항이었다 — 준수 위주로 가면
+     안전 게이지가 열흘 만에 100 에 붙어 2*g[0] 이 사실상 상수 200 이 되고,
+     여기에 8×60=480 과 준공 400 이 깔려 1080 이 그냥 주어졌다. S 문턱이 1200 이니
+     아는 것과 상관없이 거의 다 S 다. 5단인데 실제로는 1단이었다.
+
+     상수를 걷고 **결과로 갈리는 것만** 남긴다. 아는 것(충족·미달), 남긴 것
+     (미조치), 저지른 것(전용), 그리고 사람이 다쳤는가. */
   function scoreOf(won){
-    var g = st.g;
     return Math.round(
-      10 * st.okCount - 25 * st.viol.length + 8 * Math.min(60, st.day) +
-      2 * g[0] + (g[1] + g[2] + g[3]) / 3 - 15 * st.seeds.length + (won ? 400 : 0));
+      12 * st.okCount - 30 * st.viol.length - 20 * st.seeds.length
+      - 60 * st.illegal - 120 * st.hurt - 40 * st.near - (st.fatal ? 400 : 0)
+      + 5 * Math.min(60, st.day) + st.money / 40 + (won ? 250 : 0));
   }
-  var RANKS = [[1200, 'S', '무재해 준공'], [900, 'A', '선임 안전관리자'],
-               [550, 'B', '안전관리자'], [250, 'C', '안전관리 보조원'],
+  var RANKS = [[1050, 'S', '무재해 준공'], [780, 'A', '선임 안전관리자'],
+               [480, 'B', '안전관리자'], [200, 'C', '안전관리 보조원'],
                [-1e9, 'D', '현장 부적격']];
   function rankOf(v){
     for(var i = 0; i < RANKS.length; i++) if(v >= RANKS[i][0]) return RANKS[i];
@@ -4374,6 +4458,10 @@ button{font:inherit;color:inherit}
     }
     var total = noteMiss(list);
     if(total) $('oTally').textContent += ' 이 자리에서 넘긴 조문은 모두 ' + total + '개입니다.';
+    var seen = noteEnd(end.k), all = 0, _k;
+    for(_k in E) if(E.hasOwnProperty(_k)) all++;
+    $('oSeen').innerHTML = (seen.fresh ? '<em>새 결말</em> · ' : '')
+      + '본 결말 <b>' + seen.n + '</b> / ' + all;
     loadWeak();          // 이번 판에서 놓친 것이 다음 판부터 자주 온다
     box.classList.add('on');
   }
