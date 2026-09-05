@@ -239,7 +239,11 @@ if (WScript.Arguments.length > 2 && WScript.Arguments(2) === 'trace') {
 /* ---------- resume check ---------- */
 WScript.Echo('');
 press('bFresh');
-for (var i = 0; i < 7; i++) { press('chL'); press('sGo'); }
+// Comply for 7 days rather than mashing the left button: side-mashing is a losing
+// strategy, so the run could end before day 8 and leave nothing to resume from --
+// the check would then fail for a reason that has nothing to do with saving.
+for (var i = 0; i < 7 && !isOver(); i++) { press(decide('ORA')); press('sGo'); }
+if (isOver()) { WScript.Echo('FAIL: run ended before day 8, cannot test resume'); WScript.Quit(1); }
 var shownDay = ELS['mDay'].textContent, shownWho = ELS['cWho'].textContent;
 var saved = localStorage.getItem('reigns_run_v1');
 if (!saved) { WScript.Echo('FAIL: nothing saved mid-run'); WScript.Quit(1); }
