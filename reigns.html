@@ -477,9 +477,9 @@ button{font:inherit;color:inherit}
   function W(x, y, s, c){            // 안전모 쓴 근로자
     s = s || 1; c = c || '#8FB3E6';
     return '<g transform="translate(' + x + ',' + y + ') scale(' + s + ')">' + SH +
-      '<path d="M-5.5-23a5.5 5 0 0 1 11 0z" fill="' + HI + '"/>' +
-      '<path d="M-7.5-23h15" stroke="' + HI + '" stroke-width="1.6" stroke-linecap="round"/>' +
-      '<circle cx="0" cy="-18" r="3.1" fill="' + SK + '"/>' +
+      '<path d="M-4.6-23a4.6 4.4 0 0 1 9.2 0z" fill="' + HI + '"/>' +
+      '<path d="M-5.8-23h11.6" stroke="' + HI + '" stroke-width="1.6" stroke-linecap="round"/>' +
+      '<circle cx="0" cy="-18" r="3" fill="' + SK + '"/>' +
       '<path d="M0-14v9M0-11l-5.5 4M0-11l5.5 4M0-5l-4.5 6M0-5l4.5 6" stroke="' + c +
       '" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>';
   }
@@ -487,8 +487,8 @@ button{font:inherit;color:inherit}
      lift 드는 사람 · bend 굽힌 사람 · sit 주저앉은 사람 · down 쓰러진 사람 ·
      reach 손을 뻗은 사람. 안전모와 머리는 W 와 같은 규격을 쓴다. */
   function HAT(y, c){
-    return '<path d="M-5.5' + y + 'a5.5 5 0 0 1 11 0z" fill="' + (c || HI) + '"/>' +
-      '<path d="M-7.5' + y + 'h15" stroke="' + (c || HI) + '" stroke-width="1.6" stroke-linecap="round"/>';
+    return '<path d="M-4.6' + y + 'a4.6 4.4 0 0 1 9.2 0z" fill="' + (c || HI) + '"/>' +
+      '<path d="M-5.8' + y + 'h11.6" stroke="' + (c || HI) + '" stroke-width="1.6" stroke-linecap="round"/>';
   }
   function P(x, y, s, pose, c){
     s = s || 1; c = c || '#8FB3E6';
@@ -496,27 +496,27 @@ button{font:inherit;color:inherit}
     if(pose === 'lift'){
       /* 무릎을 굽히고 등을 편 채 드는 자세 — 손은 무릎 높이에서 짐을 받친다 */
       body = '<path d="M0-17v9M0-15l-5.5 9M0-15l5.5 9M0-8l-5 4l-1.5 4M0-8l5 4l1.5 4" stroke="' + c + '"';
-      head = '<circle cx="0" cy="-21" r="3.1" fill="' + SK + '"/>' + HAT('-26');
+      head = '<circle cx="0" cy="-21" r="3" fill="' + SK + '"/>' + HAT('-26');
     } else if(pose === 'bend'){
       body = '<path d="M0-13l4 7M4-6l-5 3M4-6l5 2M4-6l-2 6M4-6l4 6" stroke="' + c + '"';
-      head = '<circle cx="2" cy="-16" r="3.1" fill="' + SK + '"/>' +
+      head = '<circle cx="2" cy="-16" r="3" fill="' + SK + '"/>' +
              '<g transform="translate(2,3)">' + HAT('-22') + '</g>';
     } else if(pose === 'sit'){
       /* 바닥에 주저앉은 자세 — 엉덩이가 땅에 닿고 다리는 앞으로 */
       body = '<path d="M-2-13l2 13M0 0l10 0M0 0l-1-5M-1-11l-6 6M-1-11l6 4" stroke="' + c + '"';
-      head = '<circle cx="-3" cy="-16" r="3.1" fill="' + SK + '"/>' +
+      head = '<circle cx="-3" cy="-16" r="3" fill="' + SK + '"/>' +
              '<g transform="translate(-3,3)">' + HAT('-22') + '</g>';
     } else if(pose === 'down'){
       /* 쓰러진 자세 — 몸이 눕고 안전모는 머리에 붙어 있다 */
       body = '<path d="M0-1h17M4-1l-4-5M9-1l4-5M13-1l4 4" stroke="' + c + '"';
-      head = '<circle cx="21" cy="-4" r="3.1" fill="' + SK + '"/>' +
+      head = '<circle cx="21" cy="-4" r="3" fill="' + SK + '"/>' +
              '<g transform="translate(24,-4) rotate(78)">' + HAT('-4') + '</g>';
     } else if(pose === 'reach'){
       body = '<path d="M0-14v9M0-11l-6-4M0-11l6 3M0-5l-4.5 6M0-5l4.5 6" stroke="' + c + '"';
-      head = '<circle cx="0" cy="-18" r="3.1" fill="' + SK + '"/>' + HAT('-23');
+      head = '<circle cx="0" cy="-18" r="3" fill="' + SK + '"/>' + HAT('-23');
     } else {
       body = '<path d="M0-14v9M0-11l-5.5 4M0-11l5.5 4M0-5l-4.5 6M0-5l4.5 6" stroke="' + c + '"';
-      head = '<circle cx="0" cy="-18" r="3.1" fill="' + SK + '"/>' + HAT('-23');
+      head = '<circle cx="0" cy="-18" r="3" fill="' + SK + '"/>' + HAT('-23');
     }
     return '<g transform="translate(' + x + ',' + y + ') scale(' + s + ')">' +
       (pose === 'down' ? SHW : SH) + head + body +
