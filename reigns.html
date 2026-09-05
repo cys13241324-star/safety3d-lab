@@ -45,7 +45,7 @@ button{font:inherit;color:inherit}
    미조치 위반이 쌓이면 그것이 오늘 하루에 얼마의 확률로 터지는지 숫자로 뜬다.
    감추지 않는다. 얼마를 걸고 있는지 알아야 거는 것이 도박이 아니라 판단이 된다.
    색만으로 뜻을 지지 않도록 단계마다 글리프와 말이 함께 바뀐다. */
-#gear{width:100%;margin-top:9px;padding:9px 12px 10px;border-radius:10px;
+#gear{width:100%;margin-top:15px;padding:9px 12px 10px;border-radius:10px;
   background:var(--panel2);border:1px solid var(--line-soft);flex:none}
 #gear .fund{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding-bottom:8px;
   margin-bottom:9px;border-bottom:1px solid var(--line-soft)}
@@ -54,6 +54,9 @@ button{font:inherit;color:inherit}
 #gear .fund .v{font-size:15.5px;font-weight:700;color:var(--text);margin-left:auto;
   white-space:nowrap}
 #gear .fund .v u{text-decoration:none;font-size:10.5px;font-weight:500;color:var(--muted);margin-left:3px}
+#gear .fund .fdlt{font-family:var(--mono);font-size:11.5px;color:var(--bad);opacity:0;
+  transform:translateY(3px);transition:.28s;white-space:nowrap}
+#gear .fund .fdlt.on{opacity:1;transform:none}
 #gear .fund .note{font-size:10.5px;color:var(--dim);width:100%;order:3;margin-top:5px}
 #gear.low .fund .v{color:var(--warn)}
 #gear.out .fund .v{color:var(--bad)}
@@ -72,12 +75,45 @@ button{font:inherit;color:inherit}
 #gear .m .st{margin-top:4px;font-size:10px;color:var(--muted);white-space:nowrap}
 #gear .m .st b{color:var(--c);font-weight:700}
 .lack{color:var(--warn);font-weight:600}
+
+/* ---------- 판정 기록 ----------
+   무엇을 지켰고 무엇을 넘겼는지 그 자리에서 쌓인다. 판이 끝나야 보이는 목록은
+   늦다 — 지금 몇 건을 넘겼는지 알아야 다음 카드에서 다르게 고른다. */
+#log{position:fixed;right:0;top:0;bottom:0;width:min(320px,86vw);z-index:36;
+  background:var(--panel);border-left:1px solid var(--line);
+  padding:calc(56px + env(safe-area-inset-top,0px)) 0 calc(12px + env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;transform:translateX(100%);visibility:hidden;
+  transition:transform .3s cubic-bezier(.2,.8,.3,1);box-shadow:-14px 0 40px rgba(0,0,0,.45)}
+#log.on{transform:none;visibility:visible}
+#log .lh{display:flex;align-items:baseline;gap:8px;padding:0 14px 10px;
+  border-bottom:1px solid var(--line-soft);flex:none}
+#log .lh b{font-family:var(--display);font-weight:800;font-size:14px}
+#log .lh .sum{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+#log .lh .x{margin-left:auto;border:1px solid var(--line);background:var(--panel2);
+  color:var(--muted);border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer}
+#log ul{margin:0;padding:10px 14px;list-style:none;overflow-y:auto;flex:1;
+  display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain}
+#log li{padding-left:10px;border-left:2px solid var(--line);font-size:12.5px;line-height:1.5}
+#log li.ok{border-left-color:var(--ok)} #log li.no{border-left-color:var(--bad)}
+#log li .t{display:flex;gap:6px;align-items:baseline}
+#log li .m{font-family:var(--mono);font-size:10.5px;color:var(--dim);flex:none}
+#log li .n{color:var(--text);font-weight:600}
+#log li .v{color:var(--warn);font-family:var(--mono);font-size:11.5px}
+#log li .l{color:var(--dim);font-family:var(--mono);font-size:10.5px}
+#log .empty{margin:0;padding:16px 14px;font-size:12px;color:var(--dim);line-height:1.6}
+@media (min-width:1160px){
+  #log{transform:none;visibility:visible;box-shadow:none}
+  #log .lh .x{display:none}
+  #bLog{display:none}
+  /* 패널이 자리를 차지하므로 판을 그만큼 왼쪽으로 민다 */
+  body{padding-right:320px}
+}
 .again{color:var(--ok);font-weight:600}
 @media (max-width:430px){
   #gear .mrow{gap:8px}
   #gear .m .n{font-size:9.5px}
 }
-.g{display:flex;flex-direction:column;gap:5px}
+.g{display:flex;flex-direction:column;gap:5px;position:relative}
 .g .lb{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;letter-spacing:.02em;color:var(--muted)}
 .g .lb b{font-family:var(--mono);font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--dim)}
 .g .track{height:7px;border-radius:4px;background:var(--line-soft);overflow:hidden;position:relative}
@@ -86,7 +122,13 @@ button{font:inherit;color:inherit}
 .g[data-k="2"] .fill{background:var(--coin)} .g[data-k="3"] .fill{background:var(--gov)}
 .g.low .fill{background:var(--bad)!important} .g.low .lb{color:var(--bad)}
 .g.low .track{box-shadow:0 0 0 1px rgba(240,112,86,.5)}
-.g .dlt{position:absolute;right:0;top:-17px;font-family:var(--mono);font-size:11.5px;opacity:0;transform:translateY(4px);transition:.3s}
+/* 트랙은 fill 의 둥근 모서리 때문에 overflow:hidden 이라, 그 안에 두면 잘린다.
+   밖으로 꺼내 트랙 바로 아래에 알약으로 띄운다. */
+.g .dlt{position:absolute;right:0;top:calc(100% + 3px);z-index:3;pointer-events:none;
+  font-family:var(--mono);font-size:12px;font-weight:600;padding:1px 6px;border-radius:5px;
+  background:var(--panel);border:1px solid var(--line-soft);box-shadow:0 2px 8px rgba(0,0,0,.5);
+  opacity:0;transform:translateY(-3px);transition:.28s;white-space:nowrap}
+.g .dlt em{font-style:normal;font-size:10.5px;margin-left:2px;color:var(--warn);font-weight:700}
 .g .dlt.on{opacity:1;transform:none}
 .g .dlt.up{color:var(--ok)} .g .dlt.dn{color:var(--bad)}
 
@@ -152,6 +194,13 @@ button{font:inherit;color:inherit}
 #sheet .verdict.ok{color:var(--ok);border-color:rgba(92,192,138,.5);background:rgba(92,192,138,.12)}
 #sheet .verdict.no{color:var(--bad);border-color:rgba(240,112,86,.5);background:rgba(240,112,86,.12)}
 #sheet .out{margin:12px 0 0;font-size:14.5px;line-height:1.6}
+#sheet .twist{margin-top:10px;padding:8px 11px;border-radius:8px;font-size:12.5px;
+  background:rgba(227,181,77,.12);border-left:2px solid var(--warn);color:var(--text)}
+#sheet .delta{margin-top:10px;display:flex;flex-wrap:wrap;gap:5px 7px}
+#sheet .delta span{font-family:var(--mono);font-size:11.5px;padding:3px 7px;border-radius:6px;
+  background:var(--panel2);border:1px solid var(--line-soft)}
+#sheet .delta .up{color:var(--ok)} #sheet .delta .dn{color:var(--bad)}
+#sheet .delta .z{color:var(--dim)}
 #sheet .std{margin-top:14px;padding:12px 14px;border-radius:9px;background:var(--panel2);
   border:1px solid var(--line-soft)}
 #sheet .std .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--dim);display:block;margin-bottom:5px}
@@ -299,7 +348,7 @@ button{font:inherit;color:inherit}
 <div id="app">
   <div id="hud"></div>
   <div id="gear"></div>
-  <div id="meta"><span id="mDay">1일차</span><span class="site" id="mSite">현장 개설</span><button class="fresh" id="bFresh" type="button">새 현장</button></div>
+  <div id="meta"><span id="mDay">1일차</span><span class="site" id="mSite">현장 개설</span><button class="fresh" id="bLog" type="button">기록</button><button class="fresh" id="bFresh" type="button">새 현장</button></div>
   <div id="board">
     <div id="card" role="group" aria-labelledby="cWho" tabindex="-1">
       <span class="pick l" id="pickL"></span>
@@ -321,10 +370,19 @@ button{font:inherit;color:inherit}
 <div id="sheet" role="dialog" aria-modal="true" aria-labelledby="sV" aria-hidden="true">
   <span class="verdict" id="sV"></span>
   <p class="out" id="sOut"></p>
+  <div class="twist" id="sTwist" hidden></div>
+  <div class="delta" id="sDelta"></div>
   <div class="std"><span class="k">규정 기준</span><span class="v" id="sStd"></span></div>
   <div class="law" id="sLaw"></div>
   <button class="go" id="sGo" type="button">다음 날</button>
 </div>
+
+<aside id="log" aria-label="이번 현장의 판정 기록" aria-hidden="true">
+  <div class="lh"><b>판정 기록</b><span class="sum" id="logSum"></span>
+    <button class="x" id="logX" type="button" aria-label="닫기">✕</button></div>
+  <ul id="logList"></ul>
+  <p class="empty" id="logEmpty">아직 판정이 없습니다. 카드를 넘기면 여기에 쌓입니다.</p>
+</aside>
 
 <div id="over"><div class="box">
   <div class="tag" id="oTag"></div>
@@ -1566,7 +1624,7 @@ button{font:inherit;color:inherit}
         v:2, g:st.g, day:st.day, tags:st.tags, seeds:st.seeds, viol:st.viol,
         money:st.money, illegal:st.illegal, hurt:st.hurt, near:st.near,
         rolls:st.rolls, pSum:st.pSum, pFat:st.pFat,
-        forced:st.forced, hidden:st.hidden, stop:st.stop,
+        forced:st.forced, hidden:st.hidden, stop:st.stop, log:st.log,
         okCount:st.okCount, lastReport:st.lastReport, snap:st.snap,
         pOk:st.pOk, pNo:st.pNo, reports:st.reports, cur:st.cur, nextReport:st.nextReport,
         recent:st.recent, lastSubj:st.lastSubj, runSubj:st.runSubj,
@@ -1598,7 +1656,7 @@ button{font:inherit;color:inherit}
           lastReport:0, snap:[62,58,60,60], pOk:0, pNo:0, reports:0,
           recent:[], lastSubj:'', runSubj:0, nextReport:5,
           money:FUND0, illegal:0, hurt:0, near:0, fatal:'', spent:0, need:0,
-          rolls:0, pSum:0, pFat:0, forced:0, hidden:0, stop:0};
+          rolls:0, pSum:0, pFat:0, forced:0, hidden:0, stop:0, log:[]};
     DECK.forEach(function(c){ c.used = false; });
     FLAVOR.forEach(function(c){ c.used = false; });
 
@@ -1613,6 +1671,7 @@ button{font:inherit;color:inherit}
       st.illegal = resume.illegal || 0; st.hurt = resume.hurt || 0; st.near = resume.near || 0;
       st.rolls = resume.rolls || 0; st.pSum = resume.pSum || 0; st.pFat = resume.pFat || 0;
       st.forced = resume.forced || 0; st.hidden = resume.hidden || 0; st.stop = resume.stop || 0;
+      st.log = resume.log || [];
       st.recent = resume.recent || []; st.lastSubj = resume.lastSubj || ''; st.runSubj = resume.runSubj || 0;
       var on = {}; (resume.deck || []).forEach(function(k){ on[k] = 1; });
       DECK.forEach(function(c){ c.used = !!on[c.k]; });
@@ -1621,6 +1680,7 @@ button{font:inherit;color:inherit}
 
     $('over').classList.remove('on');
     renderHud(true);
+    renderLog();
     if(resume) show(resume.cur); else next();
   }
 
@@ -1692,6 +1752,7 @@ button{font:inherit;color:inherit}
       $('gear').innerHTML =
         '<div class="fund"><span class="k">안전보건관리비</span>' +
         '<span class="v" id="fv">0<u>만원</u></span>' +
+        '<span class="fdlt" id="fd"></span>' +
         '<span class="note" id="fn"></span></div>' +
         '<div class="mrow">' + RK.map(function(r, i){
           return '<div class="m b0" id="rk' + i + '">' +
@@ -1738,7 +1799,8 @@ button{font:inherit;color:inherit}
       $('hud').innerHTML = G.map(function(g, i){
         return '<div class="g" data-k="' + i + '">' +
           '<div class="lb"><span>' + g.n + '</span><b id="gv' + i + '">0</b></div>' +
-          '<div class="track"><div class="fill" id="gf' + i + '"></div><span class="dlt" id="gd' + i + '"></span></div>' +
+          '<div class="track"><div class="fill" id="gf' + i + '"></div></div>' +
+          '<span class="dlt" id="gd' + i + '"></span>' +
         '</div>';
       }).join('');
     }
@@ -1752,14 +1814,46 @@ button{font:inherit;color:inherit}
     renderGear(init);
   }
 
-  function flashDelta(d){
+  /* 무엇이 얼마나 변했는지는 고른 직후에 보여야 한다. 다음 카드가 오기 전에
+     사라지면 아무것도 못 읽는다. 그래서 2.2초를 잡아 둔다. */
+  function flashDelta(d, tw, spent){
     d.forEach(function(v, i){
       var e = $('gd' + i);
-      if(!v){ e.className = 'dlt'; return; }
-      e.textContent = (v > 0 ? '+' : '') + v;
+      if(!v){ e.className = 'dlt'; e.innerHTML = ''; return; }
+      e.innerHTML = (v > 0 ? '+' : '') + v + (tw && tw.i === i ? '<em>×2</em>' : '');
       e.className = 'dlt on ' + (v > 0 ? 'up' : 'dn');
-      setTimeout(function(){ e.className = 'dlt ' + (v > 0 ? 'up' : 'dn'); }, 1300);
+      setTimeout(function(){ e.className = 'dlt ' + (v > 0 ? 'up' : 'dn'); }, 2200);
     });
+    var f = $('fd');
+    if(f){
+      if(!spent){ f.className = 'fdlt'; f.textContent = ''; }
+      else {
+        f.textContent = '−' + mny(spent) + '만';
+        f.className = 'fdlt on';
+        setTimeout(function(){ f.className = 'fdlt'; }, 2200);
+      }
+    }
+  }
+
+  /* ===== 그날의 변수 ======================================================
+     현장은 계획대로만 굴러가지 않는다. 낮은 확률로 한 수치가 두 배로 움직인다.
+     준수 쪽에서는 이미 오르던 것이 더 오르고, 위반 쪽에서는 이미 깎이던 것이
+     더 깎인다 — 방향을 뒤집지는 않는다. 도박이 아니라 날씨 같은 것이어야 한다. */
+  var TWIST_P = 0.12;
+  var TWIST = [
+    {ok:'옆 조에서도 같은 자리를 따라 고쳤습니다', no:'하필 그날 비가 내렸습니다'},
+    {ok:'앞 공정이 하루 일찍 끝나 있었습니다',     no:'결국 뜯고 다시 했습니다'},
+    {ok:'옆 현장에서 자재를 빌려 왔습니다',        no:'그 자리에서 과태료가 나왔습니다'},
+    {ok:'최윤 감독관이 마침 그 자리에 있었습니다', no:'본사 안전감사와 겹쳤습니다'}
+  ];
+  function rollTwist(d, ok){
+    if(Math.random() >= TWIST_P) return null;
+    var cand = [], i;
+    for(i = 0; i < 4; i++) if(ok ? d[i] > 0 : d[i] < 0) cand.push(i);
+    if(!cand.length) return null;
+    var k = cand[Math.floor(Math.random() * cand.length)];
+    d[k] = d[k] * 2;
+    return {i:k, t:(ok ? TWIST[k].ok : TWIST[k].no), g:G[k].n};
   }
 
   /* ===== 씨앗은 반드시 돌아온다 =====
@@ -1790,6 +1884,41 @@ button{font:inherit;color:inherit}
       if(r <= 0) return pool[i];
     }
     return pool[pool.length - 1];
+  }
+
+  /* 그 카드가 물은 값만 뽑는다 — 기록에는 표 전체가 아니라 그 값이 남아야 한다 */
+  function hitVals(c){
+    var ems = [], out = [], i;
+    String(c.f || '').replace(/<em>(.*?)<\/em>/g, function(_, v){ ems.push(v); return ''; });
+    if(!ems.length) return '';
+    var h = (c.hit && c.hit.length) ? c.hit : [0];
+    for(i = 0; i < h.length; i++) if(ems[h[i]]) out.push(ems[h[i]]);
+    return out.join(' · ');
+  }
+
+  function pushLog(c, ok){
+    if(!c.law) return;
+    st.log.push({d:st.day, ok:ok ? 1 : 0,
+                 n:(c.f ? c.f.split(' · ')[0].replace(/<[^>]+>/g, '') : c.s),
+                 v:hitVals(c), l:c.law});
+    if(st.log.length > 120) st.log.shift();
+    renderLog();
+  }
+
+  function renderLog(){
+    var ok = 0, no = 0, i, out = [];
+    for(i = st.log.length - 1; i >= 0; i--){
+      var e = st.log[i];
+      if(e.ok) ok++; else no++;
+      out.push('<li class="' + (e.ok ? 'ok' : 'no') + '">' +
+        '<div class="t"><span class="m">' + (e.ok ? '✓' : '✕') + ' ' + e.d + '일</span>' +
+        '<span class="n">' + e.n + '</span></div>' +
+        (e.v ? '<div class="v">' + e.v + '</div>' : '') +
+        '<div class="l">' + e.l + '</div></li>');
+    }
+    $('logList').innerHTML = out.join('');
+    $('logEmpty').hidden = !!st.log.length;
+    $('logSum').textContent = st.log.length ? ('충족 ' + ok + ' · 미달 ' + no) : '';
   }
 
   var NM = {}, SRC = {};
@@ -2052,8 +2181,9 @@ button{font:inherit;color:inherit}
       }
     }
 
+    var twist = c.report ? null : rollTwist(d, ch.ok);
     d.forEach(function(v, i){ st.g[i] = Math.max(0, Math.min(100, st.g[i] + v)); });
-    flashDelta(d);
+    flashDelta(d, twist, spent);
 
     if(ch.ok) st.okCount++;
     /* 어긴 것은 위험 점수로 쌓인다. 그 카드에서 안전이 얼마나 깎이는지가 곧 위험도다.
@@ -2068,6 +2198,7 @@ button{font:inherit;color:inherit}
                      hits:(c.s === '사고' ? 1 : 0)});   // 사고를 겪고도 넘겼으면 경고는 이미 끝났다
     }
     if(!ch.ok && c.law){ st.viol.push({law:c.law, f:c.f, hit:c.hit, k:c.w}); }
+    pushLog(c, ch.ok);
     /* 엔딩이 읽는 세 가지 — 사고 앞에서 강행했는가, 보고를 다듬었는가, 스스로 멈췄는가 */
     if(c.s === '사고' && !ch.ok) st.forced++;
     if(c.report && !ch.ok) st.hidden++;
@@ -2085,8 +2216,8 @@ button{font:inherit;color:inherit}
        드물고(판당 각 5회 안팎) 판을 가르는 자리라 그대로 둔다. */
     var quiet = ch.ok && !c.report && c.s !== '사고' && c.s !== '아차사고' && !diverted;
     if(quiet){
-      say('기준 충족. ' + ch.o);
-      hint(ch.o + (spent ? '   관리비 -' + mny(spent) + '만' : ''), 2200);
+      say('기준 충족. ' + ch.o + (twist ? ' ' + twist.t : ''));
+      hint(twist ? '⚡ ' + twist.t + ' — ' + twist.g + ' 변화가 두 배입니다' : ch.o, 2400);
       setTimeout(advance, 620);
       return;
     }
@@ -2095,6 +2226,13 @@ button{font:inherit;color:inherit}
     $('sV').textContent = diverted ? '⚠ 공사비 전용 (목적 외 사용)'
       : (ch.ok ? '✓ ' : '✕ ') + (c.report ? (ch.ok ? '사실대로 보고' : '다듬어 보고')
       : (c.law ? (ch.ok ? '기준 충족' : '기준 미달') : (ch.ok ? '무리 없음' : '무리한 결정')));
+    $('sTwist').textContent = twist ? '⚡ ' + twist.t + ' — ' + twist.g + ' 변화가 두 배' : '';
+    $('sTwist').hidden = !twist;
+    $('sDelta').innerHTML = ['안전', '공정', '공사비', '감독'].map(function(nm, i){
+      var v = d[i];
+      return '<span class="' + (v > 0 ? 'up' : (v < 0 ? 'dn' : 'z')) + '">' + nm + ' '
+        + (v > 0 ? '+' : '') + v + (twist && twist.i === i ? ' ×2' : '') + '</span>';
+    }).join('') + (spent ? '<span class="dn">관리비 −' + mny(spent) + '만</span>' : '');
     $('sOut').textContent = ch.o
       + (diverted ? ' 관리비가 비어 공사비를 끌어 썼습니다. 안전보건관리비는 목적이 정해진 돈입니다.' : '')
       + (fixed ? ' 조치 예산이 붙어 ' + fixed + '건을 그 자리에서 시정했습니다.' : '')
@@ -2275,6 +2413,14 @@ button{font:inherit;color:inherit}
     box.classList.add('on');
   }
   $('oAgain').addEventListener('click', function(){ reset(); });
+  function toggleLog(open){
+    var e = $('log');
+    var on = open === undefined ? !e.classList.contains('on') : open;
+    e.classList.toggle('on', on);
+    e.setAttribute('aria-hidden', on ? 'false' : 'true');
+  }
+  $('bLog').addEventListener('click', function(){ toggleLog(); });
+  $('logX').addEventListener('click', function(){ toggleLog(false); });
   $('bFresh').addEventListener('click', function(){ wipe(); reset(); hint('새 현장에 부임했습니다'); });
 
   var HINT0 = '카드를 좌우로 밀거나 방향키로 결정합니다';
