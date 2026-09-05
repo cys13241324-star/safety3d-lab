@@ -112,7 +112,7 @@ function isOver() { return ELS['over'].classList.contains('on'); }
 
 var GAMES = Number(WScript.Arguments(1) || 60);
 
-function gauge(i){ return Number(ELS['gv' + i].textContent); }
+function gauge(i){ return Number(String(ELS['gv' + i].textContent).replace(/[^0-9]/g, '')); }
 
 // L  = always the left choice  (the regulation-compliant option in every card)
 // R  = always the right choice (the shortcut)

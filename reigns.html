@@ -60,7 +60,7 @@ button{font:inherit;color:inherit}
 #card{position:absolute;width:100%;max-width:400px;background:var(--card);
   border:1px solid var(--line);border-radius:16px;padding:20px 20px 22px;
   box-shadow:0 18px 40px rgba(0,0,0,.45);cursor:grab;user-select:none;-webkit-user-select:none;
-  touch-action:none;will-change:transform}
+  touch-action:pan-y;will-change:transform}
 #card.drag{cursor:grabbing;transition:none}
 #card.settle{transition:transform .32s cubic-bezier(.2,.8,.3,1),opacity .3s ease-out}
 #card.fly{transition:transform .28s ease-in,opacity .28s ease-in;opacity:0}
@@ -909,8 +909,9 @@ button{font:inherit;color:inherit}
     }
     st.g.forEach(function(v, i){
       $('gf' + i).style.width = Math.max(0, Math.min(100, v)) + '%';
-      $('gv' + i).textContent = Math.round(v);
-      $('gf' + i).parentNode.parentNode.classList.toggle('low', v <= 22);
+      var g = $('gf' + i).parentNode.parentNode;
+      g.classList.toggle('low', v <= 22);
+      $('gv' + i).textContent = (v <= 22 ? '⚠ ' : '') + Math.round(v);
     });
     $('mDay').textContent = st.day + '일차';
   }
@@ -1073,8 +1074,8 @@ button{font:inherit;color:inherit}
     } else if(ch.ok) st.pOk++; else st.pNo++;
 
     $('sV').className = 'verdict ' + (ch.ok ? 'ok' : 'no');
-    $('sV').textContent = c.report ? (ch.ok ? '사실대로 보고' : '다듬어 보고')
-      : (c.law ? (ch.ok ? '기준 충족' : '기준 미달') : (ch.ok ? '무리 없음' : '무리한 결정'));
+    $('sV').textContent = (ch.ok ? '✓ ' : '✕ ') + (c.report ? (ch.ok ? '사실대로 보고' : '다듬어 보고')
+      : (c.law ? (ch.ok ? '기준 충족' : '기준 미달') : (ch.ok ? '무리 없음' : '무리한 결정')));
     $('sOut').textContent = ch.o;
     $('sStd').innerHTML = c.f || (c.report
       ? '보고는 <em>닷새</em>마다 옵니다. 올린 위험만 조치 예산이 붙고, 남긴 위험은 사고 카드로 돌아옵니다.'
@@ -1143,16 +1144,19 @@ button{font:inherit;color:inherit}
   }
 
   /* ===== 드래그 ===== */
-  var dragging = false, x0 = 0, dx = 0;
+  var dragging = false, x0 = 0, y0 = 0, dx = 0, dy = 0, axis = 0;
   cardEl.addEventListener('pointerdown', function(e){
     if(st.dead || $('sheet').classList.contains('on')) return;
-    dragging = true; x0 = e.clientX; dx = 0;
+    dragging = true; x0 = e.clientX; y0 = e.clientY; dx = 0; dy = 0; axis = 0;
     cardEl.className = 'drag' + curExtra;
     cardEl.setPointerCapture(e.pointerId);
   });
   cardEl.addEventListener('pointermove', function(e){
     if(!dragging) return;
-    dx = e.clientX - x0;
+    dx = e.clientX - x0; dy = e.clientY - y0;
+    // 어느 축으로 미는지 한 번 정해지면 그 축을 지킨다
+    if(!axis && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) axis = Math.abs(dx) > Math.abs(dy) * 1.2 ? 1 : -1;
+    if(axis < 0){ dx = 0; return; }
     cardEl.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx * 0.05) + 'deg)';
     $('pickL').style.opacity = dx < -30 ? Math.min(1, (-dx - 30) / 50) : 0;
     $('pickR').style.opacity = dx > 30 ? Math.min(1, (dx - 30) / 50) : 0;
