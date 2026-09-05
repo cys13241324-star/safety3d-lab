@@ -129,9 +129,39 @@ button{font:inherit;color:inherit}
 #over .again{margin-top:20px;width:100%;border:0;border-radius:9px;padding:13px;background:var(--warn);
   color:#1A1200;font-weight:700;font-size:15px;cursor:pointer;font-family:var(--display)}
 
+/* ---------- 배경 장면 ---------- */
+#scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#scene svg{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .9s ease}
+#scene svg.on{opacity:.5}
+#app{position:relative;z-index:1}
+
+/* ---------- 카드 그림 ---------- */
+#card .art{height:132px;margin:-20px -20px 14px;border-bottom:1px solid var(--line-soft);
+  background:linear-gradient(180deg,#0D1420 0%,#131D2C 100%);border-radius:15px 15px 0 0;overflow:hidden;position:relative}
+#card .art svg{display:block;width:100%;height:100%}
+#card .art .cap{position:absolute;left:12px;bottom:8px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.06em;color:var(--dim)}
+#card.hit .art{background:linear-gradient(180deg,#201214 0%,#1A1620 100%)}
+
+/* ---------- 현상 보고 ---------- */
+#card.rep .say{min-height:0}
+.rp{display:flex;flex-direction:column;gap:9px}
+.rp .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  padding-bottom:8px;border-bottom:1px dashed var(--line-soft);font-size:13.5px}
+.rp .row .k{color:var(--muted)}
+.rp .row .v{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;text-align:right}
+.rp .row .v .up{color:var(--ok)} .rp .row .v .dn{color:var(--bad)} .rp .row .v .z{color:var(--dim)}
+.rp .risk{margin-top:2px}
+.rp .risk .h{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--bad);margin-bottom:6px}
+.rp .risk ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.rp .risk li{font-size:12.5px;color:var(--muted);padding-left:10px;border-left:2px solid var(--bad);line-height:1.4}
+.rp .risk li b{color:var(--text);font-weight:600}
+.rp .clean{font-size:13px;color:var(--ok);padding-left:10px;border-left:2px solid var(--ok)}
+
 @media (max-width:420px){
   #card .say{font-size:15.5px;min-height:6em}
   #card{padding:17px 17px 19px}
+  #card .art{height:112px;margin:-17px -17px 12px}
   .g .lb{font-size:10.5px}
 }
 /* ---------- 사이트 상단 바 (학습실 공통) ---------- */
@@ -157,6 +187,8 @@ button{font:inherit;color:inherit}
   <button class="b" id="bReset" type="button">처음부터</button>
 </header>
 
+<div id="scene" aria-hidden="true"></div>
+
 <div id="app">
   <div id="hud"></div>
   <div id="meta"><span id="mDay">1일차</span><span class="site" id="mSite">현장 개설</span></div>
@@ -164,6 +196,7 @@ button{font:inherit;color:inherit}
     <div id="card">
       <span class="pick l" id="pickL"></span>
       <span class="pick r" id="pickR"></span>
+      <div class="art" id="cArt" aria-hidden="true"></div>
       <div class="subj" id="cSubj"></div>
       <div class="who"><i></i><span id="cWho"></span></div>
       <div class="say" id="cSay"></div>
@@ -201,6 +234,265 @@ button{font:inherit;color:inherit}
 (function(){
   'use strict';
   var $ = function(id){ return document.getElementById(id); };
+
+  /* ===== 장면 그림 =====
+     320×132 판 위에 규정이 걸린 자리를 그리고, 노란 치수선에 그 규정의 수치를 적는다. */
+  var ST = '#5A6B87', DM = '#33425C', HI = '#E3B54D', BD = '#F07056', SK = '#F1C9A5';
+
+  function W(x, y, s, c){            // 안전모 쓴 근로자
+    s = s || 1; c = c || '#8FB3E6';
+    return '<g transform="translate(' + x + ',' + y + ') scale(' + s + ')">' +
+      '<path d="M-5.5-23a5.5 5 0 0 1 11 0z" fill="' + HI + '"/>' +
+      '<path d="M-7.5-23h15" stroke="' + HI + '" stroke-width="1.6" stroke-linecap="round"/>' +
+      '<circle cx="0" cy="-18" r="3.1" fill="' + SK + '"/>' +
+      '<path d="M0-14v9M0-11l-5.5 4M0-11l5.5 4M0-5l-4.5 6M0-5l4.5 6" stroke="' + c +
+      '" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>';
+  }
+  function Dh(x1, x2, y, t){         // 가로 치수
+    return '<path d="M' + x1 + ' ' + (y-4) + 'v8M' + x2 + ' ' + (y-4) + 'v8M' + x1 + ' ' + y + 'H' + x2 +
+      '" stroke="' + HI + '" stroke-width="1.1" fill="none"/><text x="' + ((x1+x2)/2) + '" y="' + (y-8) +
+      '" text-anchor="middle" font-size="10.5" fill="' + HI + '" font-family="monospace">' + t + '</text>';
+  }
+  function Dv(y1, y2, x, t, left){   // 세로 치수
+    return '<path d="M' + (x-4) + ' ' + y1 + 'h8M' + (x-4) + ' ' + y2 + 'h8M' + x + ' ' + y1 + 'V' + y2 +
+      '" stroke="' + HI + '" stroke-width="1.1" fill="none"/><text x="' + (left ? x-7 : x+7) + '" y="' + ((y1+y2)/2+4) +
+      '" text-anchor="' + (left ? 'end' : 'start') + '" font-size="10.5" fill="' + HI + '" font-family="monospace">' + t + '</text>';
+  }
+  function L(d, c, w, dash){         // 선
+    return '<path d="' + d + '" stroke="' + (c||ST) + '" stroke-width="' + (w||1.4) + '" fill="none"' +
+      (dash ? ' stroke-dasharray="' + dash + '"' : '') + ' stroke-linecap="round"/>';
+  }
+  function R(x, y, w, h, f, c){      // 사각
+    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + (f||'#1E293C') +
+      '" stroke="' + (c||ST) + '" stroke-width="1.2"/>';
+  }
+  function TX(x, y, t, c, sz){
+    return '<text x="' + x + '" y="' + y + '" font-size="' + (sz||10.5) + '" fill="' + (c||DM) +
+      '" font-family="monospace">' + t + '</text>';
+  }
+  var GND = R(0, 108, 320, 24, '#161F2E', 'none') + L('M0 108H320', ST, 1.2);
+  var WALL = R(20, 4, 22, 104, '#1E293C');
+
+  var SC = {
+  /* --- 건설: 추락·낙하 --- */
+  net: WALL + GND + L('M42 70L118 50', HI, 3) + L('M50 72l8 14M64 68l8 14M78 65l8 14M92 61l8 14M106 58l8 14', DM, 1) +
+    L('M42 88L118 68', ST, 1.6) + R(70, 12, 9, 9, BD, BD) + L('M74 24v14', BD, 1.2, '3 3') +
+    Dh(42, 118, 96, '2 m') + Dv(20, 70, 140, '10 m 이내', 0) + L('M42 20H132M42 70H132', DM, 1, '4 4'),
+  fall: R(0, 26, 320, 8, '#1E293C') + GND + L('M46 34C110 34 110 74 160 74C210 74 210 34 274 34', HI, 2.6) +
+    L('M60 36v26M80 38v30M100 40v32M120 42v32M140 44v30M180 44v30M200 42v32M220 40v32M240 38v30M260 36v26', DM, 1) +
+    W(160, 30, .9) + L('M160 34v22', BD, 1.2, '3 3') + Dv(34, 74, 292, '처짐 12 %', 1) + Dv(34, 108, 30, '10 m 이하', 0),
+  rail: GND + R(30, 100, 260, 8, '#1E293C') + L('M70 100V40M250 100V40', ST, 3) +
+    L('M70 40H250', HI, 3) + L('M70 70H250', ST, 2.2) + R(70, 90, 180, 10, '#243044') +
+    W(160, 100, .95) + Dv(40, 100, 292, '90 cm', 1) + Dv(90, 100, 46, '10 cm', 0),
+  ladder: WALL + GND + L('M42 108L96 20', ST, 2.6) + L('M62 108L116 20', ST, 2.6) +
+    L('M50 94h20M58 80h20M66 66h20M74 52h20M82 38h20M90 24h20', ST, 1.6) +
+    L('M96 20L110 -3', HI, 2.6) + L('M116 20L130 -3', HI, 2.6) +
+    Dv(4, 20, 140, '60 cm 돌출', 0) + L('M42 108L120 108', DM, 1) + TX(150, 84, '75° 이하', HI),
+  ramp: GND + L('M40 108L250 44', ST, 3.4) + L('M60 100l4-8M90 91l4-8M120 82l4-8M150 73l4-8M180 64l4-8M210 55l4-8', HI, 2) +
+    W(150, 66, .85) + L('M40 108H150', DM, 1, '4 4') + TX(60, 100, '30° 이하', HI),
+  plank: GND + R(50, 88, 16, 20, '#243044') + R(254, 88, 16, 20, '#243044') +
+    R(46, 76, 110, 12, '#243044') + R(166, 76, 108, 12, '#243044') +
+    L('M156 74v16M166 74v16', BD, 1.4) + W(100, 76, .9) +
+    Dh(46, 156, 62, '40 cm 이상') + Dh(156, 166, 104, '틈 3 cm'),
+  scaffold: WALL + GND + L('M70 12V108M120 12V108M170 12V108M220 12V108', ST, 2.2) +
+    L('M64 34H226M64 62H226M64 90H226', ST, 1.8) + L('M42 34H70M42 90H70', HI, 2.4) +
+    W(145, 62, .8) + Dh(70, 120, 24, '1.85 m') + Dv(34, 90, 246, '벽이음 5 m', 0),
+  stairs: GND + L('M40 108V92h32V76h32V60h32V44h32V28h34', ST, 2.6) +
+    R(168, 40, 60, 5, '#243044') + W(198, 40, .8) + Dh(168, 228, 32, '계단참 1.2 m') +
+    Dv(28, 108, 30, '3 m마다', 0) + Dh(40, 72, 120, '폭 1 m'),
+  trench: R(0, 100, 320, 32, '#161F2E', 'none') + L('M0 100H96', ST, 1.6) +
+    '<path d="M96 100L164 20H320V132H0V100" fill="none"/>' +
+    '<path d="M0 100H96L164 20H320" stroke="' + ST + '" stroke-width="2" fill="none"/>' +
+    R(96, 100, 224, 32, '#0F1725', 'none') + L('M96 100L164 20', HI, 2.6) +
+    L('M164 20V100M96 100H164', DM, 1, '4 4') + TX(176, 66, '1 : 1.8', HI) + W(60, 100, .85),
+  shore: R(20, 18, 280, 10, '#243044') + GND + L('M60 28V108M130 28V108M200 28V108M270 28V108', ST, 3) +
+    L('M52 62h226', HI, 2.2) + L('M52 88h226', ST, 1.6) + R(122, 56, 16, 12, '#2A3purple', 'none').replace('#2A3purple','#33425C') +
+    Dv(28, 108, 306, '3.5 m 초과', 1) + Dh(60, 130, 42, '2 m마다'),
+  horse: GND + L('M70 108L110 46M150 108L110 46', ST, 2.8) + L('M170 108L210 46M250 108L210 46', ST, 2.8) +
+    R(96, 40, 128, 8, '#243044') + W(160, 40, .85) + TX(56, 84, '75°', HI) +
+    Dh(96, 224, 30, '폭 40 cm') + Dv(48, 108, 276, '2 m 초과', 1),
+  mobscaf: GND + L('M110 100V26M210 100V26', ST, 2.6) + L('M110 62H210', ST, 1.8) +
+    R(102, 20, 116, 8, '#243044') + L('M102 4H218', HI, 2.4) + L('M110 4V20M210 4V20', HI, 1.6) +
+    '<circle cx="112" cy="104" r="6" fill="none" stroke="' + ST + '" stroke-width="1.6"/>' +
+    '<circle cx="208" cy="104" r="6" fill="none" stroke="' + ST + '" stroke-width="1.6"/>' +
+    W(160, 20, .8) + TX(226, 60, '250 kg', HI) + TX(226, 76, '탑승 이동 X', BD),
+  pile: GND + L('M100 108V12', ST, 3.4) + L('M100 24L46 108M100 24L154 108M100 24L100 108', HI, 1.8) +
+    R(88, 30, 24, 22, '#243044') + L('M100 52V96', ST, 2) + R(92, 96, 16, 12, '#33425C') +
+    TX(176, 46, '버팀대 3개 이상', HI) + TX(176, 66, '로프 안전계수 5', DM),
+  caisson: R(0, 30, 320, 102, '#161F2E', 'none') + L('M0 30H120M200 30H320', ST, 1.6) +
+    R(120, 30, 80, 102, '#0D1420', ST) + L('M136 30V120M184 30V120', DM, 1, '4 4') +
+    W(160, 118, .85) + Dv(30, 120, 232, '20 m 초과', 0) + TX(232, 46, '통신·송기설비', HI),
+  gangway: R(0, 96, 320, 36, '#0F1B2A', 'none') + L('M0 96H320', '#2C4A63', 1.4) +
+    '<path d="M170 40h140v46H196z" fill="#1E293C" stroke="' + ST + '" stroke-width="1.4"/>' +
+    L('M60 96L176 52', ST, 3) + L('M60 84L176 40', ST, 1.6) +
+    L('M70 96l6-12M96 87l6-12M122 78l6-12M148 69l6-12', DM, 1.2) + W(118, 72, .8) +
+    TX(20, 40, '300톤급 이상', HI) + TX(20, 56, '안전망 필수', HI),
+  carry: GND + W(120, 108, 1.15) + R(150, 76, 40, 30, '#243044') +
+    L('M132 92h20', ST, 2) + TX(206, 74, '체중 40 %', HI) + TX(206, 92, '무릎 굽혀', DM) +
+    L('M198 84H320', DM, 1, '4 4'),
+  weather: GND + L('M40 30H150M30 46H130M50 62H160', DM, 1.6) +
+    L('M150 30l-10-5M150 30l-10 5M130 46l-10-5M130 46l-10 5M160 62l-10-5M160 62l-10 5', DM, 1.6) +
+    L('M180 108V20', ST, 3) + R(174, 24, 120, 8, '#243044') + W(230, 24, .8) +
+    TX(206, 62, '10 m/s 이상', HI) + TX(206, 80, '작업 중지', BD),
+
+  /* --- 기계 --- */
+  roller: GND + '<circle cx="150" cy="52" r="26" fill="#1E293C" stroke="' + ST + '" stroke-width="1.6"/>' +
+    '<circle cx="150" cy="104" r="26" fill="#1E293C" stroke="' + ST + '" stroke-width="1.6"/>' +
+    L('M124 78H176', BD, 2.2) + L('M60 36H120', HI, 3) + L('M60 36V108', ST, 1.6) +
+    W(88, 108, .85) + Dv(36, 108, 44, '1.8 m 이내', 1) + TX(196, 60, '급정지 1/3', DM),
+  grinder: GND + '<circle cx="150" cy="60" r="34" fill="#1E293C" stroke="' + ST + '" stroke-width="1.6"/>' +
+    '<path d="M150 60 L150 26 A34 34 0 0 1 180 76 Z" fill="rgba(227,181,77,.18)" stroke="' + HI + '" stroke-width="1.4"/>' +
+    R(186, 62, 30, 6, '#243044') + L('M184 60h4', BD, 2.4) + R(134, 94, 32, 14, '#243044') +
+    TX(212, 40, '125° 이내', HI) + TX(212, 92, '워크레스트 3 mm', DM),
+  press: GND + R(70, 10, 160, 14, '#243044') + L('M80 24V96M220 24V96', ST, 2.6) +
+    R(96, 30, 128, 20, '#2A3away', 'none').replace('#2A3away','#33425C') + R(96, 84, 128, 12, '#243044') +
+    L('M96 56H224', BD, 1.6, '4 4') + W(268, 96, .85) + Dh(224, 268, 72, 'D ≥ 1.6T'),
+  sawblade: GND + '<circle cx="130" cy="76" r="40" fill="none" stroke="' + ST + '" stroke-width="2"/>' +
+    R(20, 74, 280, 6, '#243044') + '<path d="M164 52a40 40 0 0 1 0 48z" fill="none" stroke="' + HI + '" stroke-width="2.4"/>' +
+    L('M180 44V108', HI, 3) + Dh(168, 180, 36, '12 mm') + TX(200, 76, '두께 1.1배', DM),
+  forklift: GND + '<path d="M110 96V56h46l18 22v18z" fill="#1E293C" stroke="' + ST + '" stroke-width="1.6"/>' +
+    '<circle cx="124" cy="102" r="8" fill="#243044" stroke="' + ST + '"/><circle cx="166" cy="102" r="6" fill="#243044" stroke="' + ST + '"/>' +
+    L('M112 22H180', HI, 3) + L('M114 22V56M178 22V56', ST, 2) + L('M132 22V56M156 22V56', HI, 1.6) +
+    L('M180 96V34h6M186 34h20', ST, 2.4) + Dh(132, 156, 16, '16 cm 미만') + TX(216, 62, '0.903 m', HI),
+  robot: GND + L('M110 108V64L150 34L188 56', ST, 4) + '<circle cx="188" cy="56" r="6" fill="' + HI + '"/>' +
+    L('M240 108V26', ST, 2.4) + L('M240 26v0M236 40h8M236 56h8M236 72h8M236 88h8', ST, 1.4) +
+    L('M232 26H248', ST, 2) + W(280, 108, .85) + Dv(26, 108, 262, '1.8 m', 0),
+  boiler: GND + '<rect x="80" y="40" width="150" height="68" rx="16" fill="#1E293C" stroke="' + ST + '" stroke-width="1.6"/>' +
+    L('M150 40V18', ST, 3) + '<path d="M138 18h24l-6-10h-12z" fill="#243044" stroke="' + HI + '" stroke-width="1.6"/>' +
+    L('M156 8l10-8M164 12l12-6', HI, 1.6) + '<circle cx="196" cy="74" r="14" fill="#0F1725" stroke="' + ST + '"/>' +
+    L('M196 74l8-6', HI, 2) + TX(240, 46, '최고사용압력', HI) + TX(240, 64, '이하 작동', HI) + TX(240, 88, '매년 1회', DM),
+  rotor: GND + R(40, 20, 14, 88, '#243044') + R(266, 20, 14, 88, '#243044') +
+    '<circle cx="160" cy="64" r="34" fill="none" stroke="' + ST + '" stroke-width="2.4"/>' +
+    '<circle cx="160" cy="64" r="6" fill="' + ST + '"/>' + L('M126 64H194', DM, 1, '3 3') +
+    L('M196 40l14-10M198 64h18M196 88l14 10', HI, 1.6) +
+    TX(100, 18, '축 1 t 초과 · 120 m/s 이상 → 비파괴검사', HI, 9.5),
+  wirerope: R(120, 0, 80, 10, '#243044') + GND + L('M160 10V52', ST, 2.6) +
+    '<path d="M160 52c0 14-14 14-14 24s14 10 14 20" fill="none" stroke="' + ST + '" stroke-width="2.6"/>' +
+    L('M150 66l-8-4M152 78l-9 3M150 90l-8 5', BD, 1.6) +
+    R(146, 96, 28, 12, '#243044') + TX(198, 46, '탑승 10 · 화물 5', HI) + TX(198, 66, '훅 3 · 그 밖 4', HI) +
+    TX(198, 86, '소선 10 % 금지', BD),
+  /* --- 전기 --- */
+  elcb: R(0, 96, 320, 36, '#0F1B2A', 'none') + L('M0 96H320', '#2C4A63', 1.4) +
+    L('M30 108q14-8 28 0t28 0t28 0', '#2C4A63', 1.4) + R(190, 20, 76, 66, '#1E293C') +
+    R(202, 34, 52, 16, '#243044') + L('M212 42h32', HI, 2.4) + L('M228 50V72', ST, 2) +
+    W(120, 96, .95) + L('M186 60H140', BD, 1.6, '4 4') +
+    TX(20, 40, '물기 15 mA', HI) + TX(20, 58, '일반 30 mA', DM) + TX(20, 76, '0.03초', DM),
+  welder: GND + R(200, 40, 80, 68, '#1E293C') + L('M212 56h56M212 72h40', ST, 1.4) +
+    W(110, 108, 1) + L('M124 88L180 70', ST, 2.2) + L('M180 70L196 66', HI, 2.4) +
+    '<path d="M124 86l-8 6 6 2-6 6" fill="none" stroke="' + HI + '" stroke-width="1.6"/>' +
+    TX(20, 40, '무부하 25 V 이하', HI) + TX(20, 58, '지동 1초 이내', DM) + TX(20, 76, '시동감도 500 Ω', DM),
+  approach: GND + L('M250 0V108', ST, 3) + '<circle cx="250" cy="46" r="7" fill="' + BD + '"/>' +
+    '<path d="M250 46m-26 0a26 26 0 1 0 52 0a26 26 0 1 0-52 0" fill="rgba(240,112,86,.12)" stroke="' + BD + '" stroke-width="1.2" stroke-dasharray="4 4"/>' +
+    W(150, 108, 1) + Dh(150, 224, 84, '60 cm') + TX(20, 34, '15 kV → 60 cm', HI) + TX(20, 52, '37 kV → 90 cm', DM),
+  powerline: GND + L('M60 108V16M260 108V16', ST, 2.6) + L('M46 24H74M246 24H274', ST, 2) +
+    '<path d="M60 26C120 46 200 46 260 26" fill="none" stroke="' + BD + '" stroke-width="1.8"/>' +
+    L('M120 108V88L196 48', ST, 3.4) + '<circle cx="196" cy="48" r="4" fill="' + ST + '"/>' +
+    Dv(38, 48, 208, '3 m', 0) + TX(20, 74, '50 kV 이하 3 m', HI),
+  panelspace: GND + R(200, 24, 70, 84, '#1E293C') + R(212, 38, 46, 22, '#243044') +
+    L('M220 48h30', HI, 2) + R(0, 24, 40, 84, '#1E293C') + W(150, 108, 1) +
+    Dh(40, 200, 84, '70 cm 이상') + TX(120, 20, '150 lux', HI),
+  exgap: R(70, 30, 90, 70, '#1E293C') + R(170, 30, 90, 70, '#1E293C') +
+    L('M160 30V100M170 30V100', ST, 2.4) + R(160, 30, 10, 70, '#0D1420', 'none') +
+    '<path d="M120 66q20-16 34 0" fill="none" stroke="' + BD + '" stroke-width="1.6"/>' +
+    '<circle cx="116" cy="66" r="9" fill="rgba(240,112,86,.2)" stroke="' + BD + '"/>' +
+    Dh(160, 170, 118, '0.5 mm') + TX(186, 62, 'ⅡB 화염일주한계', HI, 10),
+  /* --- 화학 --- */
+  confined: R(0, 40, 320, 92, '#101827', 'none') + L('M0 40H120M200 40H320', ST, 1.6) +
+    R(120, 40, 80, 92, '#0B1220', ST) + R(112, 32, 96, 10, '#243044') +
+    R(122, 96, 76, 34, 'rgba(240,112,86,.16)', 'none') + L('M122 96H198', BD, 1.4, '4 4') +
+    L('M136 42V126M184 42V126', DM, 1.2) + L('M136 58h48M136 74h48M136 90h48M136 106h48', DM, 1.2) +
+    W(160, 126, .8) + TX(212, 60, '산소 18~23.5 %', HI) + TX(212, 78, 'H₂S 10 ppm 미만', HI) +
+    TX(212, 96, 'CO 30 ppm 미만', DM),
+  chemdist: GND + '<rect x="40" y="40" width="60" height="68" rx="8" fill="#1E293C" stroke="' + ST + '" stroke-width="1.4"/>' +
+    '<rect x="200" y="40" width="60" height="68" rx="8" fill="#1E293C" stroke="' + ST + '" stroke-width="1.4"/>' +
+    L('M70 40V22M230 40V22', ST, 2) + Dh(100, 200, 76, '10 m 이상') +
+    TX(20, 20, '플레어 반경 20 m · 저장탱크 20 m', HI, 9.5),
+  gasweld: GND + '<rect x="60" y="44" width="30" height="64" rx="14" fill="#1E293C" stroke="' + ST + '" stroke-width="1.4"/>' +
+    L('M75 44V32', ST, 2.4) + L('M90 76H190', ST, 1.8) +
+    '<path d="M196 76l-10-6v12z" fill="' + HI + '"/>' + '<path d="M206 70q10 6 0 12" fill="none" stroke="' + BD + '" stroke-width="1.8"/>' +
+    R(240, 60, 40, 48, '#243044') + Dh(90, 240, 96, '5 m 이상') + TX(20, 30, '용기 40 ℃ 이하', HI),
+  staticflow: GND + '<rect x="180" y="34" width="100" height="74" rx="8" fill="#1E293C" stroke="' + ST + '" stroke-width="1.4"/>' +
+    L('M20 50H180', ST, 3) + L('M60 50h20M100 50h20M140 50h20', HI, 2) +
+    L('M170 50l-8-4M170 50l-8 4', HI, 1.6) + R(190, 70, 80, 38, 'rgba(127,166,224,.14)', 'none') +
+    '<path d="M226 62l-6 8h8l-6 8" fill="none" stroke="' + BD + '" stroke-width="1.6"/>' +
+    TX(20, 28, '이황화탄소 1 m/s 이하', HI) + TX(20, 94, '접지 필수', DM),
+  /* --- 환경·인간공학 --- */
+  lux: GND + L('M150 0V16', ST, 2) + '<path d="M130 16h40l-8 10h-24z" fill="#243044" stroke="' + ST + '"/>' +
+    '<path d="M138 26L96 96h108L162 26z" fill="rgba(227,181,77,.14)" stroke="' + HI + '" stroke-width="1.2"/>' +
+    R(90, 96, 120, 12, '#243044') + W(240, 108, .85) +
+    TX(20, 40, '초정밀 750', HI) + TX(20, 58, '정밀 300', HI) + TX(20, 76, '보통 150 · 통로 75', DM),
+  vdt: GND + R(150, 96, 150, 12, '#243044') + R(180, 40, 76, 52, '#1E293C') +
+    L('M218 92V96', ST, 2) + W(110, 96, 1.05) + L('M124 56L176 62', DM, 1.2, '4 4') +
+    Dh(124, 180, 40, '40 cm 이상') + TX(196, 26, '시선 아래 10~15°', HI),
+  noise: GND + R(190, 56, 90, 52, '#1E293C') + L('M202 70h30M202 84h50', ST, 1.4) +
+    '<path d="M170 60q-14 22 0 44M154 52q-20 30 0 60M138 44q-26 38 0 76" fill="none" stroke="' + BD + '" stroke-width="1.6"/>' +
+    W(80, 108, 1.05) + TX(20, 34, '90 dB 8시간', HI) + TX(20, 52, '95 dB 4시간', HI) + TX(20, 70, '100 dB 2시간', DM),
+  /* --- 그 밖 --- */
+  site: GND + R(40, 30, 110, 78, '#1E293C') + L('M52 46h86M52 62h60M52 78h74', ST, 1.4) +
+    R(180, 52, 100, 56, '#1E293C') + L('M192 68h76M192 84h50', DM, 1.4) +
+    W(300, 108, .8) + TX(180, 40, '현장 사무동', DM),
+  report: R(90, 14, 140, 100, '#1E293C') + R(126, 6, 68, 14, '#243044') +
+    L('M104 40h60M104 54h112M104 68h84', ST, 1.4) +
+    R(112, 82, 14, 22, HI, 'none') + R(134, 90, 14, 14, '#5CC08A', 'none') +
+    R(156, 76, 14, 28, '#7FA6E0', 'none') + R(178, 94, 14, 10, BD, 'none') +
+    L('M104 104h100', ST, 1.4) + TX(238, 46, '현상 보고', HI) + TX(238, 64, '5일 단위', DM)
+  };
+
+  function artFor(c){
+    var key = c.art || c.k || c.req || 'site';
+    var body = SC[key] || SC.site;
+    var cap = c.s === '사고' ? '사고 현장' : (c.f ? c.f.split(' · ')[0] : c.s);
+    var hurt = c.s === '사고'
+      ? '<rect x="0" y="0" width="320" height="132" fill="rgba(240,112,86,.10)"/>' +
+        '<path d="M296 14l14 24h-28z" fill="none" stroke="' + BD + '" stroke-width="2"/>' +
+        '<path d="M303 24v6M303 33v2" stroke="' + BD + '" stroke-width="2"/>'
+      : '';
+    return '<svg viewBox="0 0 320 132" preserveAspectRatio="xMidYMid meet" role="img">' + body + hurt + '</svg>' +
+      '<span class="cap">' + cap + '</span>';
+  }
+
+  /* ===== 배경 장면 (과목마다 다른 실루엣) ===== */
+  var BGK = {'건설안전기술':'const', '기계위험방지':'mach', '전기위험방지':'elec',
+             '화학설비위험방지':'chem', '인간공학':'ergo', '안전관리론':'mgmt',
+             '사고':'accident', '현장':'mgmt', '보고':'mgmt'};
+  var BGS = {
+  const: ['#7FA6E0', '<path d="M0 260h60V140h50v120h40V180h60v80h50V120h40v140h20V0H0z" opacity=".18"/>' +
+    '<path d="M120 300V150h8v150zM128 150h70v6h-70z" opacity=".3"/>' +
+    '<path d="M240 300V120h6v180zM246 120h56v5h-56zM300 125v40" opacity=".26"/>'],
+  mach: ['#F0A35B', '<path d="M0 300v-90h70v-40h60v40h60v-60h70v60h60v90z" opacity=".18"/>' +
+    '<circle cx="100" cy="150" r="42" opacity=".22"/><circle cx="100" cy="150" r="18" opacity=".3"/>' +
+    '<circle cx="250" cy="180" r="30" opacity=".2"/>'],
+  elec: ['#E3B54D', '<path d="M60 300V60h10v240zM40 70h50M40 90h50" opacity=".26"/>' +
+    '<path d="M280 300V50h10v250zM260 60h50M260 82h50" opacity=".26"/>' +
+    '<path d="M65 75C140 130 210 130 285 65" fill="none" stroke-width="3" opacity=".22"/>' +
+    '<path d="M65 95C140 150 210 150 285 85" fill="none" stroke-width="3" opacity=".16"/>'],
+  chem: ['#6BC3C9', '<path d="M0 300v-70h340v70z" opacity=".16"/>' +
+    '<rect x="40" y="120" width="70" height="112" rx="30" opacity=".2"/>' +
+    '<rect x="150" y="90" width="46" height="142" opacity=".2"/>' +
+    '<path d="M240 232V70h12v162zM234 62h24l-6-22h-12z" opacity=".24"/>'],
+  ergo: ['#B58FE0', '<rect x="60" y="120" width="220" height="16" rx="4" opacity=".2"/>' +
+    '<rect x="120" y="40" width="120" height="80" rx="6" opacity=".18"/>' +
+    '<circle cx="70" cy="90" r="20" opacity=".2"/><path d="M70 110v50" stroke-width="12" opacity=".18"/>'],
+  mgmt: ['#8C99B0', '<rect x="50" y="60" width="110" height="180" opacity=".16"/>' +
+    '<rect x="190" y="110" width="90" height="130" opacity=".16"/>' +
+    '<path d="M66 84h78M66 112h78M66 140h50M206 134h58M206 162h40" stroke-width="4" opacity=".22"/>'],
+  accident: ['#F07056', '<path d="M170 40l90 170H80z" fill="none" stroke-width="6" opacity=".26"/>' +
+    '<path d="M170 100v56M170 172v8" stroke-width="8" opacity=".3"/>' +
+    '<path d="M0 260h340v40H0z" opacity=".14"/>']
+  };
+  var bgNow = '';
+  function setScene(kind){
+    if(kind === bgNow) return;
+    bgNow = kind;
+    var d = BGS[kind] || BGS.mgmt, host = $('scene');
+    var old = host.firstChild;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = '<svg viewBox="0 0 340 300" preserveAspectRatio="xMidYMax slice" fill="' + d[0] +
+      '" stroke="' + d[0] + '">' + d[1] + '</svg>';
+    var svg = wrap.firstChild;
+    host.appendChild(svg);
+    requestAnimationFrame(function(){ svg.classList.add('on'); if(old){ old.classList.remove('on'); setTimeout(function(){ if(old.parentNode) old.parentNode.removeChild(old); }, 950); } });
+  }
 
   /* ===== 게이지 ===== */
   var G = [
@@ -537,10 +829,11 @@ button{font:inherit;color:inherit}
   ];
 
   /* ===== 상태 ===== */
-  var st, cardEl = $('card');
+  var st, curExtra = '', cardEl = $('card');
 
   function reset(){
-    st = {g:[62,58,60,60], day:1, tags:{}, seeds:[], recent:[], viol:[], okCount:0, cur:null, dead:false};
+    st = {g:[62,58,60,60], day:1, tags:{}, seeds:[], recent:[], viol:[], okCount:0, cur:null, dead:false,
+          lastReport:0, snap:[62,58,60,60], pOk:0, pNo:0, reports:0};
     DECK.forEach(function(c){ c.used = false; });
     FLAVOR.forEach(function(c){ c.used = false; });
     $('over').classList.remove('on');
@@ -576,6 +869,41 @@ button{font:inherit;color:inherit}
     });
   }
 
+  /* ===== 현상 보고 (5일마다) ===== */
+  var NM = {};
+  DECK.forEach(function(c){ NM[c.k] = c.f.split(' · ')[0]; });
+
+  function buildReport(){
+    var risks = st.seeds.map(function(s){ return {n:NM[s.tag] || s.tag, d:st.day - s.day}; });
+    var diff = st.g.map(function(v, i){ return Math.round(v - st.snap[i]); });
+    st.reports++;
+    return {
+      s:'보고', w:'본사 안전보건팀', art:'report', law:'', f:'',
+      t:'', report:{ok:st.pOk, no:st.pNo, diff:diff, risks:risks, day:st.day},
+      a:{l:'미조치 위험까지 그대로 올린다', d:[6,-5,-6,9], ok:1, clear:2,
+         o:'숨기지 않은 보고서에는 조치 예산이 붙습니다. 위험 항목 일부가 그 자리에서 처리됐습니다.'},
+      b:{l:'진행 위주로 정리해 올린다', d:[-5,8,5,-7], ok:0,
+         o:'표는 깔끔해졌습니다. 현장에 남은 것은 그대로입니다.'}
+    };
+  }
+
+  function reportHtml(r){
+    var names = ['안전', '공정', '예산', '감독'];
+    var dl = r.diff.map(function(v, i){
+      var c = v > 0 ? 'up' : (v < 0 ? 'dn' : 'z');
+      return '<span class="' + c + '">' + names[i] + ' ' + (v > 0 ? '+' : '') + v + '</span>';
+    }).join(' · ');
+    var risk = r.risks.length
+      ? '<div class="risk"><div class="h">미조치 위험 ' + r.risks.length + '건</div><ul>' +
+        r.risks.slice(0, 4).map(function(x){ return '<li><b>' + x.n + '</b> · ' + x.d + '일째</li>'; }).join('') +
+        (r.risks.length > 4 ? '<li>그 밖 ' + (r.risks.length - 4) + '건</li>' : '') + '</ul></div>'
+      : '<div class="clean">미조치 위험 없음. 지난 닷새는 깨끗합니다.</div>';
+    return '<div class="rp">' +
+      '<div class="row"><span class="k">지난 닷새 판정</span><span class="v">충족 ' + r.ok + ' · 미달 ' + r.no + '</span></div>' +
+      '<div class="row"><span class="k">게이지 증감</span><span class="v">' + dl + '</span></div>' +
+      risk + '</div>';
+  }
+
   /* ===== 카드 뽑기 ===== */
   function next(){
     if(st.dead) return;
@@ -583,9 +911,15 @@ button{font:inherit;color:inherit}
 
     var pick = null;
 
+    // 닷새마다 본사 보고가 먼저 온다
+    if(st.day % 5 === 0 && st.lastReport !== st.day){
+      st.lastReport = st.day;
+      pick = buildReport();
+    }
+
     // 3일 넘게 묵은 씨앗이 있으면 사고로 돌려준다
     var ripe = st.seeds.filter(function(s){ return st.day - s.day >= 3; });
-    if(ripe.length && Math.random() < 0.45){
+    if(!pick && ripe.length && Math.random() < 0.45){
       var seed = ripe[Math.floor(Math.random() * ripe.length)];
       pick = FALLOUT.filter(function(c){ return c.req === seed.tag; })[0];
       if(pick){ st.seeds = st.seeds.filter(function(s){ return s !== seed; }); }
@@ -602,21 +936,31 @@ button{font:inherit;color:inherit}
     pick.used = true;
     st.cur = pick;
 
-    $('cSubj').textContent = pick.s;
+    $('cArt').innerHTML = artFor(pick);
+    setScene(BGK[pick.s] || 'mgmt');
+
+    $('cSubj').textContent = pick.report ? pick.report.day + '일차 현상 보고' : pick.s;
     $('cWho').textContent = pick.w;
-    $('cSay').textContent = pick.t;
-    $('cTopic').innerHTML = pick.law ? '<b>' + pick.law.split(' ')[0] + '</b> ' + pick.law.split(' ').slice(1).join(' ') : '법으로 정해진 사항이 아닙니다. 판단은 당신 몫입니다.';
+    if(pick.report){
+      $('cSay').innerHTML = reportHtml(pick.report);
+      $('cTopic').textContent = '보고에 적힌 것만 조치 예산이 붙습니다. 적지 않은 위험은 현장에 그대로 남습니다.';
+    } else {
+      $('cSay').textContent = pick.t;
+      $('cTopic').innerHTML = pick.law ? '<b>' + pick.law.split(' ')[0] + '</b> ' + pick.law.split(' ').slice(1).join(' ') : '법으로 정해진 사항이 아닙니다. 판단은 당신 몫입니다.';
+    }
     $('chLt').textContent = pick.a.l;
     $('chRt').textContent = pick.b.l;
     $('pickL').textContent = pick.a.l;
     $('pickR').textContent = pick.b.l;
     $('mSite').textContent = pick.s === '사고' ? '사고 대응' : pick.s;
 
+    var extra = (pick.report ? ' rep' : '') + (pick.s === '사고' ? ' hit' : '');
+    curExtra = extra;
     cardEl.className = '';
     cardEl.style.transform = 'translateY(14px) scale(.97)';
     cardEl.style.opacity = '0';
     requestAnimationFrame(function(){
-      cardEl.className = 'settle';
+      cardEl.className = 'settle' + extra;
       cardEl.style.transform = '';
       cardEl.style.opacity = '1';
     });
@@ -627,7 +971,7 @@ button{font:inherit;color:inherit}
     var c = st.cur, ch = side < 0 ? c.a : c.b;
     if(!c) return;
 
-    cardEl.className = 'fly';
+    cardEl.className = 'fly' + curExtra;
     cardEl.style.transform = 'translateX(' + (side * 520) + 'px) rotate(' + (side * 22) + 'deg)';
 
     ch.d.forEach(function(v, i){ st.g[i] = Math.max(0, Math.min(100, st.g[i] + v)); });
@@ -638,10 +982,18 @@ button{font:inherit;color:inherit}
     if(ch.tag){ st.tags[ch.tag] = true; st.seeds.push({tag:ch.tag, day:st.day}); }
     if(!ch.ok && c.law){ st.viol.push({law:c.law, f:c.f, k:c.w}); }
 
+    if(c.report){
+      if(ch.clear && st.seeds.length) st.seeds.splice(0, ch.clear);
+      st.pOk = 0; st.pNo = 0; st.snap = st.g.slice();
+    } else if(ch.ok) st.pOk++; else st.pNo++;
+
     $('sV').className = 'verdict ' + (ch.ok ? 'ok' : 'no');
-    $('sV').textContent = c.law ? (ch.ok ? '기준 충족' : '기준 미달') : (ch.ok ? '무리 없음' : '무리한 결정');
+    $('sV').textContent = c.report ? (ch.ok ? '사실대로 보고' : '다듬어 보고')
+      : (c.law ? (ch.ok ? '기준 충족' : '기준 미달') : (ch.ok ? '무리 없음' : '무리한 결정'));
     $('sOut').textContent = ch.o;
-    $('sStd').innerHTML = c.f || '이 결정에 걸린 수치 기준은 없습니다. 남는 것은 사람과 일정입니다.';
+    $('sStd').innerHTML = c.f || (c.report
+      ? '보고는 <em>닷새</em>마다 옵니다. 올린 위험만 조치 예산이 붙고, 남긴 위험은 사고 카드로 돌아옵니다.'
+      : '이 결정에 걸린 수치 기준은 없습니다. 남는 것은 사람과 일정입니다.');
     $('sLaw').textContent = c.law || '';
     $('sLaw').hidden = !c.law;
     $('sheet').classList.add('on');
@@ -693,7 +1045,7 @@ button{font:inherit;color:inherit}
   cardEl.addEventListener('pointerdown', function(e){
     if(st.dead || $('sheet').classList.contains('on')) return;
     dragging = true; x0 = e.clientX; dx = 0;
-    cardEl.className = 'drag';
+    cardEl.className = 'drag' + curExtra;
     cardEl.setPointerCapture(e.pointerId);
   });
   cardEl.addEventListener('pointermove', function(e){
@@ -708,7 +1060,7 @@ button{font:inherit;color:inherit}
     dragging = false;
     $('pickL').style.opacity = 0; $('pickR').style.opacity = 0;
     if(Math.abs(dx) > 92){ choose(dx < 0 ? -1 : 1); }
-    else { cardEl.className = 'settle'; cardEl.style.transform = ''; }
+    else { cardEl.className = 'settle' + curExtra; cardEl.style.transform = ''; }
   }
   cardEl.addEventListener('pointerup', release);
   cardEl.addEventListener('pointercancel', release);
