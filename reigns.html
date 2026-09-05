@@ -616,6 +616,20 @@ button{font:inherit;color:inherit}
     return R(x, y, w, h, '#1E293C') + R(x + 4, y + 4, w - 8, h * .4, '#243044') +
       L('M' + x + ' ' + (y + h) + 'h' + w, ST, 2);
   }
+  /* 상세원 — 작은 것을 떼어 확대한다. (fx,fy) 에서 지시선을 끌고 와
+     (cx,cy) 반지름 r 원 안에 inner 를 그린다. inner 의 좌표는 절대좌표이며
+     원 밖으로 나간 부분은 잘린다. tag 는 배율(예: '×20'). */
+  var _det = 0;
+  function DET(fx, fy, cx, cy, r, inner, tag){
+    var id = 'dc' + (++_det);
+    return L('M' + fx + ' ' + fy + 'L' + cx + ' ' + cy, TC, 1, '4 3') +
+      '<clipPath id="' + id + '"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '"/></clipPath>' +
+      C(cx, cy, r, '#121B29', 'none') +
+      '<g clip-path="url(#' + id + ')">' + inner + '</g>' +
+      C(cx, cy, r, 'none', HI) +
+      (tag ? '<text x="' + cx + '" y="' + (cy - r - 5) + '" text-anchor="middle" font-size="9.5" fill="' +
+             TC + '" font-family="monospace">' + tag + '</text>' : '');
+  }
   function DOC(x, y, s){             // 서류
     s = s || 1;
     return '<g transform="translate(' + x + ',' + y + ') scale(' + s + ')">' +
@@ -1018,7 +1032,11 @@ button{font:inherit;color:inherit}
     R(93, 105, 12, 3, HI, 'none') + R(117, 105, 12, 3, HI, 'none') +
     R(193, 105, 12, 3, HI, 'none') + R(217, 105, 12, 3, HI, 'none') +
     L('M84 108H150', DM, 1) + ANG(98, 108, 22, -75, 0, '75°') +
-    Dv(64, 108, 282, '2 m 초과', 1) + TX(232, 38, '발판 폭 40 cm', HI),
+    Dv(64, 108, 282, '2 m 초과', 1) +
+    DET(210, 60, 264, 36, 20,
+        '<path d="M246 44l10-8h34l-10 8z" fill="#243044" stroke="' + ST + '" stroke-width="1.2"/>' +
+        R(246, 44, 34, 6, '#1E293C', ST) + L('M248 40l8-6M278 40l8-6', HI, 1.4),
+        '폭 40 cm'),
   mobscaf: FAR + GND + L('M110 100V26M210 100V26', ST, 2.6) + L('M110 62H210', ST, 1.8) +
     R(102, 20, 116, 8, '#243044') + L('M102 4H218', HI, 2.4) + L('M110 4V20M210 4V20', HI, 1.6) +
     '<circle cx="112" cy="104" r="6" fill="none" stroke="' + ST + '" stroke-width="1.6"/>' +
@@ -1075,8 +1093,12 @@ button{font:inherit;color:inherit}
   grinder: GND + '<circle cx="150" cy="60" r="34" fill="#1E293C" stroke="' + ST + '" stroke-width="1.6"/>' +
     '<path d="M150 60 L150 26 A34 34 0 0 1 177.8 79.5 Z" fill="rgba(227,181,77,.18)" stroke="' + HI + '" stroke-width="1.4"/>' +
     L('M177 78L206 46', TC, 1.1) +
-    R(186, 62, 30, 6, '#243044') + L('M184 60h4', BD, 2.4) + R(134, 94, 32, 14, '#243044') +
-    TX(212, 40, '125° 이내', HI) + TX(212, 92, '워크레스트 3 mm', TC),
+    R(186, 62, 30, 6, '#243044') + R(134, 94, 32, 14, '#243044') +
+    DET(186, 64, 252, 84, 22,
+        '<path d="M234 58A30 30 0 0 1 234 110" fill="none" stroke="' + ST + '" stroke-width="2.4"/>' +
+        R(244, 80, 34, 7, '#243044', ST) + L('M236 72V98M244 72V98', HI, 1.2),
+        '×20') +
+    TX(212, 34, '125° 이내', HI) + TX(200, 118, '워크레스트 3 mm 이내', HI),
   press: GND + R(58, 8, 176, 12, '#243044') + L('M70 20V90M222 20V90', ST, 3) +
     R(86, 26, 120, 22, '#33425C', 'none') + L('M86 48h120', HI, 2.2) +
     R(86, 78, 120, 12, '#243044') +
@@ -1119,8 +1141,13 @@ button{font:inherit;color:inherit}
   wirerope: FAR + R(120, 0, 80, 10, '#243044') + GND + L('M160 10V52', ST, 2.6) +
     '<path d="M160 52c0 12-14 12-14 20s14 8 14 16" fill="none" stroke="' + ST + '" stroke-width="2.6"/>' +
     L('M150 64l-8-4M152 74l-9 3M150 84l-8 5', BD, 1.6) +
-    R(142, 88, 36, 18, '#243044', ST) + L('M160 88v-2', ST, 2) + TX(198, 46, '탑승 10 · 화물 5', HI) + TX(198, 66, '훅 3 · 그 밖 4', HI) +
-    TX(198, 86, '소선 10 % 금지', BD),
+    R(142, 88, 36, 18, '#243044', ST) + L('M160 88v-2', ST, 2) +
+    DET(152, 74, 256, 76, 22,
+        L('M238 56V96M242 56V96M246 56V96M250 56V96M258 56V96M262 56V96M266 56V96M270 56V96', ST, 1.4) +
+        L('M254 56V70M254 82V96', ST, 1.4) + L('M250 72l8 8m0-8l-8 8', BD, 1.8),
+        '×12') +
+    TX(64, 30, '탑승 10 · 화물 5', HI) + TX(64, 50, '훅 3 · 그 밖 4', HI) +
+    TX(196, 118, '소선 10 % 끊기면 폐기', BD),
   /* --- 전기 --- */
   elcb: R(0, 96, 320, 36, '#0F1B2A', 'none') + L('M0 96H320', '#2C4A63', 1.4) +
     L('M30 108q14-8 28 0t28 0t28 0', '#2C4A63', 1.4) + R(190, 20, 76, 66, '#1E293C') +
