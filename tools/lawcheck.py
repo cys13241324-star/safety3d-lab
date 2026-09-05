@@ -18,7 +18,11 @@
       출처를 따로 적기로 했다. 그래서 law 에 「고시」·「별표」·「지침」·「KS」·
       「GUIDE」 같은 말이 있으면 그 카드의 숫자는 묻지 않는다.
 
-   ② 는 다 잡히지 않는다. 조문이 표(그림 파일)로 값을 담은 곳 — 충전전로
+   ③ 그림(SC) 이름표의 숫자도 같은 조문과 대조한다. 카드의 f 는 고쳐 놓고 그림에
+   옛 값이 남는 일이 실제로 열두 군데 있었다 — 폐지된 「지게차 0.903 m」와
+   「항타기 버팀대 3개」가 그림 안에 그대로 있었다. 그림도 가르치는 면이다.
+
+   ② 와 ③ 은 다 잡히지 않는다. 조문이 표(그림 파일)로 값을 담은 곳 — 충전전로
    접근한계거리표(제321조제1항제8호) 같은 데 — 은 본문에 숫자가 없어서 늘 걸린다.
    단위 자릿수가 다른 것(조문 「300센티미터」 대 카드 「3 m」)도 걸린다.
    그래서 ② 는 종료코드를 올리지 않는다. **눈으로 보라는 목록**이다.
@@ -31,6 +35,7 @@ import os
 import re
 import sys
 
+sys.stdout.reconfigure(encoding="utf-8")   # 없으면 check.py 가 출력을 못 읽는다
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 LAWS = os.path.join(ROOT, os.pardir, "sanup-safety-cbt", "build", "_laws.json")
@@ -87,6 +92,25 @@ FF = re.compile(r"\bf:'((?:[^'\\]|\\.)*)'")
 EM = re.compile(r"<em>(.*?)</em>")
 # 「제339조제1항」·「제332조의2제1호」·「제14조 ②」를 다 잡는다
 ART = re.compile(r"제\s*(\d+)\s*조(?:의\s*(\d+))?")
+ARTF = re.compile(r"art:'([^']+)'")
+# 그림 규약상 BD(붉은색) 이름표는 「지금 어긋나 있는 상태」를 적는 자리다.
+# 그건 조문에 있으면 안 되는 값이므로 대조하지 않는다.
+TXL = re.compile(r"TX\(\s*-?[\d.]+\s*,\s*-?[\d.]+\s*,\s*'([^']*)'\s*,\s*([A-Za-z_]\w*)")
+
+
+def scenes(src):
+    """SC 표를 이름 → 본문으로 가른다."""
+    body = src[src.index("var SC = {"):]
+    body = body[:body.index(chr(10) + "  };")]
+    out, keys = {}, []
+    # 값이 다음 줄에서 시작하는 항목(  brief:)도 잡아야 한다 — 안 그러면 그
+    # 항목의 본문이 앞 장면에 딸려 붙어 엉뚱한 카드의 이름표로 검사된다.
+    for m in re.finditer(r"^  ([A-Za-z_]\w*):\s", body, re.M):
+        keys.append((m.group(1), m.start()))
+    for i, (k, st) in enumerate(keys):
+        en = keys[i + 1][1] if i + 1 < len(keys) else len(body)
+        out[k] = body[st:en]
+    return out
 
 
 # law 필드가 가리키는 법령을 고른다. 긴 이름부터 봐야 「시행규칙」이
@@ -134,7 +158,8 @@ def main():
     print("대조 원본: %s 시행 %s · 조문 %d개"
           % (rule["name"], rule["eff"], len(rule["arts"])))
 
-    missing, unmatched, checked, skipped = [], [], 0, 0
+    SC = scenes(src)
+    missing, unmatched, artbad, checked, skipped = [], [], [], 0, 0
     for key, chunk in cards(src):
         lm = LAWF.search(chunk)
         if not lm or not lm.group(1):
@@ -162,10 +187,23 @@ def main():
         if any(w in law for w in OUTSIDE):
             skipped += 1
             continue
+        ntext = norm(text)
+        # ③ 그림 이름표도 같은 잣대로 본다
+        am = ARTF.search(chunk)
+        sc = SC.get(am.group(1) if am else key)
+        if sc:
+            for t, col in TXL.findall(sc):
+                if col == "BD" or not re.search(r"\d", t):
+                    continue
+                nt = norm(t)
+                core = re.match(r"([\d.,]+)([A-Za-z%°Ω]*)", nt.lstrip("×"))
+                if not core:
+                    core = re.search(r"([\d.,]+)([A-Za-z%°Ω]*)", nt)
+                if core and core.group(0) not in ntext:
+                    artbad.append((key, t, ",".join(refs)))
         fm = FF.search(chunk)
         if not fm:
             continue
-        ntext = norm(text)
         for em in EM.findall(fm.group(1)):
             val = em.strip()
             if not re.search(r"\d", val):
@@ -201,6 +239,13 @@ def main():
             print("  %-12s %-22s 제%s조" % (k, v, r))
     else:
         print("조문에서 못 찾은 값: 0건")
+    print("")
+    if artbad:
+        print("그림 이름표에서 못 찾은 값: %d건" % len(artbad))
+        for k, v, r in artbad:
+            print("  %-12s %-24s 제%s조" % (k, v, r))
+    else:
+        print("그림 이름표에서 못 찾은 값: 0건")
 
     return 1 if missing else 0
 
