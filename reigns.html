@@ -82,7 +82,10 @@ button{font:inherit;color:inherit}
 #gear .m.b3{--c:var(--bad)}
 #gear .m .lb{display:flex;justify-content:space-between;align-items:baseline;gap:5px;margin-bottom:4px}
 #gear .m .n{font-size:10.5px;color:var(--muted);white-space:nowrap}
-#gear .m .p{font-size:13.5px;font-weight:700;color:var(--text)}
+#gear .m .p{font-size:13.5px;font-weight:700;color:var(--text);display:flex;
+  align-items:baseline;gap:4px}
+/* 아래 「· 낮음」 줄은 낮은 화면에서 접힌다. 그때도 단계는 색 말고 글리프로 남는다. */
+#gear .m .p .bg{font-size:11px;color:var(--c);font-weight:700}
 #gear .m .tk{height:5px;border-radius:3px;background:rgba(255,255,255,.08);
   background:color-mix(in srgb, var(--c) 24%, transparent);overflow:hidden}
 #gear .m .fl{height:100%;border-radius:3px;width:0;background:var(--c);
@@ -568,7 +571,8 @@ button{font:inherit;color:inherit}
       <div class="art" id="cArt" aria-hidden="true"></div>
       <div class="subj" id="cSubj"></div>
       <div class="who"><i id="cWhoI"></i><span id="cWho"></span></div>
-      <div class="say" id="cSay"></div>
+      <!-- 스크롤되는 영역은 탭으로 닿아야 방향키로 굴릴 수 있다 (WCAG 2.1.1) -->
+      <div class="say" id="cSay" tabindex="0"></div>
       <div class="topic" id="cTopic"></div>
     </div>
   </div>
@@ -3332,7 +3336,8 @@ button{font:inherit;color:inherit}
         '<div class="mrow">' + RK.map(function(r, i){
           return '<div class="m b0" id="rk' + i + '">' +
             '<div class="lb"><span class="n">' + r.n + '</span>' +
-            '<span class="p" id="rp' + i + '">0 %</span></div>' +
+            '<span class="p"><b class="bg" id="rb' + i + '">·</b>' +
+            '<span id="rp' + i + '">0 %</span></span></div>' +
             '<div class="tk"><div class="fl" id="rf' + i + '"></div></div>' +
             '<div class="st"><b id="rg' + i + '">·</b> <span id="rs' + i + '">낮음</span></div>' +
           '</div>';
@@ -3353,6 +3358,8 @@ button{font:inherit;color:inherit}
       var p = r[RK[i].k];
       var band = p < 0.03 ? 0 : (p < 0.10 ? 1 : (p < 0.20 ? 2 : 3));
       $('rp' + i).textContent = (p * 100).toFixed(p < 0.10 ? 1 : 0) + ' %';
+      $('rb' + i).textContent = BAND_G[band];      // 「· 낮음」 줄이 접혀도 남는다
+      $('rb' + i).title = BAND_T[band];
       $('rf' + i).style.width = Math.min(100, p / RK[i].cap * 100) + '%';
       $('rk' + i).className = 'm b' + band;
       $('rg' + i).textContent = BAND_G[band];
@@ -4734,6 +4741,28 @@ button{font:inherit;color:inherit}
 
   $('chL').addEventListener('click', function(){ if(!$('sheet').classList.contains('on')) choose(-1); });
   $('chR').addEventListener('click', function(){ if(!$('sheet').classList.contains('on')) choose(1); });
+  /* aria-modal 이라고 적어 두는 것만으로는 탭이 갇히지 않는다. 실제로 재 보니
+     시트가 떠 있는데도 바깥 요소 일곱 개가 탭으로 닿았다 — 엔딩 위에서
+     탭 몇 번이면 「새 현장」이 눌린다. 열려 있는 상자 안에서만 돌게 만든다. */
+  var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
+  function trapTab(e){
+    if(e.key !== 'Tab') return;
+    var box = $('over').classList.contains('on') ? $('over')
+            : ($('sheet').classList.contains('on') ? $('sheet')
+            : ($('log').classList.contains('on') ? $('log') : null));
+    if(!box) return;
+    var f = [], all = box.querySelectorAll(FOCUSABLE), i;
+    for(i = 0; i < all.length; i++){
+      var el = all[i];
+      if(el.offsetWidth || el.offsetHeight || el === document.activeElement) f.push(el);
+    }
+    if(!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    else if(f.indexOf(document.activeElement) < 0){ e.preventDefault(); first.focus(); }
+  }
+  addEventListener('keydown', trapTab);
   addEventListener('keydown', function(e){
     var open = $('sheet').classList.contains('on');
     /* 기록판은 좁은 화면에서 화면의 대부분을 덮는다. 그 위에서 방향키를 누르면
