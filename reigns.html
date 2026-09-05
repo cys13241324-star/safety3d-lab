@@ -168,6 +168,7 @@ button{font:inherit;color:inherit}
   body{padding-right:320px}
 }
 .again{color:var(--ok);font-weight:600}
+.quiet{color:var(--bad);font-weight:600}
 @media (max-width:430px){
   #gear .mrow{gap:8px}
   #gear .m .n{font-size:9.5px}
@@ -3179,6 +3180,7 @@ button{font:inherit;color:inherit}
         rolls:st.rolls, pSum:st.pSum, pFat:st.pFat,
         forced:st.forced, hidden:st.hidden, stop:st.stop, log:st.log,
         chap:st.chap, subj:st.subj, amb:st.amb, ambNo:st.ambNo, busted:st.busted,
+        who:st.who,
         cond:st.cond, conds:COND_CARDS.filter(function(c){ return c.used; })
                                       .map(function(c){ return c.k; }),
         okCount:st.okCount, lastReport:st.lastReport, snap:st.snap,
@@ -3218,7 +3220,7 @@ button{font:inherit;color:inherit}
           recent:[], lastSubj:'', runSubj:0, nextReport:5,
           money:FUND0, illegal:0, hurt:0, near:0, fatal:'', spent:0, need:0,
           rolls:0, pSum:0, pFat:0, forced:0, hidden:0, stop:0, log:[],
-          chap:0, subj:{}, amb:0, ambNo:0, busted:0, briefed:0, cond:null};
+          chap:0, subj:{}, amb:0, ambNo:0, busted:0, briefed:0, cond:null, who:{}};
     DECK.forEach(function(c){ c.used = false; });
     FLAVOR.forEach(function(c){ c.used = false; });
     CHAPTER_CARDS.forEach(function(c){ c.used = false; });
@@ -3238,7 +3240,7 @@ button{font:inherit;color:inherit}
       st.forced = resume.forced || 0; st.hidden = resume.hidden || 0; st.stop = resume.stop || 0;
       st.log = resume.log || []; st.chap = resume.chap || 0; st.subj = resume.subj || {};
       st.amb = resume.amb || 0; st.ambNo = resume.ambNo || 0; st.busted = resume.busted || 0;
-      st.cond = resume.cond || null;
+      st.cond = resume.cond || null; st.who = resume.who || {};
       if(resume.conds) COND_CARDS.forEach(function(c){
         if(resume.conds.indexOf(c.k) >= 0) c.used = true; });
       st.recent = resume.recent || []; st.lastSubj = resume.lastSubj || ''; st.runSubj = resume.runSubj || 0;
@@ -3986,6 +3988,23 @@ button{font:inherit;color:inherit}
   /* 비용 배수는 쓰지 않는다 — 돈은 규정 카드의 경제로 남긴다. 자리는 남겨 둔다. */
   function condCost(){ var c = condOf(); return c && c.cost ? c.cost : 1; }
 
+  /* ===== 사람은 기억한다 ====================================================
+     말을 세 번 자르면 그 사람은 먼저 말하지 않는다. 그때부터 그 사람이 가져온
+     위험은 아차사고를 건너뛰고 바로 사고로 온다 — 아차사고는 공짜로 주는
+     경고인데 그 경고를 주는 것이 사람이다.
+     다섯 번 편을 들면 그 사람이 먼저 고쳐 놓는다. 판마다 한 번씩. */
+  var SILENT_AT = 3, ALLY_AT = 5;
+  /* 받침이 있으면 은/이, 없으면 는/가. 이름을 문장에 넣을 때마다 필요하다. */
+  function jo(w, yes, no){
+    var c = w.charCodeAt(w.length - 1) - 0xAC00;
+    return w + ((c >= 0 && c < 11172 && c % 28 !== 0) ? yes : no);
+  }
+  function whoRec(w){
+    if(!st.who[w]) st.who[w] = {ok:0, no:0, gift:0};
+    return st.who[w];
+  }
+  function silent(w){ return !!(st.who[w] && st.who[w].no >= SILENT_AT); }
+
   /* 내 결정과 무관한 위험. 협력사와 기존 공장 설비에서 오고, 내가 안 만들었어도
      확률에는 똑같이 들어간다 — 도급인의 안전보건조치가 말하는 자리다.
      out:1 로 표시해 두어 점수와 엔딩에서는 「내가 남긴 것」과 구분한다. */
@@ -4198,6 +4217,10 @@ button{font:inherit;color:inherit}
       if(costOf(pick) > st.money){
         $('cTopic').innerHTML += ' <span class="lack">· 관리비 부족 — 오늘 조치하려면 공사비 전용(위법)</span>';
       }
+      /* 말을 세 번 자른 사람은 먼저 말하지 않는다. 그 사실은 알려 준다 —
+         감추면 배울 수가 없다. 어느 쪽이 준수인지는 여전히 말하지 않는다. */
+      if(silent(pick.w)) $('cTopic').innerHTML += ' <span class="quiet">· ' +
+        jo(pick.w.split(' ')[0], '은', '는') + ' 요즘 먼저 말하지 않습니다</span>';
       /* 왜 또 왔는지는 말해 준다. 어느 쪽이 준수인지는 여전히 말하지 않는다. */
       var wk = WEAK[pick.law] || 0;
       if(wk) $('cTopic').innerHTML += ' <span class="again">· 지난 현장에서 ' +
@@ -4217,6 +4240,14 @@ button{font:inherit;color:inherit}
     cardEl.dataset.fund = st.money;                              // 관리비 잔액
     cardEl.dataset.need = st.need;                               // 여기까지 필요했던 총액
     cardEl.dataset.ill = st.illegal;                             // 전용 횟수
+    var _mo = 0, _ms = 0, _wk;                                   // 사람과의 관계
+    for(_wk in st.who) if(st.who.hasOwnProperty(_wk)){
+      if(st.who[_wk].ok > _mo) _mo = st.who[_wk].ok;
+      if(st.who[_wk].no >= SILENT_AT) _ms++;
+    }
+    cardEl.dataset.allyok = _mo;                                 // 가장 많이 편든 횟수
+    cardEl.dataset.silent = _ms;                                 // 입을 닫은 사람 수
+    cardEl.dataset.gift = st.gifts || 0;                         // 먼저 잡아 준 횟수
     $('mSite').textContent = pick.s === '사고' ? '사고 대응' : pick.s;
     if(pick.s === '아차사고') $('mSite').textContent = '아차사고';
     if(pick.amb) $('mSite').textContent = '기습';
@@ -4305,8 +4336,22 @@ button{font:inherit;color:inherit}
       }
     }
 
-    var fixed = 0;
+    var fixed = 0, curExtra2 = '';
     if(c.report && ch.fix){
+      /* 다섯 번 편을 들어 준 사람이 있으면 그 사람이 한 건을 먼저 잡아 놨다.
+         돈이 들지 않는다. 판마다 사람당 한 번. */
+      var wk, free = '';
+      for(wk in st.who) if(st.who.hasOwnProperty(wk)){
+        var r2 = st.who[wk];
+        if(r2.ok >= ALLY_AT && !r2.gift && mySeeds()){
+          r2.gift = 1;
+          var gi = pickSeed(1);
+          if(gi >= 0){ st.seeds.splice(gi, 1); fixed++; free = wk; st.gifts = (st.gifts || 0) + 1; }
+          /* gift 를 세는 것은 종료 화면에서 한 줄 적기 위해서다 */
+          break;
+        }
+      }
+      if(free) curExtra2 = free;
       /* 시정 예산은 우리 미조치에만 붙는다. 협력사 설비를 우리 관리비로
          고칠 수는 없다 — 그렇게 두었더니 예산이 말라 완주율이 5 %가 됐다. */
       while(mySeeds() && st.money >= FIX_COST && fixed < 3){
@@ -4332,6 +4377,12 @@ button{font:inherit;color:inherit}
     flashDelta(d, twist, spent);
 
     if(ch.ok) st.okCount++;
+    /* 누구 말을 들었고 누구 말을 잘랐는지. 사고·아차사고·본사 보고는 사람이
+       가져온 제안이 아니라 벌어진 일이라 세지 않는다. */
+    if(c.w && !c.report && c.s !== '사고' && c.s !== '아차사고'){
+      var wr = whoRec(c.w);
+      if(ch.ok) wr.ok++; else wr.no++;
+    }
     /* 어긴 것은 위험 점수로 쌓인다. 그 카드에서 안전이 얼마나 깎이는지가 곧 위험도다.
        vdt 5 부터 confined 18 까지, 어느 규정이 얼마나 위험한지가 확률에 그대로 실린다. */
     if(ch.tag){
@@ -4341,7 +4392,10 @@ button{font:inherit;color:inherit}
       st.seeds.push({tag:ch.tag, day:st.day, w:w,
                      fam:(TOXTAG[ch.tag] ? 'tox' : 'acc'),
                      fat:w * (sev >= 14 ? FAT_HI : FAT_LO),
-                     hits:(c.s === '사고' ? 1 : 0)});   // 사고를 겪고도 넘겼으면 경고는 이미 끝났다
+                     /* 사고를 겪고도 넘겼으면 경고는 이미 끝났다.
+                        말을 잘린 사람이 가져온 것도 마찬가지다 — 그 사람은
+                        다음부터 먼저 말하지 않으므로 아차사고가 오지 않는다. */
+                     hits:(c.s === '사고' || silent(c.w)) ? 1 : 0});
     }
     if(!ch.ok && c.law){ st.viol.push({law:c.law, f:c.f, hit:c.hit, k:c.w}); }
     pushLog(c, ch.ok, d, spent, twist);
@@ -4393,6 +4447,7 @@ button{font:inherit;color:inherit}
     $('sOut').textContent = ch.o
       + (diverted ? ' 관리비가 비어 공사비를 끌어 썼습니다. 안전보건관리비는 목적이 정해진 돈입니다.' : '')
       + (fixed ? ' 조치 예산이 붙어 ' + fixed + '건을 그 자리에서 시정했습니다.' : '')
+      + (curExtra2 ? ' ' + jo(curExtra2, '이', '가') + ' 한 건을 먼저 잡아 놨습니다 — 돈이 들지 않았습니다.' : '')
       + (c.report && ch.fix && !fixed && st.seeds.length
           ? ' 정직하게 올렸지만 시정할 돈이 없습니다. 위험은 그대로 남았습니다.' : '');
     $('sStd').innerHTML = markHit(c) || (c.report
@@ -4656,6 +4711,15 @@ button{font:inherit;color:inherit}
     box.setAttribute('aria-hidden', 'false');
     var total = noteMiss(list);
     if(total) $('oTally').textContent += ' 이 자리에서 넘긴 조문은 모두 ' + total + '개입니다.';
+    /* 사람과의 관계도 결산에 남는다. 누가 입을 닫았는지는 판을 설명하는 사실이다. */
+    var _sil = [], _wk2;
+    for(_wk2 in st.who) if(st.who.hasOwnProperty(_wk2) && st.who[_wk2].no >= SILENT_AT)
+      _sil.push(_wk2);
+    if(_sil.length) $('oTally').textContent += ' ' + _sil.join(' · ')
+      + (_sil.length > 1 ? ' — 이 사람들은' : ' — 이 사람은')
+      + ' 이 현장에서 더는 먼저 말하지 않았습니다.';
+    if(st.gifts) $('oTally').textContent += ' 먼저 고쳐 놓아 준 것이 '
+      + st.gifts + '건 있었습니다.';
     var seen = noteEnd(end.k), all = 0, _k;
     for(_k in E) if(E.hasOwnProperty(_k)) all++;
     $('oSeen').innerHTML = (seen.fresh ? '<em>새 결말</em> · ' : '')
