@@ -169,6 +169,12 @@ button{font:inherit;color:inherit}
 .g .dlt em{font-style:normal;font-size:10.5px;margin-left:2px;color:var(--warn);font-weight:700}
 .g .dlt.on{opacity:1;transform:none}
 .g .dlt.up{color:var(--ok)} .g .dlt.dn{color:var(--bad)}
+/* 칩만 뜨면 눈이 아래로 내려간다. 숫자 자체도 한 번 튀어야 '이게 변했다'가 읽힌다. */
+.g .lb b{display:inline-block;transition:color .9s ease}
+.g .lb b.up{color:var(--ok)} .g .lb b.dn{color:var(--bad)}
+.g .lb b.bump{animation:gbump .22s ease-out}
+@keyframes gbump{50%{transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){.g .lb b.bump{animation:none}}
 
 /* ---------- 날짜 줄 ---------- */
 #meta i{font-style:normal;font-family:var(--mono);font-size:10.5px;
@@ -1190,7 +1196,7 @@ button{font:inherit;color:inherit}
     '<circle cx="160" cy="64" r="34" fill="none" stroke="' + ST + '" stroke-width="2.4"/>' +
     '<circle cx="160" cy="64" r="6" fill="' + ST + '"/>' + L('M126 64H194', DM, 1, '3 3') +
     L('M196 40l14-10M198 64h18M196 88l14 10', HI, 1.6) +
-    TX(52, 18, '축 1 t 초과 · 120 m/s 이상', HI, 9.5) + TX(52, 34, '→ 비파괴검사 후 격리', HI, 9.5),
+    TX(60, 20, '축 1 t 초과 · 120 m/s 이상', HI, 9.5) + TX(60, 36, '→ 비파괴검사 후 격리', HI, 9.5),
   wirerope: FAR + R(120, 0, 80, 10, '#243044') + GND + L('M160 10V52', ST, 2.6) +
     '<path d="M160 52c0 12-14 12-14 20s14 8 14 16" fill="none" stroke="' + ST + '" stroke-width="2.6"/>' +
     L('M150 64l-8-4M152 74l-9 3M150 84l-8 5', BD, 1.6) +
@@ -2634,11 +2640,16 @@ button{font:inherit;color:inherit}
      사라지면 아무것도 못 읽는다. 그래서 2.2초를 잡아 둔다. */
   function flashDelta(d, tw, spent){
     d.forEach(function(v, i){
-      var e = $('gd' + i);
+      var e = $('gd' + i), b = $('gv' + i);
+      if(b) b.className = '';
       if(!v){ e.className = 'dlt'; e.innerHTML = ''; return; }
       e.innerHTML = (v > 0 ? '+' : '') + v + (tw && tw.i === i ? '<em>×2</em>' : '');
       e.className = 'dlt on ' + (v > 0 ? 'up' : 'dn');
-      setTimeout(function(){ e.className = 'dlt ' + (v > 0 ? 'up' : 'dn'); }, 2200);
+      if(b) b.className = 'bump ' + (v > 0 ? 'up' : 'dn');
+      setTimeout(function(){
+        e.className = 'dlt ' + (v > 0 ? 'up' : 'dn');
+        if(b) b.className = '';
+      }, 2200);
     });
     var f = $('fd');
     if(f){
