@@ -201,8 +201,12 @@ button{font:inherit;color:inherit}
    반대로 만든다 — 통(#board)이 카드 높이를 정하고 본문이 그 안에서 스크롤한다.
    ux.md ④-1 의 처방이다. */
 #card{max-height:100%;display:flex;flex-direction:column;overflow:hidden}
-#card .art, #card .subj, #card .who, #card .topic{flex:none}
-#card .say{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#card .subj, #card .who, #card .topic{flex:none}
+/* 자리가 모자랄 때 줄어드는 것은 그림이지 본문이 아니다. 그림은 viewBox 를
+   meet 로 맞추므로 상자가 낮아지면 그만큼 작게 그려질 뿐 잘리지 않는다. */
+#card .art{flex:0 1 auto;min-height:48px}
+/* 본문에는 바닥을 깐다 — 네 줄은 스크롤 없이 보여야 한다. */
+#card .say{flex:1 1 auto;min-height:96px;overflow-y:auto;overscroll-behavior:contain}
 #card.settle{transition:transform .32s cubic-bezier(.2,.8,.3,1),opacity .3s ease-out}
 #card.fly{transition:transform .28s ease-in,opacity .28s ease-in;opacity:0}
 #card .subj{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
@@ -393,6 +397,14 @@ button{font:inherit;color:inherit}
 /* ---------- 화면이 낮을 때 (SE 1세대 같은 568px 급) ----------
    순서가 중요하다. 위의 max-width 블록들보다 뒤에 있어야 이긴다.
    줄일 수 있는 것은 그림과 계기판뿐이므로 그 둘부터 줄인다. */
+@media (max-height:780px){
+  /* 계기판은 상시 표시라 한 줄이 아쉽다. 확률 숫자와 이름은 남기고
+     막대 아래 「· 낮음」 줄만 접는다 — 띠 색이 이미 같은 말을 한다. */
+  #gear .m .st{display:none}
+  #gear .m .lb{margin-bottom:3px}
+  #gear .fund .note{font-size:10px;margin-top:4px}
+  #card .say{min-height:104px}
+}
 @media (max-height:700px){
   #app{gap:10px;padding-top:52px}
   #hud{gap:8px}
