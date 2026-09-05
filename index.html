@@ -52,6 +52,10 @@ h1{font-family:var(--display);font-weight:700;font-size:36px;letter-spacing:-.02
 .wrap{position:relative;z-index:1}
 footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
 .viz.game{position:relative;overflow:hidden} .viz.game .road{position:absolute;left:50%;bottom:0;width:78%;height:100%;transform:translateX(-50%);background:var(--line);opacity:.55;clip-path:polygon(44% 0,56% 0,100% 100%,0 100%)} .viz.game .sign{position:absolute;left:50%;top:18%;width:38%;height:44%;transform:translateX(-50%);background:var(--panel);border:1.5px solid var(--warn);border-radius:3px} .viz.game .sign:after{content:"";position:absolute;left:12%;right:30%;top:28%;height:2px;background:var(--line);box-shadow:0 9px 0 var(--line),0 18px 0 var(--line)} .viz.game .lamp{position:absolute;left:calc(50% + 21%);top:10%;width:9px;height:9px;border-radius:50%;background:var(--warn);box-shadow:0 0 10px var(--warn)}
+.viz.reigns{background:linear-gradient(180deg,#131C2C 0%,#0E1522 100%)}
+.viz.reigns .bar{position:absolute;top:12px;height:4px;border-radius:2px;opacity:.9} .viz.reigns .b0{left:8%;width:16%;background:#5CC08A} .viz.reigns .b1{left:28%;width:14%;background:#7FA6E0} .viz.reigns .b2{left:48%;width:16%;background:#E3B54D} .viz.reigns .b3{left:70%;width:9%;background:#B58FE0}
+.viz.reigns .cd{position:absolute;left:50%;top:28px;width:34%;height:44px;margin-left:-17%;border-radius:6px;background:var(--panel);border:1px solid var(--line);transform:rotate(-4deg);box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.viz.reigns .ar{position:absolute;top:46px;width:9px;height:9px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;opacity:.8} .viz.reigns .ar.l{left:20%;color:#7FA6E0;transform:rotate(45deg)} .viz.reigns .ar.r{right:20%;color:#E3B54D;transform:rotate(-135deg)}
 @media (max-width:600px){h1{font-size:30px} .wrap{padding:30px 16px 60px} .tile{padding:20px 18px 18px} .tile h2{font-size:22px}}
 
 /* ---------- 다크/라이트 ---------- */
@@ -107,6 +111,14 @@ html{overscroll-behavior-y:contain}
       <div class="viz game" aria-hidden="true"><i class="road"></i><i class="sign"></i><i class="lamp"></i></div>
       <p>안전관리자가 되어 현장을 걷다 표지판 앞에 서면 문제가 뜨고 과녁 4개가 섭니다. 20초 안에 정답 과녁을 쏘면 개념이 표지판에 나옵니다. 두 번 빗나가면 안전모 하나를 잃습니다. 힌트 수류탄 3개.</p>
       <div class="nums"><div><b>165</b>정거장</div><div><b>485</b>문제</div><div><b>20</b>초 제한</div></div>
+      <span class="go">들어가기 →</span>
+    </a>
+    <a class="tile reigns" href="reigns.html?v=09041852" aria-label="안전관리자의 하루 들어가기">
+      <div class="k">05 · 판단 게임</div>
+      <h2>안전관리자의 하루</h2>
+      <div class="viz reigns" aria-hidden="true"><i class="bar b0"></i><i class="bar b1"></i><i class="bar b2"></i><i class="bar b3"></i><i class="cd"></i><i class="ar l"></i><i class="ar r"></i></div>
+      <p>규정을 지킬지 공기를 지킬지, 카드를 좌우로 밀어 결정합니다. 근로자 안전·공정률·예산·감독기관 네 게이지 중 하나라도 바닥나면 그날로 끝납니다. 넘긴 기준은 며칠 뒤 사고 카드로 돌아옵니다.</p>
+      <div class="nums"><div><b>40</b>규정 카드</div><div><b>10</b>사고 카드</div><div><b>60</b>일 준공</div></div>
       <span class="go">들어가기 →</span>
     </a>
   </div>
