@@ -1101,7 +1101,7 @@ button{font:inherit;color:inherit}
   plank: R(36, 44, 100, 40, '#243044', ST) + R(139, 44, 100, 40, '#243044', ST) +
     L('M58 38V90M114 38V90M162 38V90M218 38V90', DM, 1.2, '4 4') +
     C(190, 64, 7.5, HI, HI) + C(190, 64, 3.2, SK, 'none') +
-    Dv(44, 84, 296, '') + TX(244, 110, '폭 40 cm 이상', HI) +
+    Dv(44, 84, 296, '') + L('M296 88v12', TC, 1.1) + TX(238, 110, '폭 40 cm 이상', HI) +
     L('M137 44L156 26', TC, 1.1) + TX(160, 24, '틈 3 cm 이하', HI) +
     TX(150, 124, '평면도 · 발판 두 장', TC),
   scaffold: FAR + WALL + GND +
@@ -1224,9 +1224,12 @@ button{font:inherit;color:inherit}
   sawblade: GND + '<path d="M101 84A40 40 0 0 1 179 84" fill="none" stroke="' + ST + '" stroke-width="2"/>' +
     L('M140 60v-5M158 64l3-5M172 78l5-3M114 64l-3-5M124 55l-2-5M156 55l2-5', ST, 1.4) +
     '<path d="M156 47A48 48 0 0 1 187 84" fill="none" stroke="' + HI + '" stroke-width="4"/>' +
+    '<path d="M158 41A53.3 53.3 0 0 1 193 84" fill="none" stroke="' + BD +
+    '" stroke-width="2" stroke-dasharray="5 4"/>' +
     R(20, 84, 280, 6, '#243044', ST) + R(96, 90, 128, 18, '#1E293C', ST) +
     L('M175 72L206 58', TC, 1.1) + TX(210, 54, '톱날과 12 mm 이내', HI) +
-    TX(210, 76, '두께 톱날의 1.1배', TC) + W(56, 108, .9),
+    TX(210, 76, '두께 톱날의 1.1배', TC) +
+    TX(20, 30, '20 mm 로 벌어졌다', BD) + W(56, 108, .9),
   forklift: FAR + GND + '<path d="M110 94V64h46l18 20v10z" fill="#1E293C" stroke="' + ST + '" stroke-width="1.6"/>' +
     '<circle cx="124" cy="100" r="8" fill="#243044" stroke="' + ST + '"/><circle cx="166" cy="100" r="8" fill="#243044" stroke="' + ST + '"/>' +
     R(118, 62, 24, 5, '#243044', ST) + L('M118 62V46', ST, 2.4) +
