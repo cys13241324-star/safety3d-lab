@@ -12,6 +12,10 @@
 
    두 가지를 본다.
 
+   ⓪ 한 번 걷어낸 값이 되살아났는가. 있으면 FAIL.
+      DECK 만 고치고 FALLOUT 을 빠뜨려 「15 mA」가 살아 있던 적이 있다.
+      조문 대조로는 안 잡힌다 — 그 조문에 없는 값은 수백 개니까.
+      이름을 대고 막는다.
    ① 인용한 조문이 실재하는가.        없으면 FAIL.
    ② f 필드의 <em>값</em>이 그 조문에 있는가.
       없으면 WARN 이다 — 별표·고시·KS 에 있는 값일 수 있고, 그런 값은 law 필드에
@@ -42,6 +46,25 @@ LAWS = os.path.join(ROOT, os.pardir, "sanup-safety-cbt", "build", "_laws.json")
 
 # law 필드에 이 말이 있으면 그 카드의 숫자는 규칙 밖에서 온 것이다
 OUTSIDE = ("고시", "별표", "지침", "KS", "GUIDE", "CODE", "표준")
+
+# 한 번 걷어낸 값은 되살아나면 안 된다. 폐지되었거나 법령에 없던 것들이다.
+# 실제로 DECK 만 고치고 FALLOUT 을 빠뜨려 「15 mA」가 살아 있었고, 그건
+# 조문 대조로는 안 잡혔다(그 조문 본문에 없는 값은 수백 개니까).
+# 이름을 대고 막는다. 파일 어디에 있든 걸린다.
+RETIRED = [
+    ("0.903", "지게차 헤드가드 좌승식 높이 — 2019.1.31 삭제"),
+    ("1.88 m", "지게차 헤드가드 입승식 높이 — 2019.1.31 삭제"),
+    ("버팀대 <em>3개", "항타기 버팀대 3개 이상 — 2022.10.18 삭제"),
+    ("15 mA", "누전차단기 물기 있는 장소 — 규칙에 없는 값"),
+    ("체중의 <em>40", "인력운반 남성 40 % — 법령이 아니라 지침 권고치"),
+    ("여성 <em>24", "인력운반 여성 24 % — 법령이 아니라 지침 권고치"),
+    ("150 lux</em> 이상", "전기 조작부 조도 — 제310조에 없는 값"),
+    ("머리 위 <em>30 cm", "충전전로 머리 위 — 제321조에 없는 값"),
+    ("1분당 40 L", "잠수 송기량 — 2017.12.28 개정 전 값"),
+    ("공기조와 안전밸브", "고압작업 점검 — 제551조에 없는 항목"),
+    ("무릎 <em>0.4~0.6", "롤러기 무릎조작식 — 현행은 0.6 m 이내"),
+    ("사망의 절반은", "출처 없는 통계"),
+]
 
 # 규칙 조문은 「센티미터」로 적고 카드는 「cm」로 적는다. 대조하려면 맞춰야 한다.
 UNITS = [
@@ -147,7 +170,7 @@ def cards(src):
             continue
         body = src[src.index(arr):]
         body = body[:body.index(chr(10) + "  ];")]
-        for m in re.finditer("^  \{%s:'([^']+)'," % kf, body, re.M):
+        for m in re.finditer(r"^  \{" + kf + r":'([^']+)',", body, re.M):
             start = m.start()
             nxt = body.find(chr(10) + "  {%s:'" % kf, start + 1)
             chunk = body[start:nxt if nxt > 0 else len(body)]
@@ -166,6 +189,10 @@ def main():
     rule = laws.get("안전보건규칙")
     print("대조 원본: %s 시행 %s · 조문 %d개"
           % (rule["name"], rule["eff"], len(rule["arts"])))
+
+    # 되살아나면 안 되는 값부터 본다. 파일 전체를 훑는다 —
+    # 카드든 그림이든 결과문이든 있어서는 안 되는 말이다.
+    revived = [(m, why) for m, why in RETIRED if m in src]
 
     SC = scenes(src)
     missing, unmatched, artbad, checked, skipped = [], [], [], 0, 0
@@ -240,6 +267,11 @@ def main():
     print("규칙을 인용한 카드 %d장 검사 · 출처를 밖으로 적어 둔 카드 %d장은 숫자 대조 제외"
           % (checked, skipped))
     print("")
+    if revived:
+        print("되살아난 폐기 값: %d건  ← 한 번 걷어낸 것이 다시 들어왔다" % len(revived))
+        for m, why in revived:
+            print("  %-22s %s" % (m, why))
+        print("")
     if missing:
         print("없는 조문을 인용한 곳: %d건" % len(missing))
         for k, r, law in missing:
@@ -261,7 +293,7 @@ def main():
     else:
         print("그림 이름표에서 못 찾은 값: 0건")
 
-    return 1 if missing else 0
+    return 1 if (missing or revived) else 0
 
 
 if __name__ == "__main__":
