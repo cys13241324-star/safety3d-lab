@@ -599,7 +599,8 @@ button{font:inherit;color:inherit}
 <div id="flash" aria-hidden="true"></div>
 <div id="chapBanner" aria-hidden="true"><i id="cbA"></i><b id="cbT"></b><span id="cbS"></span></div>
 
-<div id="over"><div class="box">
+<div id="over" role="dialog" aria-modal="true" aria-labelledby="oTitle" aria-hidden="true">
+  <div class="box">
   <div class="omark" id="oMark" aria-hidden="true"></div>
   <div class="tag" id="oTag"></div>
   <h2 id="oTitle"></h2>
@@ -3113,6 +3114,7 @@ button{font:inherit;color:inherit}
     } else wipe();
 
     $('over').classList.remove('on');
+    $('over').setAttribute('aria-hidden', 'true');
     renderHud(true);
     renderLog();
     if(resume) show(resume.cur); else next();
@@ -3440,6 +3442,13 @@ button{font:inherit;color:inherit}
                  g:[0, 0, 0, 0], m:0, tw:-1});
     if(st.log.length > 120) st.log.shift();
     renderLog();
+  }
+
+  /* 「안전 +6, 공정 -3」처럼 말로 옮긴다. 안 움직인 것은 말하지 않는다. */
+  function deltaSay(d){
+    var out = [], i;
+    for(i = 0; i < 4; i++) if(d[i]) out.push(G[i].n + ' ' + (d[i] > 0 ? '+' : '') + d[i]);
+    return out.length ? out.join(', ') + '.' : '';
   }
 
   function deltaHtml(e){
@@ -3992,6 +4001,9 @@ button{font:inherit;color:inherit}
     b.className = '';
     void b.offsetWidth;
     b.className = 'on';
+    /* 장이 바뀌면 그날부터 규칙이 달라진다. 눈으로만 알리면 축소모션을 켠 사람과
+       스크린리더 사용자는 그 사실을 영영 모른다. */
+    say(ch.n + '장 ' + ch.name + '. ' + ch.lead);
     setTimeout(function(){ b.className = ''; }, 2500);
   }
 
@@ -4185,7 +4197,9 @@ button{font:inherit;color:inherit}
        드물고(판당 각 5회 안팎) 판을 가르는 자리라 그대로 둔다. */
     var quiet = ch.ok && !c.report && c.s !== '사고' && c.s !== '아차사고' && !diverted;
     if(quiet){
-      say('기준 충족. ' + ch.o + (twist ? ' ' + twist.t : ''));
+      /* 준수 카드는 시트를 건너뛰므로 증감이 눈으로만 지나간다.
+         숫자를 말로 옮겨 붙인다 — 확률을 감추지 않는다는 원칙은 화면 밖에서도 같다. */
+      say('기준 충족. ' + ch.o + (twist ? ' ' + twist.t : '') + ' ' + deltaSay(d));
       hint(twist ? '⚡ ' + twist.t + ' — ' + twist.g + ' 변화가 두 배입니다' : ch.o, 2400);
       var g0 = gen;
       setTimeout(function(){ if(gen === g0) advance(); }, 620);
@@ -4456,6 +4470,9 @@ button{font:inherit;color:inherit}
         + (act > exp + 1.5 ? ' (운이 나빴습니다).'
            : (act < exp - 1.5 ? ' (운이 좋았습니다).' : '.'));
     }
+    /* 끝났다는 것을 말해 주고, 포커스를 안으로 옮긴다. 이 둘이 없어서
+       엔딩 위에서 탭 몇 번이면 「새 현장」이 눌렸다. */
+    box.setAttribute('aria-hidden', 'false');
     var total = noteMiss(list);
     if(total) $('oTally').textContent += ' 이 자리에서 넘긴 조문은 모두 ' + total + '개입니다.';
     var seen = noteEnd(end.k), all = 0, _k;
@@ -4464,17 +4481,46 @@ button{font:inherit;color:inherit}
       + '본 결말 <b>' + seen.n + '</b> / ' + all;
     loadWeak();          // 이번 판에서 놓친 것이 다음 판부터 자주 온다
     box.classList.add('on');
+    say(end.h + '. ' + end.t + '. ' + end.d + ' ' + end.l
+        + ' 근무 ' + Math.min(60, st.day) + '일차. 기준 충족 ' + st.okCount
+        + '건, 미달 ' + st.viol.length + '건. 점수 ' + sc + '점, ' + rk[1] + '랭크 '
+        + rk[2] + '.');
+    setTimeout(function(){ try{ $('oAgain').focus(); }catch(e){} }, 60);
   }
   $('oAgain').addEventListener('click', function(){ reset(); });
   function toggleLog(open){
     var e = $('log');
     var on = open === undefined ? !e.classList.contains('on') : open;
     e.classList.toggle('on', on);
-    e.setAttribute('aria-hidden', on ? 'false' : 'true');
+    /* 넓은 화면에서는 기록판이 늘 떠 있는데 여는 단추가 display:none 이라
+       toggleLog 가 불릴 일이 없다 — aria-hidden 이 true 로 굳어 있었다.
+       보이는 것을 숨겨진 것으로 두면 안 된다. */
+    e.setAttribute('aria-hidden', (on || logAlways()) ? 'false' : 'true');
+    if(!on){ try{ $('bLog').focus(); }catch(e2){} }
+  }
+  function logAlways(){
+    try{ return matchMedia('(min-width:1160px)').matches; }catch(e){ return false; }
   }
   $('bLog').addEventListener('click', function(){ toggleLog(); });
+  if(logAlways()) $('log').setAttribute('aria-hidden', 'false');
+  addEventListener('resize', function(){
+    if(logAlways()) $('log').setAttribute('aria-hidden', 'false');
+  });
   $('logX').addEventListener('click', function(){ toggleLog(false); });
-  $('bFresh').addEventListener('click', function(){ wipe(); reset(); hint('새 현장에 부임했습니다'); });
+  /* 「새 현장」과 「처음부터」는 진행을 통째로 지운다. 그런데 25 px 짜리 단추가
+     7 px 간격으로 붙어 있어서 잘못 누르기 쉽다. 확인창을 띄우는 대신 한 번 더
+     누르게 한다 — 흐름을 끊지 않으면서 실수는 막는다. */
+  function armed(btn, label, go){
+    var t = 0;
+    btn.addEventListener('click', function(){
+      if(!st || st.dead || st.day <= 1){ go(); return; }   // 지울 것이 없으면 그냥 간다
+      if(t){ clearTimeout(t); t = 0; btn.textContent = label; go(); return; }
+      btn.textContent = '정말?';
+      hint('한 번 더 누르면 ' + st.day + '일차 진행이 사라집니다');
+      t = setTimeout(function(){ t = 0; btn.textContent = label; }, 3500);
+    });
+  }
+  armed($('bFresh'), '새 현장', function(){ wipe(); reset(); hint('새 현장에 부임했습니다'); });
 
   var HINT0 = '카드를 좌우로 밀거나 방향키로 결정합니다';
   function hint(t, ms){
@@ -4529,7 +4575,8 @@ button{font:inherit;color:inherit}
     else if((e.key === 'Enter' || e.key === ' ') && open){ e.preventDefault(); $('sGo').click(); }
   });
 
-  var bR = document.getElementById('bReset'); if(bR) bR.addEventListener('click', function(){ wipe(); reset(); });
+  var bR = document.getElementById('bReset');
+  if(bR) armed(bR, '처음부터', function(){ wipe(); reset(); hint('처음부터 시작합니다'); });
   var saved = loadRun();
   try{
     reset(saved);
