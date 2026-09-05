@@ -306,6 +306,18 @@ button{font:inherit;color:inherit}
 #card .art .cap{position:absolute;left:12px;bottom:8px;font-family:var(--mono);font-size:10px;
   letter-spacing:.06em;color:var(--dim)}
 #card.hit .art{background:linear-gradient(180deg,#201214 0%,#1A1620 100%)}
+/* 그림이 바뀔 때 치수선을 그어 보인다. 카드마다 innerHTML 을 갈아 끼우니
+   애니메이션은 저절로 처음부터 다시 돈다. */
+/* 정지 상태(dashoffset 0 · opacity 1)가 이미 맞는 그림이다. 애니메이션은
+   그 상태에서 시작점만 되감아 준다 — 애니메이션이 빠져도 그림은 온전하다. */
+@keyframes dimDraw{from{stroke-dashoffset:var(--dl)}}
+@keyframes dimIn{from{opacity:0}}
+@keyframes sparkPulse{0%,100%{opacity:1}50%{opacity:.35}}
+#cArt .dl{animation:dimDraw .52s .14s cubic-bezier(.25,.9,.35,1) backwards}
+#cArt .dk{animation:dimIn .18s .08s backwards}
+#cArt .dt{animation:dimIn .3s .5s backwards}
+#cArt .spk{animation:sparkPulse 1.6s .6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){#cArt .dl,#cArt .dk,#cArt .dt,#cArt .spk{animation:none}}
 
 /* ---------- 현상 보고 ---------- */
 #card.rep .say{min-height:0}
@@ -507,15 +519,28 @@ button{font:inherit;color:inherit}
       (pose === 'down' ? SHW : SH) + head + body +
       ' stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>';
   }
+  /* 치수선은 세 조각으로 나눠 낸다 — 보조선(dk)이 먼저 들어오고,
+     재는 선(dl)이 그어지고, 숫자(dt)가 마지막에 앉는다. 카드가 무엇을
+     재는지 눈이 순서대로 따라가게 하려는 것이다. 애니메이션은 CSS 쪽. */
+  function DTX(x, y, t, anchor){
+    return '<text class="dt" x="' + x + '" y="' + y + '" text-anchor="' + anchor +
+      '" font-size="10.5" fill="' + HI + '" font-family="monospace">' + t + '</text>';
+  }
+  function DL(d, len){               // 재는 선 — 정지 상태가 이미 다 그어진 선이다
+    return '<path class="dl" style="--dl:' + len + '" d="' + d + '" stroke="' + HI +
+      '" stroke-width="1.1" fill="none" stroke-dasharray="' + len + '" stroke-dashoffset="0"/>';
+  }
   function Dh(x1, x2, y, t){         // 가로 치수
-    return '<path d="M' + x1 + ' ' + (y-4) + 'v8M' + x2 + ' ' + (y-4) + 'v8M' + x1 + ' ' + y + 'H' + x2 +
-      '" stroke="' + HI + '" stroke-width="1.1" fill="none"/><text x="' + ((x1+x2)/2) + '" y="' + (y-8) +
-      '" text-anchor="middle" font-size="10.5" fill="' + HI + '" font-family="monospace">' + t + '</text>';
+    var len = Math.abs(x2 - x1);
+    return '<path class="dk" d="M' + x1 + ' ' + (y-4) + 'v8M' + x2 + ' ' + (y-4) + 'v8" stroke="' + HI +
+      '" stroke-width="1.1" fill="none"/>' +
+      DL('M' + x1 + ' ' + y + 'H' + x2, len) + DTX((x1+x2)/2, y-8, t, 'middle');
   }
   function Dv(y1, y2, x, t, left){   // 세로 치수
-    return '<path d="M' + (x-4) + ' ' + y1 + 'h8M' + (x-4) + ' ' + y2 + 'h8M' + x + ' ' + y1 + 'V' + y2 +
-      '" stroke="' + HI + '" stroke-width="1.1" fill="none"/><text x="' + (left ? x-7 : x+7) + '" y="' + ((y1+y2)/2+4) +
-      '" text-anchor="' + (left ? 'end' : 'start') + '" font-size="10.5" fill="' + HI + '" font-family="monospace">' + t + '</text>';
+    var len = Math.abs(y2 - y1);
+    return '<path class="dk" d="M' + (x-4) + ' ' + y1 + 'h8M' + (x-4) + ' ' + y2 + 'h8" stroke="' + HI +
+      '" stroke-width="1.1" fill="none"/>' +
+      DL('M' + x + ' ' + y1 + 'V' + y2, len) + DTX(left ? x-7 : x+7, (y1+y2)/2+4, t, left ? 'end' : 'start');
   }
   function L(d, c, w, dash){         // 선
     return '<path d="' + d + '" stroke="' + (c||ST) + '" stroke-width="' + (w||1.4) + '" fill="none"' +
@@ -560,7 +585,7 @@ button{font:inherit;color:inherit}
   }
   function SPARK(x, y, s, c){        // 불꽃·아크
     s = s || 1;
-    return '<g transform="translate(' + x + ',' + y + ') scale(' + s + ')">' +
+    return '<g class="spk" transform="translate(' + x + ',' + y + ') scale(' + s + ')">' +
       L('M0-8v6M0 8v-6M-8 0h6M8 0h-6M-5.6-5.6l4 4M5.6 5.6l-4-4M-5.6 5.6l4-4M5.6-5.6l-4 4',
         c || BD, 1.5) + '</g>';
   }
