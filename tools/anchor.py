@@ -130,8 +130,61 @@ for n, (name, a) in enumerate(scenes[:-1]):
             loose.append((name, "Dv 끝 %s 이 아무것도 안 잡음"
                           % " · ".join("y=%g" % v for v in miss), t))
 
-print("치수 끝이 허공인 곳: %d건 (허용오차 %g px)" % (len(loose), TOL))
+
+# ── 사람 키 — W/P 글리프의 전체 높이는 31 단위다(안전모 꼭대기 -31 ~ 발끝 0).
+#    판의 px/m 를 알면 그린 사람이 몇 미터인지 역산된다.
+GLYPH, LO, HI_ = 31.0, 1.45, 1.95
+BAND = (12.0, 60.0)          # 사람 크기를 잴 만한 축척 대역
+UNIT = {"mm": .001, "cm": .01, "m": 1.0}
+LEN = re.compile(r"([\d.]+)\s*(mm|cm|m)(?![\w/㎥㎠])")
+
+
+def det_spans(body):
+    out = []
+    for mm_ in re.finditer(r"DET\(", body):
+        k, d = mm_.end(), 1
+        while k < len(body) and d:
+            d += (body[k] == "(") - (body[k] == ")")
+            k += 1
+        out.append((mm_.start(), k))
+    return out
+
+
+tall = []
+for n, (name, a0) in enumerate(scenes[:-1]):
+    body = sc[a0:scenes[n + 1][1]]
+    skip = det_spans(body)
+    pxm = []
+    for pat in (r"Dh\((%s),\s*(%s),\s*(%s),\s*'([^']*)'" % (NUM, NUM, NUM),
+                r"Dv\((%s),\s*(%s),\s*(%s),\s*'([^']*)'" % (NUM, NUM, NUM)):
+        for mm_ in re.finditer(pat, body):
+            if any(x <= mm_.start() < y for x, y in skip):
+                continue
+            g = LEN.search(mm_.group(4))
+            if not g:
+                continue
+            px = abs(float(mm_.group(2)) - float(mm_.group(1)))
+            me = float(g.group(1)) * UNIT[g.group(2)]
+            if me > 0 and px > 0:
+                pxm.append(px / me)
+    if not pxm:
+        continue
+    pxm.sort()
+    med = pxm[len(pxm) // 2]
+    if not (BAND[0] <= med <= BAND[1]):
+        continue
+    for mm_ in re.finditer(r"(?:W|P)\((%s),\s*(%s),\s*(%s)" % (NUM, NUM, NUM), body):
+        s_ = float(mm_.group(3))
+        h = GLYPH * s_ / med
+        if h < LO or h > HI_:
+            tall.append((name, s_, med, h, 1.7 * med / GLYPH))
+
+print("치수 끝이 허공인 곳: %d건 (허용오차 %g px) · 사람 키가 어긋난 곳: %d건"
+      % (len(loose), TOL, len(tall)))
 for name, why, t in loose:
     print("  %-13s %-34s %s" % (name, why, t))
+for name, s_, med, h, want in tall:
+    print("  %-13s 배율 %.2f · %.0f px/m → 키 %.2f m   (1.7 m 이려면 %.2f)"
+          % (name, s_, med, h, want))
 
-sys.exit(1 if loose else 0)
+sys.exit(1 if (loose or tall) else 0)
