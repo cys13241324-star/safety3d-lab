@@ -14,10 +14,26 @@ cscript //Nologo tools\harness.js reigns.html 300
 
 | 정책 | 규칙 |
 |---|---|
-| always comply | 늘 왼쪽 — 모든 카드에서 규정을 지키는 쪽 |
-| balance the weakest | 안전·감독이 가장 낮으면 준수, 공정·예산이 가장 낮으면 위반 |
+| always comply | 늘 왼쪽 — 지금은 모든 카드에서 규정을 지키는 쪽이다 |
+| balance the weakest | 카드를 안 읽고 게이지만 본다. 안전·감독이 최저면 준수, 공정·예산이 최저면 위반 |
 | coin flip | 무작위 |
 | always cut corners | 늘 오른쪽 |
+
+세 번째 인자로 `swap` 을 주면 **수험생 모델**로 바뀐다. 준수 선택이 좌우
+어느 쪽에 서는지 섞은 판(`data-ok` 힌트가 붙은 빌드)에서만 쓴다.
+
+```
+cscript //Nologo tools\harness.js var-swap.html 250 swap
+```
+
+| 정책 | 규칙 |
+|---|---|
+| knows 100% / 85% / 70% / 55% | 규정을 그 비율만큼 안다. 그 확률로 준수 선택을, 아니면 반대를 고른다 |
+| balance the weakest | 위와 같음 — 카드를 안 읽는 대조군 |
+| coin flip | 무작위 |
+
+목표는 **규정을 아는 사람 60일 도달률 55~70 %, 무작위 10 % 미만**이다.
+「게이지만 보기」가 「아는 사람」을 이기면 그 판은 학습 도구가 아니다.
 
 생존 일수 분포·60일 도달률·종료 사유를 내고, 이어하기 저장분이
 화면 상태와 일치하는지까지 확인한다.

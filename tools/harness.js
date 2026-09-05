@@ -115,6 +115,12 @@ function gauge(i){ return Number(ELS['gv' + i].textContent); }
 // RND= coin flip
 // BAL= comply while safety/oversight is the weakest, cut corners while schedule/budget is
 function decide(pol){
+  if(pol.substr(0,3) === 'ORA'){
+    var acc = pol.length > 3 ? Number(pol.substr(3)) / 100 : 1;
+    var d = ELS['card'].dataset.ok, right = (d === 'r') ? 'chR' : 'chL';
+    if(Math.random() < acc) return right;
+    return right === 'chR' ? 'chL' : 'chR';
+  }
   if(pol === 'L') return 'chL';
   if(pol === 'R') return 'chR';
   if(pol === 'RND') return Math.random() < 0.5 ? 'chL' : 'chR';
@@ -148,8 +154,10 @@ function runPolicy(pol, n){
           won: won, rate: (won * 100 / n), causes: causes, reports: reports, hits: hits};
 }
 
-var POLS = ['L', 'BAL', 'RND', 'R'];
-var NAME = {L:'always comply', BAL:'balance the weakest', RND:'coin flip', R:'always cut corners'};
+var POLS = (WScript.Arguments.length > 2 && WScript.Arguments(2) === 'swap')
+  ? ['ORA', 'ORA85', 'ORA70', 'ORA55', 'BAL', 'RND'] : ['L', 'BAL', 'RND', 'R'];
+var NAME = {L:'always comply', ORA:'knows 100%', ORA85:'knows 85%', ORA70:'knows 70%',
+            ORA55:'knows 55%', BAL:'balance the weakest', RND:'coin flip', R:'always cut corners'};
 WScript.Echo('');
 WScript.Echo('policy               n    mean  median  min  max   reached 60d');
 WScript.Echo('-------------------------------------------------------------');
