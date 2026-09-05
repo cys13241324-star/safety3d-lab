@@ -269,6 +269,9 @@ button{font:inherit;color:inherit}
 #over.on{opacity:1;pointer-events:auto;visibility:visible}
 #over .box{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);
   border-radius:16px;padding:26px 24px}
+#over .omark{margin:-6px -4px 12px;border-radius:10px;overflow:hidden;
+  background:linear-gradient(180deg,#0D1420 0%,#131D2C 100%);border:1px solid var(--line-soft)}
+#over .omark svg{display:block;width:100%;height:auto}
 #over .tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--bad)}
 #over h2{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.03em;margin:8px 0 10px;text-wrap:balance}
 #over h2.win{color:var(--ok)}
@@ -452,6 +455,7 @@ button{font:inherit;color:inherit}
 <div id="chapBanner" aria-hidden="true"><b id="cbT"></b><span id="cbS"></span></div>
 
 <div id="over"><div class="box">
+  <div class="omark" id="oMark" aria-hidden="true"></div>
   <div class="tag" id="oTag"></div>
   <h2 id="oTitle"></h2>
   <p id="oDesc"></p>
@@ -1351,6 +1355,86 @@ button{font:inherit;color:inherit}
     R(112, 82, 14, 22, HI, 'none') + R(134, 90, 14, 14, '#5CC08A', 'none') +
     R(156, 76, 14, 28, '#7FA6E0', 'none') + R(178, 94, 14, 10, BD, 'none') +
     L('M104 104h100', ST, 1.4) + TX(238, 46, '현상 보고', HI) + TX(238, 64, '5일 단위', TC)
+  };
+
+
+  /* ===== 엔딩 그림 =====
+     판 300×96, 지면선 86. 카드 그림과 같은 어휘를 쓴다 — 엔딩만 다른 세계로
+     보이면 안 된다. 글자는 넣지 않는다(엔딩 본문이 이미 말한다). */
+  var GL = L('M20 86H280', ST, 1.4);
+  var EA = {
+    /* 결재란이 있는 작업일보. 조사관이 가져간 것은 도면이 아니었다. */
+    songchi: R(76, 8, 118, 78, '#1E293C', ST) +
+      L('M90 26h90M90 40h90M90 54h58', ST, 1.2) +
+      R(140, 56, 44, 24, '#243044', BD) + L('M148 68h28', BD, 1.4) +
+      C(214, 58, 18, 'none', BD) + C(214, 58, 13, 'none', BD) +
+      L('M204 54h20M204 62h20', BD, 2.2) + GL,
+    /* 무너진 비탈, 반쯤 묻힌 안전모 */
+    buried: '<path d="M20 86h116l58-38 86 38z" fill="#1E293C" stroke="' + ST + '" stroke-width="1.4"/>' +
+      L('M56 86l26-18M96 86l22-14M150 62l18 14M196 86l-14-14', DM, 1.2) +
+      '<path d="M196 76a11 10 0 0 1 22 0z" fill="' + HI + '"/>' +
+      L('M191 76h32', HI, 2.2) + GL,
+    /* 충전전로와 놓지 못한 손 */
+    shock: L('M40 18H260', ST, 2.6) + L('M84 18v16M176 18v16', ST, 1.6) +
+      P(122, 86, 2.1, 'reach', BD) + L('M109 54L98 26', BD, 2.6) +
+      SPARK(96, 20, 1.5) + GL,
+    /* 작은 것들이 순서대로 이어졌다 — 마지막 몇 개가 붉다 */
+    small: L('M36 56h16M60 56h16M84 56h16M108 56h16M132 56h16M156 56h16', ST, 3.4) +
+      L('M180 56h16M204 56h16M228 56h16', BD, 3.4) +
+      L('M36 72h208', DM, 1, '4 4') + WARN(252, 20, 1.1) + GL,
+    /* 후임이 첫 주에 걷어 낸 방호망 */
+    replaced: L('M40 26H146', HI, 2.6) +
+      L('M46 28l6 12M62 28l6 12M78 28l6 12M94 28l6 12M110 28l6 12M126 28l6 12', DM, 1) +
+      '<path d="M150 26q42 26 92 2" fill="none" stroke="' + BD + '" stroke-width="2.2" stroke-dasharray="6 5"/>' +
+      ARR(168, 56, 232, 66, BD, 1.6) + W(74, 86, 1) + GL,
+    /* 장부에는 아직 잔액이 있다 */
+    ledger: R(56, 12, 188, 66, '#1E293C', ST) + L('M150 12v66', ST, 1.6) +
+      L('M70 30h62M70 44h62M70 58h44M166 30h62M166 44h62', ST, 1.1) +
+      L('M166 60h62', BD, 2.2) + GL,
+    /* 다듬어 올린 보고서와 현장 사진이 나란히 */
+    hidden: R(36, 12, 98, 66, '#1E293C', ST) + L('M48 28h74M48 40h74M48 52h48', ST, 1.1) +
+      R(166, 12, 98, 66, '#16202F', ST) + L('M178 58l24-20 18 14 20-16 24 22', ST, 1.4) +
+      C(150, 45, 13, 'none', BD) + L('M143 38l14 14m0-14l-14 14', BD, 1.9) + GL,
+    /* 붙은 작업중지명령 */
+    stopOrder: L('M150 86V16', ST, 3.2) + R(94, 20, 112, 36, '#1E293C', BD) +
+      L('M106 32h88M106 44h58', BD, 1.6) + W(56, 86, 1) + W(244, 86, 1) + GL,
+    /* 예고 없이 온 것들 */
+    ambush: L('M64 12l-15 32h17l-13 28M150 8l-15 34h19l-15 30M238 14l-15 32h17l-13 28', BD, 2.4) +
+      W(150, 86, 1) + GL,
+    /* 봉인 */
+    busted: R(94, 10, 112, 76, '#1E293C', ST) + C(192, 48, 3.4, ST, ST) +
+      L('M82 26L218 70M82 70L218 26', BD, 3.2) + GL,
+    /* 판을 짜기도 전에 무너졌다 — 절반은 세우지도 못했다 */
+    early: L('M56 86V26M96 86V26M136 86V46', ST, 2.4) + L('M50 26h92M50 46h92', ST, 1.6) +
+      L('M186 86V56M226 86V56', ST, 2.2, '5 4') + L('M180 56h52', ST, 1.4, '5 4') +
+      W(258, 86, 1) + GL,
+    /* 마지막 날 아침에도 망은 걸려 있었다 */
+    clean: L('M38 22H150', HI, 2.6) +
+      L('M44 24l6 12M60 24l6 12M76 24l6 12M92 24l6 12M108 24l6 12M124 24l6 12', DM, 1) +
+      L('M186 86V16', ST, 2.4) + L('M180 16h62', ST, 2) + L('M240 16v14', ST, 1.4) +
+      W(112, 86, 1.1) + GL,
+    /* 남긴 목록을 다음 사람에게 넘긴다 */
+    handover: DOC(150, 58, 1.7) + ARR(104, 40, 132, 40, HI, 1.8) +
+      ARR(190, 40, 218, 40, HI, 1.8) + W(70, 86, 1) + W(240, 86, 1) + GL,
+    /* 하루도 밀리지 않았다 */
+    onTime: C(150, 44, 30, '#1E293C', ST) + L('M150 24v20l15 9', HI, 2.4) +
+      L('M150 12v6M182 44h-6M150 76v-6M118 44h6', ST, 1.4) +
+      L('M40 86h60M200 86h60', DM, 1.4) + GL,
+    /* 마지막 주에 두 사람이 그만뒀다 */
+    worn: W(72, 86, 1.1) + P(126, 86, 1.1, 'bend') +
+      ARR(180, 56, 254, 56, TC, 1.8) + L('M44 26h84M44 40h58', DM, 1.4) + GL,
+    /* 아차사고 보고가 열두 건 넘게 쌓였다 */
+    warned: R(56, 60, 188, 9, '#243044', ST) + R(62, 48, 176, 9, '#243044', ST) +
+      R(68, 36, 164, 9, '#243044', ST) + R(74, 24, 152, 9, '#243044', ST) +
+      WARN(150, 15, 1.2) + GL,
+    /* 할 이야기가 없는 현장 */
+    master: L('M56 86V36M56 40h74', ST, 2.2) + R(170, 56, 64, 30, '#1E293C', ST) +
+      C(238, 24, 13, 'none', HI) +
+      L('M238 8v5M251 24h-5M238 40v-5M225 24h5M229 15l4 4M247 33l-4-4M247 15l-4 4M229 33l4-4', HI, 1.4) + GL,
+    /* 준공서류 뒤에 그대로 붙어 남는다 */
+    record: R(76, 10, 146, 76, '#1E293C', ST) + L('M76 10v76', ST, 3.4) +
+      L('M98 30h104M98 44h104M98 58h74', ST, 1.2) +
+      C(206, 66, 15, 'none', HI) + L('M198 66l6 7 11-13', HI, 2.4) + GL
   };
 
   function artFor(c){
@@ -3567,6 +3651,8 @@ button{font:inherit;color:inherit}
     l:'현장은 닫혀도 기록은 닫히지 않는다.'}
   };
 
+  for(var _ek in E){ if(E.hasOwnProperty(_ek)) E[_ek].k = _ek; }
+
   function ending(won){
     var g = st.g, V = st.viol.length, R = st.seeds.length, i;
     if(!won){
@@ -3617,6 +3703,8 @@ button{font:inherit;color:inherit}
     st.dead = true;
     var box = $('over');
     var end = ending(won);
+    $('oMark').innerHTML = '<svg viewBox="0 0 300 96" preserveAspectRatio="xMidYMid meet" ' +
+      'role="img">' + (EA[end.k] || EA.record) + '</svg>';
     $('oTag').textContent = end.h;
     $('oTag').style.color = won ? 'var(--ok)' : 'var(--bad)';
     $('oTitle').textContent = end.t;
