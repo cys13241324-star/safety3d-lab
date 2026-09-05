@@ -114,8 +114,10 @@ var GAMES = Number(WScript.Arguments(1) || 60);
 
 function gauge(i){ return Number(String(ELS['gv' + i].textContent).replace(/[^0-9]/g, '')); }
 
-// L  = always the left choice  (the regulation-compliant option in every card)
-// R  = always the right choice (the shortcut)
+// L  = always the left button.  NOT "always comply": since cards flip which side
+//      the compliant option sits on, this is now a side-mashing strategy and should lose.
+// R  = always the right button.  Same caveat.
+// ORAnn = knows the rule nn% of the time (reads card.dataset.ok). This is the comply model.
 // RND= coin flip
 // BAL= comply while safety/oversight is the weakest, cut corners while schedule/budget is
 function decide(pol){
@@ -135,7 +137,7 @@ function decide(pol){
 }
 
 function runPolicy(pol, n){
-  var days = [], causes = {}, won = 0, reports = 0, hits = 0;
+  var days = [], causes = {}, won = 0, reports = 0, hits = 0, sheets = 0;
   var lastSubj = '', run = 0, maxRun = 0, seen = {}, dupes = 0;
   for(var g = 0; g < n; g++){
     press('bFresh');
@@ -148,6 +150,7 @@ function runPolicy(pol, n){
       var wh = ELS['cWho'].textContent + '|' + sj;
       if(seen[wh]) dupes++; seen[wh] = 1;
       press(decide(pol));
+      if(document.getElementById('sheet').classList.contains('on')) sheets++;
       press('sGo');
     }
     if(guard >= 500) return {err: 'no end'};
@@ -160,16 +163,17 @@ function runPolicy(pol, n){
   days.sort(function(a,b){ return a - b; });
   var sum = 0; for(var i = 0; i < days.length; i++) sum += days[i];
   return {mean: sum / n, med: days[Math.floor(n/2)], min: days[0], max: days[days.length-1],
-          won: won, rate: (won * 100 / n), causes: causes, reports: reports, hits: hits, maxRun: maxRun};
+          won: won, rate: (won * 100 / n), causes: causes, reports: reports, hits: hits,
+          maxRun: maxRun, sheets: sheets / n, cards: (sum / n)};
 }
 
-var POLS = (WScript.Arguments.length > 2 && WScript.Arguments(2) === 'swap')
-  ? ['ORA', 'ORA85', 'ORA70', 'ORA55', 'BAL', 'RND'] : ['L', 'BAL', 'RND', 'R'];
-var NAME = {L:'always comply', ORA:'knows 100%', ORA85:'knows 85%', ORA70:'knows 70%',
-            ORA55:'knows 55%', BAL:'balance the weakest', RND:'coin flip', R:'always cut corners'};
+var POLS = (WScript.Arguments.length > 2 && WScript.Arguments(2) === 'sides')
+  ? ['L', 'R', 'RND'] : ['ORA', 'ORA85', 'ORA70', 'ORA55', 'BAL', 'RND', 'L'];
+var NAME = {L:'always left (side-mash)', ORA:'knows 100%', ORA85:'knows 85%', ORA70:'knows 70%',
+            ORA55:'knows 55%', BAL:'balance the weakest', RND:'coin flip', R:'always right (side-mash)'};
 WScript.Echo('');
-WScript.Echo('policy               n    mean  median  min  max   reached 60d');
-WScript.Echo('-------------------------------------------------------------');
+WScript.Echo('policy                    n    mean  median  min  max  reached 60d   sheets/run');
+WScript.Echo('---------------------------------------------------------------------------------');
 var results = {};
 for(var pi = 0; pi < POLS.length; pi++){
   var r = runPolicy(POLS[pi], GAMES);
@@ -177,8 +181,9 @@ for(var pi = 0; pi < POLS.length; pi++){
   results[POLS[pi]] = r;
   var pad = function(v, w){ v = String(v); while(v.length < w) v = ' ' + v; return v; };
   var padr = function(v, w){ v = String(v); while(v.length < w) v = v + ' '; return v; };
-  WScript.Echo(padr(NAME[POLS[pi]], 20) + pad(GAMES, 4) + pad(r.mean.toFixed(1), 8) + pad(r.med, 7) +
-               pad(r.min, 5) + pad(r.max, 5) + pad(r.rate.toFixed(0) + '%', 12));
+  WScript.Echo(padr(NAME[POLS[pi]], 25) + pad(GAMES, 4) + pad(r.mean.toFixed(1), 8) + pad(r.med, 7) +
+               pad(r.min, 5) + pad(r.max, 5) + pad(r.rate.toFixed(0) + '%', 12) +
+               pad(r.sheets.toFixed(1), 13));
 }
 WScript.Echo('');
 for(var pi = 0; pi < POLS.length; pi++){
