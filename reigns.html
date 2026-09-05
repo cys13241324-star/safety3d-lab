@@ -1720,13 +1720,30 @@ button{font:inherit;color:inherit}
     if(kind === bgNow) return;
     bgNow = kind;
     var d = BGS[kind] || BGS.mgmt, host = $('scene');
-    var old = host.firstChild;
+    /* 지울 것은 '가장 오래된 층'이 아니라 '지금까지 있던 층 전부'다.
+       firstChild 하나만 지우면 빠르게 두 번 바뀔 때 가운데 층이 남아 쌓인다. */
+    var olds = [], i;
+    for(i = 0; i < host.children.length; i++) olds.push(host.children[i]);
+    /* 빠르게 넘기면 사라지는 중인 층이 여러 겹 겹친다. 바로 앞의 하나만
+       천천히 지우고 나머지는 즉시 치운다 — 반투명이 겹칠수록 탁해진다. */
+    while(olds.length > 1){
+      var ex = olds.shift();
+      if(ex.parentNode) ex.parentNode.removeChild(ex);
+    }
     var wrap = document.createElement('div');
     wrap.innerHTML = '<svg viewBox="0 0 340 300" preserveAspectRatio="xMidYMax slice" fill="' + d[0] +
       '" stroke="' + d[0] + '">' + d[1] + '</svg>';
     var svg = wrap.firstChild;
     host.appendChild(svg);
-    requestAnimationFrame(function(){ svg.classList.add('on'); if(old){ old.classList.remove('on'); setTimeout(function(){ if(old.parentNode) old.parentNode.removeChild(old); }, 950); } });
+    requestAnimationFrame(function(){
+      svg.classList.add('on');
+      for(var j = 0; j < olds.length; j++) olds[j].classList.remove('on');
+      setTimeout(function(){
+        for(var j = 0; j < olds.length; j++){
+          if(olds[j].parentNode) olds[j].parentNode.removeChild(olds[j]);
+        }
+      }, 950);
+    });
   }
 
   function strip(h){ return String(h || '').replace(/<[^>]+>/g, ''); }
