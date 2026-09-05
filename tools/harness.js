@@ -246,7 +246,11 @@ press('bFresh');
 // the check would then fail for a reason that has nothing to do with saving.
 for (var i = 0; i < 7 && !isOver(); i++) { press(decide('ORA')); press('sGo'); }
 if (isOver()) { WScript.Echo('FAIL: run ended before day 8, cannot test resume'); WScript.Quit(1); }
-var shownDay = ELS['mDay'].textContent, shownWho = ELS['cWho'].textContent;
+// renderHud writes the day with innerHTML (it carries an <i> for the chapter),
+// so textContent stays empty in this stub. Read what the game actually wrote --
+// this check has been printing NO for its whole life for that reason alone.
+var shownDay = ELS['mDay'].innerHTML || ELS['mDay'].textContent;
+var shownWho = ELS['cWho'].textContent;
 var saved = localStorage.getItem('reigns_run_v1');
 if (!saved) { WScript.Echo('FAIL: nothing saved mid-run'); WScript.Quit(1); }
 var r = JSON.parse(saved);

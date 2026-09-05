@@ -3231,7 +3231,7 @@ button{font:inherit;color:inherit}
         rolls:st.rolls, pSum:st.pSum, pFat:st.pFat,
         forced:st.forced, hidden:st.hidden, stop:st.stop, log:st.log,
         chap:st.chap, subj:st.subj, amb:st.amb, ambNo:st.ambNo, busted:st.busted,
-        who:st.who,
+        who:st.who, gifts:st.gifts,
         cond:st.cond, conds:COND_CARDS.filter(function(c){ return c.used; })
                                       .map(function(c){ return c.k; }),
         okCount:st.okCount, lastReport:st.lastReport, snap:st.snap,
@@ -3271,7 +3271,7 @@ button{font:inherit;color:inherit}
           recent:[], lastSubj:'', runSubj:0, nextReport:5,
           money:FUND0, illegal:0, hurt:0, near:0, fatal:'', spent:0, need:0,
           rolls:0, pSum:0, pFat:0, forced:0, hidden:0, stop:0, log:[],
-          chap:0, subj:{}, amb:0, ambNo:0, busted:0, briefed:0, cond:null, who:{}};
+          chap:0, subj:{}, amb:0, ambNo:0, busted:0, briefed:0, cond:null, who:{}, gifts:0};
     DECK.forEach(function(c){ c.used = false; });
     FLAVOR.forEach(function(c){ c.used = false; });
     CHAPTER_CARDS.forEach(function(c){ c.used = false; });
@@ -3292,6 +3292,7 @@ button{font:inherit;color:inherit}
       st.log = resume.log || []; st.chap = resume.chap || 0; st.subj = resume.subj || {};
       st.amb = resume.amb || 0; st.ambNo = resume.ambNo || 0; st.busted = resume.busted || 0;
       st.cond = resume.cond || null; st.who = resume.who || {};
+      st.gifts = resume.gifts || 0;
       if(resume.conds) COND_CARDS.forEach(function(c){
         if(resume.conds.indexOf(c.k) >= 0) c.used = true; });
       st.recent = resume.recent || []; st.lastSubj = resume.lastSubj || ''; st.runSubj = resume.runSubj || 0;
@@ -4337,7 +4338,7 @@ button{font:inherit;color:inherit}
     }
     cardEl.dataset.allyok = _mo;                                 // 가장 많이 편든 횟수
     cardEl.dataset.silent = _ms;                                 // 입을 닫은 사람 수
-    cardEl.dataset.gift = st.gifts || 0;                         // 먼저 잡아 준 횟수
+    cardEl.dataset.gift = st.gifts;                              // 먼저 잡아 준 횟수
     $('mSite').textContent = pick.s === '사고' ? '사고 대응' : pick.s;
     if(pick.s === '아차사고') $('mSite').textContent = '아차사고';
     if(pick.amb) $('mSite').textContent = '기습';
@@ -4436,7 +4437,7 @@ button{font:inherit;color:inherit}
         if(r2.ok >= ALLY_AT && !r2.gift && mySeeds()){
           r2.gift = 1;
           var gi = pickSeed(1);
-          if(gi >= 0){ st.seeds.splice(gi, 1); fixed++; free = wk; st.gifts = (st.gifts || 0) + 1; }
+          if(gi >= 0){ st.seeds.splice(gi, 1); fixed++; free = wk; st.gifts++; }
           /* gift 를 세는 것은 종료 화면에서 한 줄 적기 위해서다 */
           break;
         }
