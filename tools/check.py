@@ -5,6 +5,7 @@
    anchor    치수 부착 · 사람 키                                  (실패하면 종료 1)
    lawcheck  인용한 조문이 실재하는가 · 그 조문에 그 숫자가 있는가  (없는 조문이면 종료 1)
    hitcheck  hit 자리번호가 f 의 <em> 안을 가리키는가              (실패하면 종료 1)
+   shape     카드 값이 덱의 생성 규칙(P형/B형)을 따르는가          (경고, 항상 0)
    onobj     이름표가 물건 위에                                   (경고, 항상 0)
 
    이 검사들이 보지 않는 것: **형상** — 그린 것이 규정이 말하는 물건으로
@@ -14,7 +15,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 HERE = os.path.dirname(os.path.abspath(__file__))
 TARGET = sys.argv[1:] if len(sys.argv) > 1 else []
 bad = 0
-for name, hard in (("artlint", True), ("anchor", True), ("lawcheck", True), ("hitcheck", True), ("onobj", False)):
+for name, hard in (("artlint", True), ("anchor", True), ("lawcheck", True), ("hitcheck", True), ("shape", False), ("onobj", False)):
     print("── %s" % name)
     r = subprocess.run([sys.executable, os.path.join(HERE, name + ".py")] + TARGET,
                        capture_output=True, text=True, encoding="utf-8")
