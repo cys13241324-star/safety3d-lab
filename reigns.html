@@ -312,6 +312,15 @@ button{font:inherit;color:inherit}
   clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 /* ---------- 카드 그림 ---------- */
+/* 외부 상황 띠 — 며칠 남았는지 계기판에 떠 있어야 「오늘은 넘기자」가 도박이 된다 */
+#gear .cond{margin-top:9px;padding:7px 10px;border-radius:8px;display:flex;align-items:baseline;
+  gap:8px;flex-wrap:wrap;background:rgba(240,112,86,.10);border:1px solid rgba(240,112,86,.34)}
+#gear .cond.soft{background:rgba(227,181,77,.09);border-color:rgba(227,181,77,.32)}
+#gear .cond b{font-size:12.5px;color:var(--bad);font-weight:700}
+#gear .cond.soft b{color:var(--warn)}
+#gear .cond span{font-family:var(--mono);font-size:10.5px;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+#gear .cond em{font-style:normal;font-size:11.5px;color:var(--muted);flex-basis:100%}
 #card .art{height:132px;margin:-20px -20px 14px;border-bottom:1px solid var(--line-soft);
   background:linear-gradient(180deg,#0D1420 0%,#131D2C 100%);border-radius:15px 15px 0 0;overflow:hidden;position:relative}
 #card .art svg{display:block;width:100%;height:100%}
@@ -810,6 +819,45 @@ button{font:inherit;color:inherit}
     ARR(120, 118, 120, 100, HI, 1.6) + TX(150, 122, '카드가 이 값을 움직인다', HI),
 
 
+
+  /* --- 외부 상황 --- */
+  /* 폭염경보 — 해가 높고, 그늘은 저기 하나뿐이다. */
+  cd_heat: FAR + GND +
+    C(258, 32, 18, 'none', HI) +
+    L('M258 6v8M258 50v8M232 32h8M276 32h8M240 14l6 6M276 50l-6-6M240 50l6-6M276 14l-6 6', HI, 1.6) +
+    L('M40 92q10-16 20 0t20 0M84 92q10-16 20 0t20 0', BD, 1.5) +
+    P(96, 108, 1, 'sit') + W(150, 108, 1) +
+    R(186, 76, 52, 6, '#243044', ST) + L('M190 82v26M234 82v26', ST, 1.4) +
+    TX(24, 40, '체감온도가 오후에 가장 높다', BD) + TX(180, 122, '그늘은 저기 하나', TC),
+  /* 한파 · 결빙 — 발판과 사다리가 얼었다. */
+  cd_cold: FAR + GND +
+    R(60, 74, 120, 7, '#243044', ST) + L('M64 74h112', '#9FD8E6', 2.2) +
+    L('M66 81v27M174 81v27', ST, 1.6) +
+    L('M216 108L246 34M234 108L264 34', ST, 2.4) +
+    L('M220 96h16M226 82h16M232 68h16M238 54h16', ST, 1.6) +
+    L('M40 20l4 8M62 14l4 8M84 22l4 8M106 16l4 8M128 24l4 8', '#9FD8E6', 1.6) +
+    TX(24, 44, '밤사이 영하', TC) + TX(150, 122, '언 발판 · 언 사다리', BD),
+  /* 집중 감독 기간 — 관내 전 현장이 대상이다. */
+  cd_watch: FAR + GND +
+    L('M40 108V28M120 108V28M200 108V28', ST, 2.2) +
+    L('M34 44h72M114 44h72M194 44h72', ST, 1.4) +
+    W(70, 108, .9) + W(150, 108, .9) + W(230, 108, .9) +
+    DOC(288, 56, 1.2) + L('M266 56h10', TC, 1.2, '4 3') +
+    TX(24, 22, '관내 전 현장', TC) + TX(150, 122, '이번 주 · 집중 감독', HI),
+  /* 자재 수급 차질 — 난간재와 방호망 자리가 비었다. */
+  cd_supply: FAR + GND +
+    L('M40 108V70M120 108V70', ST, 2.6) + L('M40 70h80', HI, 2.6) + L('M40 88h80', ST, 2) +
+    L('M160 108V70M240 108V70', ST, 2.6, '6 5') + L('M160 70h80', BD, 2.2, '6 5') +
+    C(200 , 44, 13, 'none', BD) + L('M192 36l16 16m0-16l-16 16', BD, 1.8) +
+    TX(30, 56, '있는 것', TC) + TX(150, 122, '난간재 · 방호망 납품 지연', BD) +
+    W(286, 108, .9),
+  /* 명절 전 주간 — 다음 주는 인원이 절반이다. */
+  cd_holi: FAR + GND +
+    W(40, 108, .95) + W(64, 108, .95) + W(88, 108, .95) + W(112, 108, .95) +
+    W(136, 108, .95) + W(160, 108, .95) +
+    ARR(190, 78, 254, 78, TC, 1.8) +
+    W(276, 108, .95, '#4E6A94') + W(300, 108, .95, '#4E6A94') +
+    TX(24, 40, '명절 전 마지막 주', HI) + TX(150, 122, '다음 주는 절반', TC),
   /* --- 기습 이벤트 · 국면 --- */
   /* 옆 현장에서 사람이 죽었다. 같은 원청, 같은 비계 업체. */
   amb_near: FAR + GND +
@@ -2761,6 +2809,8 @@ button{font:inherit;color:inherit}
         rolls:st.rolls, pSum:st.pSum, pFat:st.pFat,
         forced:st.forced, hidden:st.hidden, stop:st.stop, log:st.log,
         chap:st.chap, subj:st.subj, amb:st.amb, ambNo:st.ambNo, busted:st.busted,
+        cond:st.cond, conds:COND_CARDS.filter(function(c){ return c.used; })
+                                      .map(function(c){ return c.k; }),
         okCount:st.okCount, lastReport:st.lastReport, snap:st.snap,
         pOk:st.pOk, pNo:st.pNo, reports:st.reports, cur:st.cur, nextReport:st.nextReport,
         recent:st.recent, lastSubj:st.lastSubj, runSubj:st.runSubj,
@@ -2793,11 +2843,12 @@ button{font:inherit;color:inherit}
           recent:[], lastSubj:'', runSubj:0, nextReport:5,
           money:FUND0, illegal:0, hurt:0, near:0, fatal:'', spent:0, need:0,
           rolls:0, pSum:0, pFat:0, forced:0, hidden:0, stop:0, log:[],
-          chap:0, subj:{}, amb:0, ambNo:0, busted:0, briefed:0};
+          chap:0, subj:{}, amb:0, ambNo:0, busted:0, briefed:0, cond:null};
     DECK.forEach(function(c){ c.used = false; });
     FLAVOR.forEach(function(c){ c.used = false; });
     CHAPTER_CARDS.forEach(function(c){ c.used = false; });
     AMBUSH.forEach(function(c){ c.used = false; });
+    COND_CARDS.forEach(function(c){ c.used = false; });
 
     if(resume && !resume.g) resume = null;          // 이벤트 객체 등이 넘어온 경우
     if(resume){
@@ -2812,6 +2863,9 @@ button{font:inherit;color:inherit}
       st.forced = resume.forced || 0; st.hidden = resume.hidden || 0; st.stop = resume.stop || 0;
       st.log = resume.log || []; st.chap = resume.chap || 0; st.subj = resume.subj || {};
       st.amb = resume.amb || 0; st.ambNo = resume.ambNo || 0; st.busted = resume.busted || 0;
+      st.cond = resume.cond || null;
+      if(resume.conds) COND_CARDS.forEach(function(c){
+        if(resume.conds.indexOf(c.k) >= 0) c.used = true; });
       st.recent = resume.recent || []; st.lastSubj = resume.lastSubj || ''; st.runSubj = resume.runSubj || 0;
       var on = {}; (resume.deck || []).forEach(function(k){ on[k] = 1; });
       DECK.forEach(function(c){ c.used = !!on[c.k]; });
@@ -2864,7 +2918,7 @@ button{font:inherit;color:inherit}
     if(!c) return 0;
     if(typeof c.cost === 'number') return c.cost;      // 아차사고 카드는 원래 카드의 값을 쓴다
     if(!c.law || c.report || !c.b) return 0;
-    return Math.round((60 + 12 * Math.abs(c.b.d[0])) / 10) * 10;
+    return Math.round((60 + 12 * Math.abs(c.b.d[0])) * condCost() / 10) * 10;
   }
 
   /* 미조치 위반이 만들어 내는 오늘 하루의 확률.
@@ -2902,7 +2956,17 @@ button{font:inherit;color:inherit}
             '<div class="tk"><div class="fl" id="rf' + i + '"></div></div>' +
             '<div class="st"><b id="rg' + i + '">·</b> <span id="rs' + i + '">낮음</span></div>' +
           '</div>';
-        }).join('') + '</div>';
+        }).join('') + '</div>' +
+        '<div class="cond" id="cond" hidden>' +
+          '<b id="cdN"></b><span id="cdD"></span><em id="cdT"></em></div>';
+    }
+    var cd = condOf();
+    $('cond').hidden = !cd;
+    if(cd){
+      $('cdN').textContent = cd.n;
+      $('cdD').textContent = st.cond.left + '일 남음' + (st.cond.soft ? ' · 대비함' : '');
+      $('cdT').textContent = cd.note;
+      $('cond').className = 'cond' + (st.cond.soft ? ' soft' : '');
     }
     var r = riskNow(), i;
     for(i = 0; i < RK.length; i++){
@@ -3061,6 +3125,15 @@ button{font:inherit;color:inherit}
     renderLog();
   }
 
+  /* 상황은 카드가 아니라 상태라 pushLog 에 넣을 수 없다(그쪽은 카드를 받는다).
+     기록에는 남아야 하므로 한 줄짜리 전용 항목을 쌓는다. */
+  function pushCond(name, note, ok){
+    st.log.push({d:st.day, ok:ok ? 1 : 0, k:'cond', n:name, v:note, l:'',
+                 g:[0, 0, 0, 0], m:0, tw:-1});
+    if(st.log.length > 120) st.log.shift();
+    renderLog();
+  }
+
   function deltaHtml(e){
     var out = [], i;
     for(i = 0; i < 4; i++){
@@ -3079,12 +3152,13 @@ button{font:inherit;color:inherit}
       var e = st.log[i], law = e.k === 'law';
       if(law){ if(e.ok) ok++; else no++; }
       var mark = law ? (e.ok ? '✓' : '✕')
-      : (e.k === 'rep' ? '\u25A6' : (e.k === 'amb' ? '\u26A1' : '\u25CB'));
+      : (e.k === 'rep' ? '\u25A6' : (e.k === 'amb' ? '\u26A1'
+        : (e.k === 'cond' ? '\u25C6' : '\u25CB')));
       out.push('<li class="' + (law ? (e.ok ? 'ok' : 'no') : 'nu') + '">' +
         '<div class="t"><span class="m">' + mark + ' ' + e.d + '일</span>' +
         '<span class="n">' + e.n + '</span></div>' +
         (e.v ? '<div class="v">' + e.v + '</div>' : '') +
-        (!law ? '<div class="v2">' + (e.k === 'rep'
+        (!law && e.k !== 'cond' ? '<div class="v2">' + (e.k === 'rep'
             ? (e.ok ? '사실대로 올렸습니다' : '다듬어 올렸습니다')
             : (e.k === 'amb' ? (e.ok ? '기습 — 맞섰습니다' : '기습 — 넘겼습니다')
             : (e.ok ? '무리 없이 넘겼습니다' : '무리한 결정'))) + '</div>' : '') +
@@ -3342,6 +3416,72 @@ button{font:inherit;color:inherit}
       o:'막힌 문 앞에서 찍은 그림이 저녁에 나갔습니다.'}}
   ];
 
+
+  /* ===== 외부 상황 =========================================================
+     기습은 한 번 정하면 끝난다. 바깥에서 오는 것들은 대개 며칠씩 간다 —
+     폭염경보는 사흘을 가고 집중 감독 기간은 한 주를 간다. 그동안 판이
+     달라져야 「오늘은 넘기고 내일 고치자」가 도박이 된다.
+
+     상황은 카드가 아니라 상태다. 카드는 시작됐다는 통보이고, 거기서 고른
+     것이 남은 날들을 무겁게도 가볍게도 만든다(준수하면 매일 값이 절반).
+     g 하루 증감 · fo 그날 위험이 터질 확률 배수 · cost 조치 비용 배수. */
+  var COND = {
+    heat:   {n:'폭염경보',       d:3, g:[-1, -2, 0, 0], fo:1.12,
+             note:'그늘과 휴식이 없으면 사람이 먼저 꺾입니다'},
+    cold:   {n:'한파 · 결빙',    d:3, g:[-1, -2, 0, 0], fo:1.12,
+             note:'언 발판과 언 자재. 미끄러지고 부러집니다'},
+    watch:  {n:'집중 감독 기간', d:5, g:[0, -1, 0, -1], fo:1.06,
+             note:'미조치가 남아 있으면 이번 주에 걸립니다'},
+    supply: {n:'자재 수급 차질', d:4, g:[0, -2, 0, 0], fo:1.08,
+             note:'없는 것으로는 세울 수 없습니다'},
+    holi:   {n:'명절 전 주간',   d:4, g:[-2, 1, 0, 0], fo:1.14,
+             note:'다들 서두릅니다. 공정은 저절로 나가고 사람이 다칩니다'}
+  };
+
+  /* 상황을 여는 카드. 고르는 순간 상황이 시작되고 며칠 남았는지 계기판에 뜬다. */
+  var COND_CARDS = [
+  {k:'cd_heat', s:'기습', w:'윤경아 보건관리자', amb:1, art:'cd_heat', law:'', cond:'heat',
+   t:'폭염경보가 내렸습니다. 사흘 간다고 합니다. 오후 두 시가 제일 위험합니다.',
+   a:{l:'오후를 쉬고 그늘과 물을 댄다', d:[9, -9, -1, 4], ok:1,
+      o:'그늘막과 얼음물을 댔습니다. 오후 두 시간이 통째로 빕니다.'},
+   b:{l:'오전에 몰아서 끝낸다', d:[-7, 6, 2, -3], ok:0, seed:'heatwave',
+      o:'오전에 몰면 오전이 오후가 됩니다. 쉬는 시간이 먼저 사라졌습니다.'}},
+
+  {k:'cd_cold', s:'기습', w:'오만근 반장', amb:1, art:'cd_cold', law:'', cond:'cold',
+   t:'밤사이 영하로 떨어졌습니다. 발판과 사다리가 얼어 있습니다.',
+   a:{l:'제빙부터 하고 올린다', d:[9, -9, -1, 3], ok:1,
+      o:'염화칼슘을 뿌리고 발판을 닦았습니다. 오전이 날아갔습니다.'},
+   b:{l:'해 뜨면 녹는다', d:[-8, 6, 3, -3], ok:0, seed:'plank',
+      o:'해가 드는 쪽만 녹습니다. 북쪽 발판은 오후까지 얼어 있었습니다.'}},
+
+  {k:'cd_watch', s:'기습', w:'최윤 감독관', amb:1, art:'cd_watch', law:'', cond:'watch',
+   t:'이번 주가 건설현장 집중 감독 기간으로 지정됐습니다. 관내 전 현장이 대상입니다.',
+   a:{l:'미조치 목록부터 정리한다', d:[7, -7, -2, 10], ok:1,
+      o:'먼저 내민 목록에는 기한이 붙습니다. 나중에 발견된 목록에는 과태료가 붙습니다.'},
+   b:{l:'평소대로 간다', d:[-3, 4, 3, -9], ok:0,
+      o:'평소대로 간다는 것은 평소의 미조치도 그대로 둔다는 뜻입니다.'}},
+
+  {k:'cd_supply', s:'기습', w:'장영수 소장', amb:1, art:'cd_supply', law:'', cond:'supply',
+   t:'안전난간재와 방호망 납품이 밀렸습니다. 나흘은 더 걸린다고 합니다.',
+   a:{l:'웃돈을 주더라도 확보한다', d:[8, -9, -2, 4], ok:1,
+      o:'값이 올랐습니다. 없는 것보다는 비싼 것이 낫습니다.'},
+   b:{l:'있는 것으로 돌려 쓴다', d:[-7, 5, 5, -3], ok:0, seed:'rail',
+      o:'한 층에서 걷어 다른 층에 답니다. 걷어 낸 층은 그대로 비어 있습니다.'}},
+
+  {k:'cd_holi', s:'기습', w:'차동수 소장', amb:1, art:'cd_holi', law:'', cond:'holi',
+   t:'명절 전에 한 층 더 올리자고 합니다. 다음 주는 인원이 절반입니다.',
+   a:{l:'무리한 연장과 야간은 막는다', d:[8, -9, -1, 5], ok:1,
+      o:'올릴 수 있는 만큼만 올렸습니다. 소장은 아쉬워했고 아무도 다치지 않았습니다.'},
+   b:{l:'이번 주만 밀어붙인다', d:[-8, 8, 3, -4], ok:0, seed:'lux',
+      o:'명절 전 마지막 주에 사고가 몰리는 것은 통계가 아니라 경험입니다.'}}
+  ];
+
+  /* 지금 걸린 상황의 배수. 없으면 1이다. */
+  function condOf(){ return st.cond ? COND[st.cond.k] : null; }
+  function condFo(){ var c = condOf(); return c && c.fo ? c.fo : 1; }
+  /* 비용 배수는 쓰지 않는다 — 돈은 규정 카드의 경제로 남긴다. 자리는 남겨 둔다. */
+  function condCost(){ var c = condOf(); return c && c.cost ? c.cost : 1; }
+
   /* ===== 현상 보고 (5일마다) ===== */
 
   function buildReport(){
@@ -3409,6 +3549,13 @@ button{font:inherit;color:inherit}
       pick = buildReport();
     }
 
+    /* 바깥 사정 — 걸린 상황이 없을 때만 온다. 겹치면 무엇 때문에 깎이는지
+       읽을 수 없다. 하나가 끝나야 다음이 온다. */
+    if(!pick && st.day > 5 && !st.cond && Math.random() < 0.04){
+      var cds = COND_CARDS.filter(function(c){ return !c.used; });
+      if(cds.length) pick = cds[Math.floor(Math.random() * cds.length)];
+    }
+
     // 예고 없이 들어오는 것 — 닷새 지나서부터, 하루 9 %
     if(!pick && st.day > 4 && Math.random() < 0.075){
       var amb = AMBUSH.filter(function(c){ return !c.used; });
@@ -3420,7 +3567,7 @@ button{font:inherit;color:inherit}
     if(!pick && st.seeds.length){
       var rk = riskNow();
       st.rolls++; st.pSum += rk.any; st.pFat += rk.f;      // 얼마를 걸었는지 적어 둔다
-      if(Math.random() < rk.any * chap.fo){
+      if(Math.random() < rk.any * chap.fo * condFo()){
         var si = pickSeed(), seed = st.seeds[si];
         if(!seed.hits){
           /* 그 위반의 첫 발화 — 아차사고. 씨앗은 남고 확률도 그대로다. */
@@ -3656,6 +3803,13 @@ button{font:inherit;color:inherit}
     /* 엔딩이 읽는 세 가지 — 사고 앞에서 강행했는가, 보고를 다듬었는가, 스스로 멈췄는가 */
     if(c.s === '사고' && !ch.ok) st.forced++;
     if(c.amb){ st.amb++; if(!ch.ok) st.ambNo++; }
+    if(c.cond && COND[c.cond]){
+      /* 준수 쪽을 골랐으면 남은 날들이 절반만 무겁다 — 고른 것이 계속 남는다 */
+      st.cond = {k:c.cond, left:COND[c.cond].d, soft:ch.ok ? 1 : 0};
+      pushCond(COND[c.cond].n,
+               COND[c.cond].d + '일간 · ' + (ch.ok ? '대비했습니다' : '대비 없이 들어갑니다'),
+               ch.ok);
+    }
     if(c.report && !ch.ok) st.hidden++;
     if(ch.stop) st.stop++;
 
@@ -3718,6 +3872,18 @@ button{font:inherit;color:inherit}
     /* 하루가 넘어갈 때 그 장의 자연 증감과, 준공기의 누적 위반 감시가 걸린다 */
     var ch2 = chapOf(st.day), k;
     for(k = 0; k < 4; k++) if(ch2.drift[k]) st.g[k] = Math.max(0, Math.min(100, st.g[k] + ch2.drift[k]));
+    /* 걸린 상황이 하루치를 민다. 대비했으면 절반이고, 날이 다 가면 풀린다. */
+    if(st.cond){
+      var cd = COND[st.cond.k];
+      for(k = 0; k < 4; k++) if(cd.g[k]){
+        var v = st.cond.soft ? cd.g[k] / 2 : cd.g[k];
+        st.g[k] = Math.max(0, Math.min(100, st.g[k] + (v > 0 ? Math.ceil(v) : Math.floor(v))));
+      }
+      if(--st.cond.left <= 0){
+        pushCond(cd.n, '풀렸습니다', 1);
+        st.cond = null;
+      }
+    }
     if(ch2.audit && st.viol.length){
       st.g[3] = Math.max(0, st.g[3] - ch2.audit * st.viol.length);
     }
