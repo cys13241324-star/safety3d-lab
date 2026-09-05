@@ -12,7 +12,11 @@
 :root{
   --bg:#0A1018; --panel:#0F1622; --panel2:#182234; --card:#141E2E;
   --line:#33425C; --line-soft:#1E2938;
-  --text:#E8EEF8; --muted:#8C99B0; --dim:#6E7C95;
+  --text:#E8EEF8; --muted:#8C99B0;
+  /* 흐린 글자 하나가 AA 미달을 전부 만들고 있었다. #6E7C95 는 계기판 바탕
+     (#182234) 위에서 3.78:1 이라 본문 기준 4.5 에 못 미쳤다. 이 값은
+     panel2 4.63 · card 4.86 · panel 5.27 · 그림판 4.92 로 전부 넘긴다. */
+  --dim:#7E8BA2;
   --safe:#5CC08A; --pace:#7FA6E0; --coin:#E3B54D; --gov:#B58FE0;
   --bad:#F07056; --ok:#5CC08A; --warn:#E3B54D;
   --sans:"IBM Plex Sans KR","Malgun Gothic",sans-serif;
@@ -31,7 +35,16 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);fon
   background-image:radial-gradient(120% 70% at 50% -10%, #16233A 0%, #0A1018 62%)}
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--warn);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  /* 무한 반복은 .01ms 로 줄여도 꺼지지 않는다 — 초당 십만 번 깜빡이는 것이 된다.
+     끌 것은 끈다고 적어야 꺼진다. */
+  .g.low .track{animation:none!important}
+  #cArt .spk{animation:none!important}
+  /* 장 배너는 규칙이 바뀐다는 안내다. 애니메이션을 .01ms 로 줄이면 뜨지도 않고
+     사라진다. 움직임 없이 그대로 세워 두고, 시간이 지나면 지운다. */
+  #chapBanner.on{animation:none!important;opacity:1;transform:none}
+}
 
 #app{height:100%;display:flex;flex-direction:column;align-items:center;
   padding:14px 16px calc(18px + env(safe-area-inset-bottom, 0px));
@@ -158,7 +171,9 @@ button{font:inherit;color:inherit}
 .g{display:flex;flex-direction:column;gap:5px;position:relative}
 .g .lb{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;letter-spacing:.02em;color:var(--muted)}
 .g .lb b{font-family:var(--mono);font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--dim)}
-.g .track{height:7px;border-radius:4px;background:var(--line-soft);overflow:hidden;position:relative}
+/* 빈 칸이 안 보이면 채워진 길이를 견줄 데가 없다. 숫자가 옆에 있어 색 단독은
+   아니지만, 눈으로 읽는 쪽도 기준선이 있어야 한다. */
+.g .track{height:7px;border-radius:4px;background:#39465F;overflow:hidden;position:relative}
 .g .fill{height:100%;width:60%;border-radius:4px;transition:width .45s cubic-bezier(.2,.8,.3,1),background .3s}
 .g[data-k="0"] .fill{background:var(--safe)} .g[data-k="1"] .fill{background:var(--pace)}
 .g[data-k="2"] .fill{background:var(--coin)} .g[data-k="3"] .fill{background:var(--gov)}
@@ -229,7 +244,9 @@ button{font:inherit;color:inherit}
 
 /* ---------- 선택 버튼 ---------- */
 #choices{width:100%;max-width:400px;display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none}
-.ch{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:12px 13px;
+/* 누르는 것의 경계는 3:1 이 필요하다. --line 은 배경 대비 1.89:1 이라
+   선택 버튼이 배경에 잠겼다. 장식용 테두리와 달리 여기는 조작부다. */
+.ch{border:1px solid #4E6086;background:var(--panel2);border-radius:10px;padding:12px 13px;
   text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .15s,background .15s}
 .ch:hover{border-color:var(--warn);background:#1E2A3F}
 .ch .kb{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--dim)}
@@ -425,6 +442,33 @@ button{font:inherit;color:inherit}
   #card .art{display:none}      /* 그림을 접어 본문에 자리를 준다 — 읽히는 것이 먼저다 */
   #swipeHint{display:none}
 }
+/* ---------- 가로로 눕혔을 때 (740×360 같은) ----------
+   본문에 깔아 둔 104 px 바닥이 여기서는 독이 된다. 카드에 남는 자리가 41 px 인데
+   본문이 104 를 요구하니 #card{overflow:hidden} 이 통째로 잘라 냈다 —
+   인물도 본문도 0 px 이고 「건설안전기술」 한 줄만 남았다.
+   바닥을 걷고, 상시 표시 중에 접을 수 있는 것을 전부 접는다. */
+@media (max-height:520px){
+  #app{gap:7px;padding-top:46px;padding-bottom:8px}
+  #top{padding:5px 10px}
+  #hud{gap:7px}
+  .g{gap:3px} .g .track{height:5px}
+  #gear{margin-top:0;padding:6px 10px 7px}
+  #gear .fund{padding-bottom:5px;margin-bottom:5px}
+  #gear .fund .note{display:none}
+  #meta{font-size:10.5px}
+  #card{padding:12px 14px 13px}
+  /* 과목은 날짜 줄(#mSite)이 이미 말한다. 카드 안에서는 지운다. */
+  #card .subj{display:none}
+  /* min-height:0 만 주면 본문이 0 까지 줄고 조문 줄만 남는다 — 순서가 거꾸로다.
+     결정할 내용에 바닥을 깔고, 줄어드는 것은 조문 줄로 돌린다. */
+  #card .say{min-height:52px;font-size:13.5px;line-height:1.5}
+  #card .who{font-size:15px;margin:0 0 6px}
+  #card .topic{margin-top:6px;padding-top:5px;font-size:11px;
+    max-height:2.9em;overflow:hidden}
+  .ch{padding:8px 11px} .ch .tx{font-size:12.5px;line-height:1.35}
+  /* 시트도 화면보다 커질 수 있다 — 넘치면 스크롤되게 둔다 */
+  #sheet{max-height:100dvh;overflow-y:auto}
+}
 /* ---------- 휴대폰 ----------
    카드가 곧 게임이다. 그런데 세로 예산을 재 보니 덩어리 사이 여백(14 px × 4)과
    계기판 윗margin 만 71 px — 그림 한 장 값이 빈칸으로 나가고 있었다.
@@ -441,26 +485,13 @@ button{font:inherit;color:inherit}
   #hud{gap:8px}
   #gear{margin-top:3px;padding:8px 11px 9px}
   #gear .fund{padding-bottom:7px;margin-bottom:7px}
-  #gear .fund .note{display:none}          /* 펼쳤을 때만 — 접힘은 한 줄이 원칙이다 */
-  #gear.open .fund .note{display:block}
-
-  /* 접혔을 때 보이는 한 줄. 이름 · 확률 · 글리프와 말 — 색만으로 지지 않는다. */
-  #gear .sum{display:flex;width:100%;align-items:baseline;gap:7px;
-    background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;
-    text-align:left;cursor:pointer;--c:var(--ok)}
-  #gear .sum.b1{--c:var(--warn)} #gear .sum.b2{--c:#EC835A} #gear .sum.b3{--c:var(--bad)}
-  #gear .sum .k{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--dim);
-    white-space:nowrap}
-  #gear .sum .v{font-size:11.5px;color:var(--muted);flex:1;white-space:nowrap;
-    overflow:hidden;text-overflow:ellipsis}
-  #gear .sum .v b{font-size:13.5px;color:var(--text);font-weight:700;margin:0 2px}
-  #gear .sum .v i{font-style:normal;color:var(--c);font-weight:700}
-  #gear .sum .cv{font-size:10px;color:var(--dim);transition:transform .2s}
-  #gear.open .sum{margin-bottom:9px}
-  #gear.open .sum .cv{transform:rotate(180deg)}
-  #gear:not(.open) .mrow{display:none}
-
-  #meta .fresh{padding:3px 7px;margin-left:7px}
+  /* 25 px 짜리 단추 둘이 7 px 간격이고 한쪽은 판을 지운다. 키우고 떼어 놓는다. */
+  #meta .fresh{padding:8px 10px;margin-left:10px}
+  #meta{gap:4px}
+  #top .b{padding:8px 10px}
+  /* 접기 단추도 21 px 이었다 — 위아래로 여백을 줘 손가락이 닿게 한다 */
+  #gear .sum{padding:6px 0}
+  #gear.open .sum{margin-bottom:5px}
   #swipeHint{display:none}          /* 선택 단추가 이미 ← 왼쪽 / 오른쪽 → 을 말한다 */
   .ch{padding:10px 11px;gap:3px}
   .ch .tx{font-size:13px;line-height:1.38}
@@ -482,6 +513,31 @@ button{font:inherit;color:inherit}
 /* 낮은 화면에서는 본문이 먼저다 — 위 블록보다 뒤여야 이긴다 */
 @media (max-width:520px) and (max-height:700px){
   #card .art{height:96px;margin:-16px -16px 10px}
+}
+
+/* ---------- 확률 접기 ----------
+   접는 까닭은 폭이 좁아서가 아니라 자리가 없어서다. 740×360 으로 눕힌 폰은
+   폭이 740 이라 위 블록에 안 걸리는데 세로는 폰보다 더 없다.
+   쉼표는 「또는」이다 — 좁거나 낮으면 접는다. */
+@media (max-width:520px), (max-height:560px){
+  #gear .fund .note{display:none}          /* 펼쳤을 때만 — 접힘은 한 줄이 원칙이다 */
+  #gear.open .fund .note{display:block}
+
+  /* 접혔을 때 보이는 한 줄. 이름 · 확률 · 글리프와 말 — 색만으로 지지 않는다. */
+  #gear .sum{display:flex;width:100%;align-items:baseline;gap:7px;padding:6px 0;
+    background:none;border:0;margin:0;color:inherit;font:inherit;
+    text-align:left;cursor:pointer;--c:var(--ok)}
+  #gear .sum.b1{--c:var(--warn)} #gear .sum.b2{--c:#EC835A} #gear .sum.b3{--c:var(--bad)}
+  #gear .sum .k{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--dim);
+    white-space:nowrap}
+  #gear .sum .v{font-size:11.5px;color:var(--muted);flex:1;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  #gear .sum .v b{font-size:13.5px;color:var(--text);font-weight:700;margin:0 2px}
+  #gear .sum .v i{font-style:normal;color:var(--c);font-weight:700}
+  #gear .sum .cv{font-size:10px;color:var(--dim);transition:transform .2s}
+  #gear.open .sum{margin-bottom:5px}
+  #gear.open .sum .cv{transform:rotate(180deg)}
+  #gear:not(.open) .mrow{display:none}
 }
 </style>
 </head>
@@ -2942,7 +2998,11 @@ button{font:inherit;color:inherit}
         pOk:st.pOk, pNo:st.pNo, reports:st.reports, cur:st.cur, nextReport:st.nextReport,
         recent:st.recent, lastSubj:st.lastSubj, runSubj:st.runSubj,
         deck:DECK.filter(function(c){ return c.used; }).map(function(c){ return c.k; }),
-        flav:FLAVOR.map(function(c){ return c.used ? 1 : 0; })
+        ambs:AMBUSH.filter(function(c){ return c.used; }).map(function(c){ return c.k; }),
+        chaps:CHAPTER_CARDS.filter(function(c){ return c.used; }).map(function(c){ return c.chapter; }),
+        /* 자리번호로 적으면 현장 카드를 하나 끼워 넣는 순간 옛 저장본이 엉뚱한
+           카드를 소진 처리한다. 뽑기에 쓰이지 않는 저장용 키를 따로 둔다. */
+        flav:FLAVOR.filter(function(c){ return c.used; }).map(function(c){ return c.fk; })
       }));
     }catch(e){}
   }
@@ -2964,6 +3024,7 @@ button{font:inherit;color:inherit}
 
   function reset(resume){
     locked = false;
+    gen++;                       // 앞 판이 걸어 둔 타이머를 무효로 만든다
     loadWeak();
     st = {g:[62,58,60,60], day:1, tags:{}, seeds:[], viol:[], okCount:0, cur:null, dead:false,
           lastReport:0, snap:[62,58,60,60], pOk:0, pNo:0, reports:0,
@@ -2996,7 +3057,12 @@ button{font:inherit;color:inherit}
       st.recent = resume.recent || []; st.lastSubj = resume.lastSubj || ''; st.runSubj = resume.runSubj || 0;
       var on = {}; (resume.deck || []).forEach(function(k){ on[k] = 1; });
       DECK.forEach(function(c){ c.used = !!on[c.k]; });
-      (resume.flav || []).forEach(function(u, i){ if(FLAVOR[i]) FLAVOR[i].used = !!u; });
+      var fon = {}; (resume.flav || []).forEach(function(k){ fon[k] = 1; });
+      FLAVOR.forEach(function(c){ c.used = !!fon[c.fk]; });
+      var aon = {}; (resume.ambs || []).forEach(function(k){ aon[k] = 1; });
+      AMBUSH.forEach(function(c){ c.used = !!aon[c.k]; });
+      var con = {}; (resume.chaps || []).forEach(function(k){ con[k] = 1; });
+      CHAPTER_CARDS.forEach(function(c){ c.used = !!con[c.chapter]; });
     } else wipe();
 
     $('over').classList.remove('on');
@@ -3125,7 +3191,11 @@ button{font:inherit;color:inherit}
     }
     $('fv').innerHTML = mny(st.money) + '<u>만원</u>';
     var need = costOf(st.cur);
-    $('gear').className = st.money <= 0 ? 'out' : (st.money < 600 ? 'low' : '');
+    /* className 을 통째로 대입하면 접기 상태(open)까지 함께 지워진다.
+       renderGear 는 결정할 때마다 도니 휴대폰에서 펼친 확률이 매번 도로 접혔다. */
+    var gcl = $('gear').classList;
+    gcl.toggle('out', st.money <= 0);
+    gcl.toggle('low', st.money > 0 && st.money < 600);
     $('fn').textContent = need > (st.money || 0)
       ? '오늘 조치에 ' + mny(need) + '만원이 듭니다 — 잔액으로는 모자랍니다'
       : (st.seeds.length
@@ -3571,7 +3641,9 @@ button{font:inherit;color:inherit}
    t:'본사 안전점검단이 다음 주에 옵니다. 지적 건수가 소장 평가에 들어갑니다.',
    a:{l:'있는 그대로 받는다', d:[7, -3, -2, 6], ok:1,
       o:'지적 열한 건을 받았습니다. 그중 아홉 건은 우리가 이미 알고 있던 것이었습니다.'},
-   b:{l:'지적받을 곳을 미리 가린다', d:[-5, 4, 2, -6], ok:0, seed:'report',
+   /* 가리는 것은 새 위험을 만드는 것이 아니라 있는 것을 덮는 것이다.
+      seed 로 적었더니 덱에 없는 키('report')라 아무 일도 일어나지 않았다. */
+   b:{l:'지적받을 곳을 미리 가린다', d:[-5, 4, 2, -6], ok:0, hide:1,
       o:'가린 곳은 고쳐지지 않습니다. 다음에 오는 사람은 점검단이 아닐 수도 있습니다.'}},
 
   {k:'amb_press', s:'기습', w:'차동수 소장', amb:1, art:'amb_press', law:'',
@@ -3895,6 +3967,10 @@ button{font:inherit;color:inherit}
      준수 카드는 시트 없이 넘어가므로, 시트의 존재만으로 막히던 재입력이
      이제는 막히지 않는다. 카드가 날아가는 동안은 잠근다. */
   var locked = false;
+  /* 「지켰습니다」 카드는 620 ms 뒤에 스스로 넘어간다. 그 사이에 새 현장을 누르면
+     앞 판의 타이머가 새 판에 대고 advance 를 불러 1일차가 결정 없이 사라졌다.
+     판마다 번호를 매겨 두고, 번호가 달라졌으면 그 타이머는 버린다. */
+  var gen = 0;
   function choose(side){
     var c = st.cur;
     if(!c || locked) return;
@@ -3928,7 +4004,10 @@ button{font:inherit;color:inherit}
     if(ch.cost){
       var extra2 = Math.min(st.money, ch.cost);
       st.money -= extra2; st.spent += extra2; st.need += ch.cost; spent += extra2;
-      if(extra2 < ch.cost){ d[3] -= 5; st.illegal++; diverted = true; }
+      if(extra2 < ch.cost){
+        d[3] -= 5; st.illegal++; diverted = true;
+        st.busted = st.illegal >= 6;     // 규정 카드 쪽과 같은 자리에서 세야 한다
+      }
     }
     if(ch.seed && SRC[ch.seed]){
       var sv = Math.abs(SRC[ch.seed].b.d[0]), sw = sv / 4;
@@ -3994,7 +4073,7 @@ button{font:inherit;color:inherit}
                COND[c.cond].d + '일간 · ' + (ch.ok ? '대비했습니다' : '대비 없이 들어갑니다'),
                ch.ok);
     }
-    if(c.report && !ch.ok) st.hidden++;
+    if((c.report && !ch.ok) || ch.hide) st.hidden++;
     if(ch.stop) st.stop++;
 
     if(c.report){ st.pOk = 0; st.pNo = 0; st.snap = st.g.slice(); }
@@ -4011,7 +4090,8 @@ button{font:inherit;color:inherit}
     if(quiet){
       say('기준 충족. ' + ch.o + (twist ? ' ' + twist.t : ''));
       hint(twist ? '⚡ ' + twist.t + ' — ' + twist.g + ' 변화가 두 배입니다' : ch.o, 2400);
-      setTimeout(advance, 620);
+      var g0 = gen;
+      setTimeout(function(){ if(gen === g0) advance(); }, 620);
       return;
     }
 
@@ -4057,6 +4137,7 @@ button{font:inherit;color:inherit}
     var ch2 = chapOf(st.day), k;
     for(k = 0; k < 4; k++) if(ch2.drift[k]) st.g[k] = Math.max(0, Math.min(100, st.g[k] + ch2.drift[k]));
     /* 걸린 상황이 하루치를 민다. 대비했으면 절반이고, 날이 다 가면 풀린다. */
+    if(st.cond && !COND[st.cond.k]) st.cond = null;   // 옛 저장본에 없어진 상황
     if(st.cond){
       var cd = COND[st.cond.k];
       for(k = 0; k < 4; k++) if(cd.g[k]){
@@ -4173,7 +4254,8 @@ button{font:inherit;color:inherit}
   function ending(won){
     var g = st.g, V = st.viol.length, R = st.seeds.length, i;
     if(!won){
-      if(st.day <= 14) return E.early;
+      /* 사람이 죽은 판을 「조기 교체」로 닫으면 바로 아래 결산 줄의 「중대재해 1건」과
+         어긋난다. 죽음이 먼저다. */
       if(st.busted) return E.busted;
       if(g[3] <= 0 && st.ambNo >= 2) return E.ambush;
       if(st.fatal || g[0] <= 0){
@@ -4182,6 +4264,7 @@ button{font:inherit;color:inherit}
         if(has('shock', 2))  return E.shock;
         return E.small;
       }
+      if(st.day <= 14) return E.early;
       if(g[1] <= 0) return E.replaced;
       if(g[2] <= 0) return E.ledger;
       if(g[3] <= 0) return st.hidden >= 2 ? E.hidden : E.stopOrder;
@@ -4231,7 +4314,10 @@ button{font:inherit;color:inherit}
     $('oLesson').textContent = end.l;
     $('oTally').textContent = '';      // 결산 숫자는 아래 줄에 따로 쌓는다
     wipe();
-    $('oDays').textContent = st.day;
+    $('oDays').textContent = Math.min(60, st.day);   // 완주는 61일이 아니라 60일이다
+    /* 승패는 화면 숫자가 아니라 이 표시로 읽는다 — tools/harness.js 가 쓴다.
+       예전에는 「근무 일수가 60을 넘었는가」로 판정했는데, 그 61은 표시 버그였다. */
+    box.dataset.won = won ? '1' : '0';
     $('oOk').textContent = st.okCount + ' / ' + st.viol.length;
     var sc = scoreOf(won), rk = rankOf(sc);
     $('oScore').textContent = sc;
@@ -4285,7 +4371,7 @@ button{font:inherit;color:inherit}
   /* ===== 드래그 ===== */
   var dragging = false, x0 = 0, y0 = 0, dx = 0, dy = 0, axis = 0;
   cardEl.addEventListener('pointerdown', function(e){
-    if(st.dead || $('sheet').classList.contains('on')) return;
+    if(st.dead || locked || $('sheet').classList.contains('on')) return;
     dragging = true; x0 = e.clientX; y0 = e.clientY; dx = 0; dy = 0; axis = 0;
     cardEl.className = 'drag' + curExtra;
     cardEl.setPointerCapture(e.pointerId);
@@ -4313,10 +4399,17 @@ button{font:inherit;color:inherit}
   $('chL').addEventListener('click', function(){ if(!$('sheet').classList.contains('on')) choose(-1); });
   $('chR').addEventListener('click', function(){ if(!$('sheet').classList.contains('on')) choose(1); });
   addEventListener('keydown', function(e){
-    if(st.dead) return;
     var open = $('sheet').classList.contains('on');
-    if(e.key === 'ArrowLeft' && !open) choose(-1);
-    else if(e.key === 'ArrowRight' && !open) choose(1);
+    /* 기록판은 좁은 화면에서 화면의 대부분을 덮는다. 그 위에서 방향키를 누르면
+       보이지 않는 카드가 결정됐다. 덮고 있는 것이 있으면 결정하지 않는다. */
+    var logOn = $('log').classList.contains('on');
+    if(e.key === 'Escape'){
+      if(logOn){ toggleLog(false); return; }
+      if($('over').classList.contains('on')) return;   // 끝난 판은 닫을 것이 없다
+    }
+    if(st.dead) return;
+    if(e.key === 'ArrowLeft' && !open && !logOn) choose(-1);
+    else if(e.key === 'ArrowRight' && !open && !logOn) choose(1);
     else if((e.key === 'Enter' || e.key === ' ') && open){ e.preventDefault(); $('sGo').click(); }
   });
 

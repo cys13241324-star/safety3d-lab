@@ -180,7 +180,9 @@ function runPolicy(pol, n){
     ill += Number(ELS['card'].dataset.ill || 0);
     var d = Number(ELS['oDays'].textContent);
     days.push(d);
-    if(d > 60) won++;
+    // the game marks the outcome on the overlay. Reading it off the day count
+    // used to work only because a completed run displayed 61 -- a display bug.
+    if(ELS['over'].dataset.won === '1') won++;
     var c = ELS['oTag'].textContent;
     causes[c] = (causes[c] || 0) + 1;
   }
