@@ -391,6 +391,10 @@ button{font:inherit;color:inherit}
 .rp .risk ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
 .rp .risk li{font-size:12.5px;color:var(--muted);padding-left:10px;border-left:2px solid var(--bad);line-height:1.4}
 .rp .risk li b{color:var(--text);font-weight:600}
+.rp .risk li em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--warn)}
+/* 협력사 것은 우리 조치 예산이 붙지 않는다. 목록에서도 결을 달리한다. */
+.rp .risk li.out{border-left-color:var(--dim)}
+.rp .risk li.out em{color:var(--dim)}
 .rp .clean{font-size:13px;color:var(--ok);padding-left:10px;border-left:2px solid var(--ok)}
 
 @media (max-width:420px){
@@ -924,9 +928,10 @@ button{font:inherit;color:inherit}
     C(300, 74, 7, 'none', ST) + TX(96, 68, '2명 1조', HI) +
     W(44, 74, .8) + TX(16, 42, '감시인', TC),
   hpcheck: GND + MACH(50, 56, 70, 52) + TANK(150, 40, 34, 68) +
-    L('M120 76h30', ST, 3) + C(206, 60, 9, 'none', HI) + L('M206 54v6l4 3', HI, 1.4) +
-    TX(224, 64, '주 1회', HI) + C(206, 92, 9, 'none', ST) + TX(224, 96, '월 1회', TC) +
-    W(286, 108, .85),
+    L('M120 76h30', ST, 3) +
+    C(206, 40, 9, 'none', BD) + L('M206 34v6l4 3', BD, 1.4) + TX(222, 44, '매일 배기관·밸브', BD) +
+    C(206, 70, 9, 'none', HI) + L('M206 64v6l4 3', HI, 1.4) + TX(222, 74, '매주 공기압축기', HI) +
+    C(206, 100, 9, 'none', ST) + L('M206 94v6l4 3', ST, 1.4) + TX(222, 104, '매월 압력계', TC),
   divecheck: GND + L('M12 100H308', ST, 1.4) +
     R(30, 74, 44, 26, '#1E293C', ST) + L('M40 74v-6M64 74v-6', ST, 1.4) +
     C(116, 86, 14, '#1E293C', ST) + L('M116 86l9-7', HI, 1.8) +
@@ -3326,6 +3331,11 @@ button{font:inherit;color:inherit}
      = 8,600만원뿐이다. 15 % 가 모자라므로 다 지키려 들면 후반에 반드시 마른다.
      모자란 만큼은 위험이 작은 카드에서 덜어 내야 한다 — 그것이 이 판이 가르치는 일이다. */
 
+  /* 미조치에는 기한이 있다. 위험한 것일수록 짧다. 넘기면 확률이 올라간다 —
+     「나중에」가 공짜이면 나중이 기본값이 된다. */
+  function dueOf(sev){ return st.day + (sev >= 14 ? 5 : (sev >= 9 ? 7 : 10)); }
+  var LATE_UP = 1.35;        // 기한을 넘긴 뒤의 배수 (한 번만)
+
   var K_ACC = 70;            // 재해 확률의 완만함. 클수록 천천히 오른다
   var K_TOX = 45;            // 중독은 건수가 적은 대신 가파르다
   var FAT_CAP = 0.35;        // 재해가 났을 때 사람이 죽는 비율의 천장
@@ -3441,11 +3451,13 @@ button{font:inherit;color:inherit}
     var gcl = $('gear').classList;
     gcl.toggle('out', st.money <= 0);
     gcl.toggle('low', st.money > 0 && st.money < 600);
-    $('fn').textContent = need > (st.money || 0)
+    /* dueNote() 가 표시를 달고 오므로 textContent 로는 태그가 글자로 보인다 */
+    $('fn').innerHTML = need > (st.money || 0)
       ? '오늘 조치에 ' + mny(need) + '만원이 듭니다 — 잔액으로는 모자랍니다'
       : (st.seeds.length
           ? '미조치 ' + st.seeds.length + '건'
             + (outCount() ? '(협력사 ' + outCount() + '건 포함)' : '')
+            + dueNote()
             + '. 본사 보고에서 한 건당 ' + FIX_COST + '만원으로 시정합니다'
           : '미조치 위험 없음. 기성마다 ' + mny(FUND_IN) + '만원이 들어옵니다');
   }
@@ -4035,6 +4047,20 @@ button{font:inherit;color:inherit}
       o:'명절 전 마지막 주에 사고가 몰리는 것은 통계가 아니라 경험입니다.'}}
   ];
 
+  /* 가장 급한 미조치가 며칠 남았는지. 확률을 감추지 않듯 시계도 감추지 않는다. */
+  function dueNote(){
+    var best = null, i;
+    for(i = 0; i < st.seeds.length; i++){
+      var sd = st.seeds[i];
+      if(sd.out || !sd.due) continue;
+      if(best === null || sd.due < best) best = sd.due;
+    }
+    if(best === null) return '';
+    var left = best - st.day;
+    return left < 0 ? ' · <b class="lack">기한 초과</b>'
+         : (left === 0 ? ' · <b class="lack">오늘까지</b>' : ' · 가장 급한 것 D-' + left);
+  }
+
   /* 지금 걸린 상황의 배수. 없으면 1이다. */
   function condOf(){ return st.cond ? COND[st.cond.k] : null; }
   function condFo(){ var c = condOf(); return c && c.fo ? c.fo : 1; }
@@ -4080,7 +4106,12 @@ button{font:inherit;color:inherit}
   /* ===== 현상 보고 (5일마다) ===== */
 
   function buildReport(){
-    var risks = st.seeds.map(function(s){ return {n:NM[s.tag] || s.tag, d:st.day - s.day}; });
+    /* 협력사 것과 우리 것은 표에서도 갈라야 한다 — 조치 예산이 붙는 곳이 다르다.
+       기한도 함께 적는다. 「나중에」가 언제까지인지 보이지 않으면 나중이 기본값이 된다. */
+    var risks = st.seeds.map(function(s){
+      return {n:NM[s.tag] || s.tag, d:st.day - s.day, out:s.out ? 1 : 0,
+              left:s.due ? s.due - st.day : null};
+    });
     var diff = st.g.map(function(v, i){ return Math.round(v - st.snap[i]); });
     st.reports++;
     st.money += FUND_IN;          // 기성에 따라 안전보건관리비가 들어온다
@@ -4141,7 +4172,14 @@ button{font:inherit;color:inherit}
     }).join(' · ');
     var risk = r.risks.length
       ? '<div class="risk"><div class="h">미조치 위험 ' + r.risks.length + '건</div><ul>' +
-        r.risks.slice(0, 4).map(function(x){ return '<li><b>' + x.n + '</b> · ' + x.d + '일째</li>'; }).join('') +
+        r.risks.slice(0, 4).map(function(x){
+          return '<li' + (x.out ? ' class="out"' : '') + '><b>' + x.n + '</b> · ' + x.d + '일째'
+            + (x.out ? ' <em>협력사</em>'
+               : (x.left === null ? ''
+                  : (x.left < 0 ? ' <em>기한 초과</em>'
+                     : (x.left === 0 ? ' <em>오늘까지</em>' : ' <em>D-' + x.left + '</em>'))))
+            + '</li>';
+        }).join('') +
         (r.risks.length > 4 ? '<li>그 밖 ' + (r.risks.length - 4) + '건</li>' : '') + '</ul></div>'
       : '<div class="clean">미조치 위험 없음. 지난 닷새는 깨끗합니다.</div>';
     return '<div class="rp">' +
@@ -4407,7 +4445,7 @@ button{font:inherit;color:inherit}
     }
     if(ch.seed && SRC[ch.seed]){
       var sv = Math.abs(SRC[ch.seed].b.d[0]), sw = sv / 4;
-      st.seeds.push({tag:ch.seed, day:st.day, w:sw,
+      st.seeds.push({tag:ch.seed, day:st.day, due:dueOf(sv), w:sw,
                      fam:(TOXTAG[ch.seed] ? 'tox' : 'acc'),
                      fat:sw * (sv >= 14 ? FAT_HI : FAT_LO), hits:0});
       st.tags[ch.seed] = true;
@@ -4480,7 +4518,7 @@ button{font:inherit;color:inherit}
       var sev = Math.abs(ch.d[0]);
       st.tags[ch.tag] = true;
       var w = sev / 4;
-      st.seeds.push({tag:ch.tag, day:st.day, w:w,
+      st.seeds.push({tag:ch.tag, day:st.day, due:dueOf(sev), w:w,
                      fam:(TOXTAG[ch.tag] ? 'tox' : 'acc'),
                      fat:w * (sev >= 14 ? FAT_HI : FAT_LO),
                      /* 사고를 겪고도 넘겼으면 경고는 이미 끝났다.
@@ -4572,6 +4610,14 @@ button{font:inherit;color:inherit}
       for(k = 0; k < 4; k++) if(ch2.drift[k]) st.g[k] = Math.max(0, Math.min(100, st.g[k] + ch2.drift[k]));
     /* 닷새마다 협력사 쪽에서 한 건씩 온다. 두 건을 넘기지 않는다 —
        계기판을 켜 두는 것이 목적이지 난이도를 올리는 것이 목적이 아니다. */
+    /* 기한을 넘긴 미조치는 그날부터 무거워진다. 한 번만 올린다 —
+       미루는 값을 매기는 것이지 벌을 주는 것이 아니다. */
+    for(k = 0; k < st.seeds.length; k++){
+      var sk = st.seeds[k];
+      if(sk.out || sk.late || !sk.due || st.day <= sk.due) continue;
+      sk.late = 1; sk.w *= LATE_UP; sk.fat *= LATE_UP;
+      pushCond(NM[sk.tag] || sk.tag, '시정 기한이 지났습니다', 0);
+    }
     /* 협력사 위험은 우리 돈으로 못 고치는 대신 영원히 남지도 않는다.
        그쪽 공정이 지나가면 사라진다. 그 사이 며칠을 확률과 함께 보내는 것이
        이 장치가 만드는 유일한 부담이다. */
