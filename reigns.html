@@ -1232,6 +1232,35 @@ button{font:inherit;color:inherit}
     P(160, 108, 1.1, 'reach') + Dv(26, 82, 196, '300 cm', 0) + L('M120 82H196', HI, 1.2, '3 3') +
     GV(26, 73, 116) + L('M92 73H116', BD, 1.1, '3 3') + TX(24, 92, '200 cm 로 섰다', BD) +
     SPARK(160, 44, .8) + TX(212, 96, '절연용 방호구', HI),
+  /* 정전 절차 — 내린 차단기에 자물쇠와 꼬리표가 걸려 있어야 아무도 못 올린다. */
+  loto: GND + PANEL(52, 22, 88, 86) +
+    L('M78 60V38', HI, 3.4) + C(78, 34, 4.5, 'none', HI) +
+    R(96, 52, 24, 18, '#243044', HI) +
+    '<path d="M102 52v-7a6 6 0 0 1 12 0v7" fill="none" stroke="' + HI + '" stroke-width="1.8"/>' +
+    DOC(166, 62, .85) + L('M140 62h15', TC, 1.2, '4 3') +
+    W(238, 108, 1) + L('M244 86l14-14', HI, 2.2) + C(260, 70, 4.5, 'none', HI) +
+    SPARK(260, 70, .5, HI) +
+    TX(20, 18, '잠금장치와 꼬리표', HI) + TX(150, 122, '검전기로 확인한다', HI) +
+    TX(196, 40, '잔류전하 방전', TC),
+
+  /* 과전류차단장치 — 접지선이 아니라 전로에 직렬로 들어가야 끊을 것을 끊는다. */
+  overcurrent: GND + R(40, 20, 116, 88, '#1E293C', ST) + L('M64 20V6M124 20V6', ST, 2) +
+    R(52, 40, 26, 18, '#243044', HI) + L('M65 40V20M65 58v50', HI, 2.4) +
+    R(112, 40, 26, 18, '#243044', BD) + L('M125 40V20M125 58v50', BD, 2, '5 4') +
+    L('M78 49h34', ST, 1.2, '3 3') +
+    TX(174, 32, '전로에 직렬로', HI) + TX(174, 54, '접지선에 달았다', BD) +
+    TX(174, 76, '최대 과전류를 끊을 성능', TC) + W(276, 108, .9),
+
+  /* 꽂음접속기 — 습윤한 장소는 물이 닿는 곳이 아니라 젖어 있는 곳이다. */
+  plugjoint: R(-40, 94, 400, 38, '#0F1B2A', 'none') + L('M-40 94H360', '#2C4A63', 1.4) +
+    L('M22 108q16-7 32 0t32 0t32 0', '#2C4A63', 1.3) +
+    R(150, 50, 44, 32, '#1E293C', ST) + C(164, 66, 3.6, 'none', HI) + C(180, 66, 3.6, 'none', HI) +
+    L('M172 82v12', ST, 2.2) +
+    P(120, 94, 1.05, 'reach') + SPARK(150, 66, .6) +
+    TX(20, 30, '습윤한 장소는 방수형', HI) +
+    TX(206, 52, '접속 후 잠근다', TC) + TX(206, 72, '젖은 손으로 취급 금지', TC) +
+    TX(20, 50, '물바닥 옆 · 일반형', BD),
+
   exgap2: GND + R(64, 40, 86, 58, '#1E293C') + R(170, 40, 86, 58, '#1E293C') +
     L('M150 40v58M170 40v58', HI, 2.4) + R(150, 40, 20, 58, '#0E1520', 'none') +
     Dh(150, 170, 32, '접합면') + TX(170, 118, '하나만 일반품이어도 끝이다', HI) +
@@ -2224,6 +2253,36 @@ button{font:inherit;color:inherit}
    hit:[0,2],
    a:{l:'감시인을 세우고 방호관을 씌운다', d:[4, -1, 5, 3], ok:1, o:'3 m가 안 나오면 방호구와 감시인입니다. 붐 선회 범위를 묶었습니다.'},
    b:{l:'22.9 kV는 2 m면 이격거리 안이다', d:[-16, 4, -12, -8], ok:0, tag:'powerline', o:'50 kV 이하도 3 m입니다. 붐은 기사가 보는 것보다 길게 돕니다.'}},
+
+  {k:'loto', s:'전기위험방지', w:'정민혁 반장',
+   law:'산업안전보건기준에 관한 규칙 제319조제2항',
+   t:'고압반 점검입니다. 차단기는 내렸는데 잠금장치도 꼬리표도 없고, 검전기 없이 들어가려 합니다.',
+   f:'정전전로에서의 전기작업 · 모든 전원을 <em>도면·배선도</em>로 확인 · 차단 후 단로기를 <em>개방하고 확인</em> · <em>잠금장치와 꼬리표</em> 부착 · <em>잔류전하</em>를 완전히 방전 · <em>검전기</em>로 충전 여부 확인 · 역송전 우려가 있으면 <em>단락 접지기구</em>로 접지',
+   hit:[2,4],
+   a:{l:'잠그고 꼬리표를 달고 검전한다', d:[6, -1, 5, 4], ok:1,
+      o:'꼬리표가 붙은 차단기는 아무도 못 올립니다. 검전기에서 아무 소리도 나지 않았습니다.'},
+   b:{l:'검전기는 특별고압에서만 쓴다', d:[-16, 4, -12, -8], ok:0, tag:'loto',
+      o:'절차는 여섯 단계 전부입니다. 교대조가 순서를 모르고 올릴 때 안에 사람이 있습니다.'}},
+
+  {k:'overcurrent', s:'전기위험방지', w:'정민혁 반장',
+   law:'산업안전보건기준에 관한 규칙 제305조',
+   t:'가설 분전반 과전류차단기를 접지선 쪽에 물려 놨습니다. 용량도 계통 최대 과전류보다 작습니다.',
+   f:'과전류차단장치 · <em>접지선이 아닌 전로</em>에 <em>직렬</em>로 연결해 과전류 발생 시 자동 차단 · 차단기·퓨즈는 계통에서 발생하는 <em>최대 과전류</em>를 충분히 차단할 성능 · 계통상 서로 <em>협조·보완</em>되도록 설치',
+   hit:[0,2],
+   a:{l:'전로에 직렬로 옮기고 용량을 키운다', d:[5, -1, 5, 3], ok:1,
+      o:'접지선에 달린 차단기는 사고전류가 흐르는 길에 없습니다. 끊을 자리에 옮겼습니다.'},
+   b:{l:'접지선에 달아도 끊기면 된다', d:[-13, 4, -12, -7], ok:0, tag:'overcurrent',
+      o:'끊기는 것과 끊어야 할 것을 끊는 것은 다릅니다. 사고전류는 전로로 흐릅니다.'}},
+
+  {k:'plugjoint', s:'전기위험방지', w:'정민혁 반장',
+   law:'산업안전보건기준에 관한 규칙 제316조',
+   t:'지하 배수 펌프 콘센트가 물 고인 바닥 옆에 있습니다. 일반형이고, 작업자는 젖은 손으로 꽂습니다.',
+   f:'꽂음접속기 · 서로 <em>다른 전압</em>은 접속되지 않는 구조 · 습윤한 장소는 <em>방수형</em> 등 그 장소에 적합한 것 · <em>젖은 손</em>으로 취급하지 않도록 · 잠금장치가 있으면 접속 후 <em>잠그고</em> 사용',
+   hit:[1,2],
+   a:{l:'방수형으로 바꾸고 손을 닦게 한다', d:[4, -1, 5, 3], ok:1,
+      o:'방수형으로 갈고 접속부를 물에서 떼어 올렸습니다. 마른 장갑을 옆에 뒀습니다.'},
+   b:{l:'물만 안 닿으면 일반형도 된다', d:[-12, 4, -12, -7], ok:0, tag:'plugjoint',
+      o:'습윤한 장소는 물이 닿는 장소가 아니라 젖어 있는 장소입니다. 젖은 손도 도체입니다.'}},
 
   {k:'panelspace', s:'전기위험방지', w:'정민혁 반장', law:'산업안전보건기준에 관한 규칙 제310조',
    t:'분전반 앞에 자재 파렛트가 서 있습니다. 남은 통로가 55 cm입니다.',
@@ -3494,7 +3553,7 @@ button{font:inherit;color:inherit}
      lead:'아무것도 없는 상태에서 판을 짭니다. 지금 안 세우면 나중엔 못 세웁니다.',
      pool:'trench net ramp ladder stairs lux carry carry2 panelspace elcb powerline pile pile2 '
           + 'caisson edu tbm risk permit harness vdt walkway workplan ppe chief jobedu '
-          + 'loadmark officeair caissondig hpvolume divecrew'},
+          + 'loadmark officeair caissondig hpvolume divecrew overcurrent plugjoint'},
     {n:2, till:32, name:'골조기', mul:[1.0, 1.2, 1.0, 1.0], drift:[0, -1, 0, 0], fo:1.0,
      lead:'물량 전쟁입니다. 공정이 매일 저절로 깎입니다.',
      pool:'scaffold frame frame2 shore plank rail fall weather weather2 wirerope mobscaf horse '
@@ -3506,7 +3565,7 @@ button{font:inherit;color:inherit}
      pool:'confined confined2 gasweld staticflow staticflow2 chemdist exgap exgap2 noise roller '
           + 'grinder press robot boiler boiler2 rotor msds gangway gangway2 reliefvalve valveset '
           + 'flamearr fireproof dryer genroom acetylene firewatch alarmset airvol gasdig stopduty '
-          + 'dustclean ventspec co2ext pittemp'},
+          + 'dustclean ventspec co2ext pittemp loto'},
     {n:4, till:60, name:'준공기', mul:[1.0, 1.0, 1.0, 1.3], drift:[0, 0, 0, -1], fo:1.35,
      audit:0.3, lead:'넘긴 것들이 서류로 돌아옵니다. 새 위험보다 과거 위반이 무섭습니다.',
      pool:'*'}
