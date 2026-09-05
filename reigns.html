@@ -141,6 +141,8 @@ button{font:inherit;color:inherit}
 .g .dlt.up{color:var(--ok)} .g .dlt.dn{color:var(--bad)}
 
 /* ---------- 날짜 줄 ---------- */
+#meta i{font-style:normal;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.06em;color:var(--warn);margin-left:5px}
 #meta{width:100%;display:flex;justify-content:space-between;align-items:center;flex:none;
   font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.04em}
 #meta .site{color:var(--muted);flex:1;text-align:right}
@@ -1522,7 +1524,133 @@ button{font:inherit;color:inherit}
    a:{l:'한 달 안에 다시 조사한다', d:[5, 5, -2, 4], ok:1,
       o:'질환자가 나오면 3년을 기다리지 않습니다. 배근 높이와 자재 위치를 바꿨습니다.'},
    b:{l:'주기가 아직 안 됐다', d:[-9, -3, 4, -5], ok:0, tag:'msdcheck',
-      o:'셋이 아프다고 말한 것은 아홉이 참고 있다는 뜻입니다. 근골격계는 조용히 쌓입니다.'}}
+      o:'셋이 아프다고 말한 것은 아홉이 참고 있다는 뜻입니다. 근골격계는 조용히 쌓입니다.'}},
+
+{k:'hotwork', s:'인간공학', w:'윤경아 보건관리자', law:'산업안전보건기준에 관한 규칙 제559조 · 제562조',
+   t:'가열로 보수조에 새 인원 셋이 배치됐습니다. 첫날부터 기존 조와 같은 시간을 돌립니다.',
+   f:'고열작업 · 새로 배치하면 <em>순응할 때까지</em> 작업시간을 매일 단계적으로 증가 · <em>온도계</em>를 작업장소에 상시 비치 · 증상과 응급조치 요령을 <em>작업 전에</em> 알릴 것',
+   hit:[0,2],
+   a:{l:'시간을 나눠 붙이고 교육부터', d:[4, 5, -2, 4], ok:1,
+      o:'첫 주는 절반 시간으로 시작했습니다. 열탈진은 순응 안 된 사람에게 먼저 옵니다.'},
+   b:{l:'다들 그렇게 배웠다', d:[-9, -3, 4, -5], ok:0, tag:'hotwork',
+      o:'셋 중 하나가 오후에 앉아 버렸습니다. 본인도 언제부터 어지러웠는지 모릅니다.'}},
+
+  {k:'pittemp', s:'인간공학', w:'윤경아 보건관리자', law:'산업안전보건기준에 관한 규칙 제568조',
+   t:'갱내 온도계가 39 ℃를 가리킵니다. 인명구조 작업은 아니고 그냥 굴착 중입니다.',
+   f:'갱내의 온도 · 갱내 기온은 <em>37 ℃ 이하</em>로 유지 · <em>인명구조</em>나 유해·위험 방지작업으로 필요한 조치를 한 경우만 예외',
+   hit:[0],
+   a:{l:'환기를 늘리고 온도를 내린다', d:[5, 5, -2, 4], ok:1,
+      o:'송풍기를 하나 더 넣어 36 ℃로 내렸습니다. 37 ℃는 예외 조항이 붙은 숫자입니다.'},
+   b:{l:'두 시간이면 끝난다', d:[-11, -3, 4, -6], ok:0, tag:'pittemp',
+      o:'갱내는 바깥보다 늦게 식습니다. 두 시간이 세 시간이 되는 곳입니다.'}},
+
+  {k:'msdprog', s:'인간공학', w:'한지우 대리', law:'산업안전보건기준에 관한 규칙 제662조',
+   t:'올해 근골격계질환으로 업무상 질병 인정을 받은 사람이 열한 명입니다. 본사는 개인별로 관리하자고 합니다.',
+   f:'근골격계질환 예방관리 프로그램 · 업무상 질병 인정자가 연간 <em>10명 이상</em>이거나 <em>5명 이상</em>이면서 근로자 수의 <em>10 % 이상</em>이면 수립·시행 · <em>노사협의</em>를 거칠 것',
+   hit:[0,3],
+   a:{l:'프로그램을 세우고 노사협의를 연다', d:[5, 5, -2, 5], ok:1,
+      o:'열 명을 넘으면 개인 관리가 아니라 프로그램입니다. 공정 자체를 손보기로 했습니다.'},
+   b:{l:'개인별로 관리한다', d:[-8, -3, 4, -6], ok:0, tag:'msdprog',
+      o:'같은 공정에서 열한 명이 아팠다면 그건 개인의 문제가 아닙니다.'}},
+
+  {k:'loadmark', s:'인간공학', w:'윤경아 보건관리자', law:'산업안전보건기준에 관한 규칙 제665조',
+   t:'자재 야적장에 무게 표시가 없습니다. 들어 보고 무거우면 둘이 드는 식입니다.',
+   f:'중량의 표시 등 · <em>5 kg 이상</em> 중량물을 인력으로 들어올리면 <em>중량과 무게중심</em>을 주변에 안내표시 · 취급이 곤란하면 <em>손잡이·갈고리·진공빨판</em> 등 보조도구',
+   hit:[0,1],
+   a:{l:'무게를 적고 보조도구를 넣는다', d:[4, 5, -2, 3], ok:1,
+      o:'무게와 무게중심을 붙였습니다. 들어 보고 아는 것은 이미 든 뒤입니다.'},
+   b:{l:'들어 보면 안다', d:[-7, -3, 4, -4], ok:0, tag:'loadmark',
+      o:'허리는 무겁다고 느낀 순간이 아니라 그 전에 다칩니다.'}},
+
+  {k:'dustclean', s:'인간공학', w:'윤경아 보건관리자', law:'산업안전보건기준에 관한 규칙 제613조',
+   t:'분진작업 실내작업장을 압축공기로 붑니다. 정기 청소는 두 달째 건너뛰었습니다.',
+   f:'분진작업장 청소 · <em>매일 작업 시작 전</em> 청소 · 바닥·벽·설비와 휴게시설은 <em>매월 1회 이상</em> <em>진공청소기나 물</em>로 흩날리지 않게 · 곤란하면 호흡용 보호구 지급',
+   hit:[1,2],
+   a:{l:'진공청소기로 바꾸고 주기를 지킨다', d:[4, 5, -2, 3], ok:1,
+      o:'압축공기는 쌓인 분진을 공기 중으로 되돌립니다. 진공으로 걷어 냈습니다.'},
+   b:{l:'부는 게 빠르다', d:[-8, -3, 4, -5], ok:0, tag:'dustclean',
+      o:'바닥이 깨끗해진 만큼 공기가 더러워졌습니다. 그 공기를 여덟 시간 마십니다.'}},
+
+  {k:'officeair', s:'인간공학', w:'한지우 대리', law:'산업안전보건기준에 관한 규칙 제647조',
+   t:'현장사무실 공조 취출구가 자리 바로 위에 있습니다. 바람이 목덜미에 그대로 떨어집니다.',
+   f:'공기정화설비등의 가동 · 중앙관리 방식 사무실은 오염 방지되도록 <em>적절히 가동</em> · 들어오는 공기가 근로자에게 <em>직접 닿지 않게</em> · 기류속도 <em>초당 0.5 m 이하</em>',
+   hit:[1,2],
+   a:{l:'취출구를 돌리고 풍속을 낮춘다', d:[3, 5, -2, 3], ok:1,
+      o:'0.4 m/s로 내리고 방향을 틀었습니다. 오후에 어깨를 웅크리는 사람이 없어졌습니다.'},
+   b:{l:'시원해서 좋다고 한다', d:[-6, -3, 4, -4], ok:0, tag:'officeair',
+      o:'직접 닿는 바람은 시원한 게 아니라 냉방병입니다.'}},
+
+  {k:'hpvolume', s:'인간공학', w:'장영수 소장', law:'산업안전보건기준에 관한 규칙 제523조',
+   t:'고압 작업실에 여섯 명이 들어갑니다. 작업실 공기 부피는 20 ㎥입니다.',
+   f:'작업실 공기의 부피 · 고압작업자 <em>1명당 4 ㎥ 이상</em>',
+   hit:[0],
+   a:{l:'인원을 줄여 들여보낸다', d:[6, 5, -2, 4], ok:1,
+      o:'1명당 4 ㎥면 다섯 명입니다. 한 사람은 다음 조로 돌렸습니다.'},
+   b:{l:'한 사람 더 들어가도 된다', d:[-12, -3, 4, -6], ok:0, tag:'hpvolume',
+      o:'가압된 공간에서 사람이 늘면 공기가 그만큼 빨리 나빠집니다.'}},
+
+  {k:'ventspec', s:'인간공학', w:'윤경아 보건관리자', law:'산업안전보건기준에 관한 규칙 제430조',
+   t:'유기화합물 취급 실내에 전체환기장치만 달았습니다. 성능 계산서는 없습니다.',
+   f:'전체환기장치의 성능 · 유기화합물 취급 시 <em>1시간</em>당 필요 환기량 이상으로 가동 · 국소배기장치를 갈음하는 것이 아니라 <em>제한된 경우</em>에만 허용',
+   hit:[0],
+   a:{l:'성능을 계산해 맞추고 돌린다', d:[4, 5, -2, 4], ok:1,
+      o:'필요 환기량을 계산하니 지금의 두 배였습니다. 송풍기를 바꿨습니다.'},
+   b:{l:'돌아가고 있으니 됐다', d:[-9, -3, 4, -5], ok:0, tag:'ventspec',
+      o:'돌아가는 것과 충분한 것은 다릅니다. 계산하지 않으면 알 수 없습니다.'}},
+
+  {k:'caissondig', s:'건설안전기술', w:'장영수 소장', law:'산업안전보건기준에 관한 규칙 제543조',
+   t:'잠함작업실 바닥을 천장판 아래 70 cm까지 파 내려가자고 합니다.',
+   f:'잠함작업실 굴착의 제한 · 작업실 바닥면과 그 아래 천장판 사이는 <em>50 cm</em>를 초과해 굴착해서는 안 됨',
+   hit:[0],
+   a:{l:'50 cm에서 멈춘다', d:[7, 5, -2, 5], ok:1,
+      o:'천장판 아래로 더 파면 그 위가 무엇을 딛고 있는지 알 수 없게 됩니다.'},
+   b:{l:'조금 더 파야 맞는다', d:[-16, -3, 4, -8], ok:0, tag:'caissondig',
+      o:'잠함은 아래가 비면 통째로 내려앉습니다. 안에 사람이 있습니다.'}},
+
+  {k:'airsupply', s:'건설안전기술', w:'장영수 소장', law:'산업안전보건기준에 관한 규칙 제544조',
+   t:'표면공급식 잠수작업 송기량을 분당 40 L로 맞춰 놨습니다.',
+   f:'송기량 · 표면공급식 잠수작업은 잠수작업자 <em>1명당 분당 60 L 이상</em>의 공기를 보낼 것 · 압력조절기를 사용하면 수심 압력에 <em>1분당 40 L</em>를 곱한 양 이상',
+   hit:[0],
+   a:{l:'송기량을 올리고 들어간다', d:[7, -2, 5, 5], ok:1,
+      o:'분당 60 L로 올렸습니다. 물속에서 숨이 모자라면 올라오는 것도 위험합니다.'},
+   b:{l:'지금까지 문제없었다', d:[-16, 4, -12, -8], ok:0, tag:'airsupply',
+      o:'깊이 들어갈수록 같은 부피라도 필요한 공기는 늘어납니다.'}},
+
+  {k:'divecrew', s:'건설안전기술', w:'장영수 소장', law:'산업안전보건기준에 관한 규칙 제545조 · 제547조',
+   t:'스쿠버 잠수작업에 한 명만 들여보내려 합니다. 비상장비는 배 위에 있습니다.',
+   f:'잠수작업 인원 · 스쿠버 잠수는 <em>2명 이상</em>이 짝을 이루어 작업 · 표면공급식은 감시인 <em>1명 이상</em>을 배치하고 응급상황에 대비 · 잠수작업자와 <em>연락</em>할 수 있을 것',
+   hit:[0,1],
+   a:{l:'짝을 붙이고 감시인을 세운다', d:[8, 5, -2, 5], ok:1,
+      o:'혼자 들어간 사람은 이상이 생겨도 아무도 모릅니다. 둘이 들어갔습니다.'},
+   b:{l:'얕아서 금방 나온다', d:[-17, -3, 4, -9], ok:0, tag:'divecrew',
+      o:'물속에서는 얕고 깊고가 아니라 혼자냐 아니냐가 갈립니다.'}},
+
+  {k:'hpcheck', s:'건설안전기술', w:'박성태 기사', law:'산업안전보건기준에 관한 규칙 제551조',
+   t:'고압작업 공기압축기와 공기청정장치 점검 기록이 석 달째 비어 있습니다.',
+   f:'고압작업설비의 점검 · 공기압축기·공기청정장치·배관·밸브는 <em>1주일에 1회 이상</em> · 압력계는 <em>1개월에 1회 이상</em> · 공기조와 안전밸브는 <em>1년에 1회 이상</em> 점검',
+   hit:[0,1],
+   a:{l:'밀린 점검부터 돌린다', d:[6, -2, 5, 5], ok:1,
+      o:'주간 점검에서 밸브 하나가 굳어 있는 것을 찾았습니다. 석 달을 그대로 썼습니다.'},
+   b:{l:'돌아가니 문제없다', d:[-14, 4, -12, -7], ok:0, tag:'hpcheck',
+      o:'고압설비는 고장 나기 전까지 정상으로 보입니다. 그래서 주기가 있습니다.'}},
+
+  {k:'divecheck', s:'건설안전기술', w:'박성태 기사', law:'산업안전보건기준에 관한 규칙 제552조',
+   t:'표면공급식 잠수 장비를 다음 주에 씁니다. 수중시계와 산소발생기 점검이 언제였는지 아무도 모릅니다.',
+   f:'잠수작업 설비의 점검 · 공기압축기·수압펌프는 <em>매주 1회 이상</em> · 수중압력계는 <em>매월 1회 이상</em> · 수중시계는 <em>3개월에 1회 이상</em> · 산소발생기는 <em>6개월에 1회 이상</em>',
+   hit:[2,3],
+   a:{l:'전부 점검하고 기록을 만든다', d:[6, -2, 5, 5], ok:1,
+      o:'수중시계 하나가 물이 들어 있었습니다. 그걸 보고 감압 시간을 잽니다.'},
+   b:{l:'다음 주에 확인한다', d:[-14, 4, -12, -7], ok:0, tag:'divecheck',
+      o:'점검하지 않은 장비는 쓰기 시작한 뒤에 이상을 알립니다.'}},
+
+  {k:'co2ext', s:'화학설비위험방지', w:'윤경아 보건관리자', law:'산업안전보건기준에 관한 규칙 제628조',
+   t:'지하 전기실 이산화탄소 소화설비에 오작동 방지 조치가 없습니다. 점검자가 수시로 드나듭니다.',
+   f:'이산화탄소 소화설비 · 방출 시 <em>질식 위험</em>을 알리는 표지 · 오작동 방지 조치 · 소화용기는 <em>1년에 1회 이상</em> 점검 · 밀폐공간에 <em>100개</em> 이상 보관 시 별도 조치',
+   hit:[0,2],
+   a:{l:'표지를 붙이고 잠금장치를 단다', d:[7, -2, 5, 5], ok:1,
+      o:'이산화탄소는 불을 끄는 방식이 산소를 밀어내는 것입니다. 사람도 같이 밀려납니다.'},
+   b:{l:'소방 설비는 소방이 본다', d:[-16, 4, -12, -8], ok:0, tag:'co2ext',
+      o:'점검 중에 방출되면 나갈 시간이 없습니다. 지하 전기실은 문이 하나입니다.'}}
   ];
 
   /* 씨앗이 터지는 사고 카드 — 앞에서 넘긴 위반을 뒤에서 돌려준다 */
@@ -1633,6 +1761,7 @@ button{font:inherit;color:inherit}
         money:st.money, illegal:st.illegal, hurt:st.hurt, near:st.near,
         rolls:st.rolls, pSum:st.pSum, pFat:st.pFat,
         forced:st.forced, hidden:st.hidden, stop:st.stop, log:st.log,
+        chap:st.chap, subj:st.subj,
         okCount:st.okCount, lastReport:st.lastReport, snap:st.snap,
         pOk:st.pOk, pNo:st.pNo, reports:st.reports, cur:st.cur, nextReport:st.nextReport,
         recent:st.recent, lastSubj:st.lastSubj, runSubj:st.runSubj,
@@ -1664,9 +1793,11 @@ button{font:inherit;color:inherit}
           lastReport:0, snap:[62,58,60,60], pOk:0, pNo:0, reports:0,
           recent:[], lastSubj:'', runSubj:0, nextReport:5,
           money:FUND0, illegal:0, hurt:0, near:0, fatal:'', spent:0, need:0,
-          rolls:0, pSum:0, pFat:0, forced:0, hidden:0, stop:0, log:[]};
+          rolls:0, pSum:0, pFat:0, forced:0, hidden:0, stop:0, log:[],
+          chap:0, subj:{}};
     DECK.forEach(function(c){ c.used = false; });
     FLAVOR.forEach(function(c){ c.used = false; });
+    CHAPTER_CARDS.forEach(function(c){ c.used = false; });
 
     if(resume && !resume.g) resume = null;          // 이벤트 객체 등이 넘어온 경우
     if(resume){
@@ -1679,7 +1810,7 @@ button{font:inherit;color:inherit}
       st.illegal = resume.illegal || 0; st.hurt = resume.hurt || 0; st.near = resume.near || 0;
       st.rolls = resume.rolls || 0; st.pSum = resume.pSum || 0; st.pFat = resume.pFat || 0;
       st.forced = resume.forced || 0; st.hidden = resume.hidden || 0; st.stop = resume.stop || 0;
-      st.log = resume.log || [];
+      st.log = resume.log || []; st.chap = resume.chap || 0; st.subj = resume.subj || {};
       st.recent = resume.recent || []; st.lastSubj = resume.lastSubj || ''; st.runSubj = resume.runSubj || 0;
       var on = {}; (resume.deck || []).forEach(function(k){ on[k] = 1; });
       DECK.forEach(function(c){ c.used = !!on[c.k]; });
@@ -1714,7 +1845,8 @@ button{font:inherit;color:inherit}
   // 중독·질식으로 가는 계열. 나머지는 재해로 간다.
   var TOXTAG = {confined:1, confined2:1, gasweld:1, staticflow:1, staticflow2:1,
                 chemdist:1, exgap:1, exgap2:1, caisson:1, msds:1, permit:1,
-                gasdig:1, airvol:1, alarmset:1, rescuedrill:1};
+                gasdig:1, airvol:1, alarmset:1, rescuedrill:1,
+                co2ext:1, dustclean:1, ventspec:1};
 
   function mny(v){
     var t = String(Math.max(0, Math.round(v))), o = '', c = 0;
@@ -1818,7 +1950,7 @@ button{font:inherit;color:inherit}
       g.classList.toggle('low', v <= 22);
       $('gv' + i).textContent = (v <= 22 ? '⚠ ' : '') + Math.round(v);
     });
-    $('mDay').textContent = st.day + '일차';
+    $('mDay').innerHTML = st.day + '일차 <i>' + chapOf(st.day).name + '</i>';
     renderGear(init);
   }
 
@@ -1881,7 +2013,10 @@ button{font:inherit;color:inherit}
   }
   function weightOf(c){
     var w = WEAK[c.law] || 0;
-    return 1 + Math.min(3, w) * 1.6;      // 세 번 이상 놓쳤으면 5.8배까지
+    var base = 1 + Math.min(3, w) * 1.6;  // 세 번 이상 놓쳤으면 5.8배까지
+    var ch = chapOf(st.day);
+    var inPool = ch.pool === '*' || ch.pool.indexOf(c.k) >= 0;
+    return base * subjWeight(c) * (inPool ? 1.35 : 1);
   }
   function pickWeighted(pool){
     var tot = 0, i;
@@ -1953,6 +2088,53 @@ button{font:inherit;color:inherit}
     $('logSum').textContent = st.log.length ? ('충족 ' + ok + ' · 미달 ' + no) : '';
   }
 
+  /* ===== 국면 4장 ==========================================================
+     60일이 한 덩어리면 매일이 같은 날이다. 착공기에는 판을 짜고, 골조기에는
+     물량에 쫓기고, 마감기에는 심어 둔 것이 몰려 터지고, 준공기에는 넘긴 것이
+     서류로 돌아온다. story.md ② 의 설계 그대로다. */
+  var CHAP = [
+    {n:1, till:14, name:'착공기', mul:[1.0, 1.0, 1.2, 0.85], drift:[0, 0, 0, 0], fo:0.9,
+     lead:'아무것도 없는 상태에서 판을 짭니다. 지금 안 세우면 나중엔 못 세웁니다.',
+     pool:'trench net ramp ladder stairs lux carry carry2 panelspace elcb powerline pile pile2 '
+          + 'caisson edu tbm risk permit harness vdt walkway workplan ppe chief jobedu '
+          + 'loadmark officeair caissondig hpvolume divecrew'},
+    {n:2, till:32, name:'골조기', mul:[1.0, 1.2, 1.0, 1.0], drift:[0, 0, 0, 0], fo:1.0,
+     lead:'물량 전쟁입니다. 공정이 매일 저절로 깎입니다.',
+     pool:'scaffold frame frame2 shore plank rail fall weather weather2 wirerope mobscaf horse '
+          + 'welder approach approach2 forklift forklift2 sawblade sawblade2 contractor serious '
+          + 'scafwork gondola twsupport craneway girdergap hookring overwind stopright '
+          + 'hotwork msdprog hpcheck divecheck airsupply'},
+    {n:3, till:48, name:'마감기', mul:[1.2, 1.0, 1.0, 1.0], drift:[0, 0, 0, 0], fo:1.35,
+     lead:'심어 둔 것이 몰려 터집니다. 공장 설비와 우리 공사가 뒤엉킵니다.',
+     pool:'confined confined2 gasweld staticflow staticflow2 chemdist exgap exgap2 noise roller '
+          + 'grinder press robot boiler boiler2 rotor msds gangway gangway2 reliefvalve valveset '
+          + 'flamearr fireproof dryer genroom acetylene firewatch alarmset airvol gasdig stopduty '
+          + 'dustclean ventspec co2ext pittemp'},
+    {n:4, till:60, name:'준공기', mul:[1.0, 1.0, 1.0, 1.3], drift:[0, 0, 0, 0], fo:1.35,
+     audit:0.3, lead:'넘긴 것들이 서류로 돌아옵니다. 새 위험보다 과거 위반이 무섭습니다.',
+     pool:'*'}
+  ];
+  function chapOf(day){
+    for(var i = 0; i < CHAP.length; i++) if(day <= CHAP[i].till) return CHAP[i];
+    return CHAP[CHAP.length - 1];
+  }
+
+  /* 시험은 여섯 과목이 20문항씩 균등하다. 덱은 건설이 32 %, 인간공학이 4 % 다.
+     카드를 더 써서는 못 맞춘다(법령 쪽 재료가 인간공학·전기는 바닥났다).
+     그래서 뽑을 때 맞춘다 — 덜 나온 과목이 먼저 온다. */
+  var SUBJ = ['건설안전기술', '기계위험방지', '전기위험방지', '화학설비위험방지',
+              '인간공학', '안전관리론'];
+  function subjWeight(c){
+    if(!c.s || SUBJ.indexOf(c.s) < 0) return 1;
+    var seen = st.subj[c.s] || 0, tot = 0, i;
+    for(i = 0; i < SUBJ.length; i++) tot += (st.subj[SUBJ[i]] || 0);
+    if(tot < 4) return 1;                       // 맨 앞 몇 장은 그냥 둔다
+    var want = tot / SUBJ.length;               // 균등 목표
+    /* 국면 풀이 과목을 한쪽으로 몰기 때문에 보정을 세게 건다. 공부 도구에서는
+       국면의 색깔보다 과목 균형이 먼저다 — 시험은 여섯 과목이 균등하다. */
+    return Math.max(0.3, Math.min(3.0, (want + 0.7) / (seen + 0.7)));
+  }
+
   var NM = {}, SRC = {};
   DECK.forEach(function(c){ NM[c.k] = c.f.split(' · ')[0]; SRC[c.k] = c; });
 
@@ -1994,6 +2176,32 @@ button{font:inherit;color:inherit}
          o:'그대로 두었습니다. 다음에 같은 자리가 터지면 그때는 사람이 있습니다.'}
     };
   }
+
+  var CHAPTER_CARDS = [
+  {k:'ch2', s:'현장', w:'차동수 소장', law:'', chapter:2, art:'site',
+   t:'터파기가 끝났습니다. 내일부터 골조입니다. 남은 날이 마흔여섯 날인데 층수는 열둘입니다.',
+   f:'',
+   a:{l:'가설을 먼저 세우고 올린다', d:[8, -7, -6, 5], ok:1,
+      o:'비계와 방호망이 층을 따라 올라가는 순서로 공정표를 다시 짰습니다. 첫 주가 통째로 밀렸습니다.'},
+   b:{l:'골조부터 올린다', d:[-9, 10, 4, -5], ok:0,
+      o:'철근이 먼저 올라갑니다. 방호망은 따라 올리겠다고 했습니다. 따라 올린 적은 없습니다.'}},
+
+  {k:'ch3', s:'현장', w:'차동수 소장', law:'', chapter:3, art:'site',
+   t:'골조가 덮였습니다. 이제 설비와 배관이 들어옵니다. 공장은 그동안에도 계속 돌아갑니다.',
+   f:'',
+   a:{l:'공장 측과 작업 구역을 나눈다', d:[9, -6, -4, 7], ok:1,
+      o:'가동 배관과 우리 동선이 겹치는 열한 군데를 표시했습니다. 회의는 세 시간 걸렸습니다.'},
+   b:{l:'겹치는 데만 조심시킨다', d:[-11, 7, 3, -6], ok:0,
+      o:'표시는 하지 않았습니다. 우리 인부는 어느 배관에 무엇이 흐르는지 모릅니다.'}},
+
+  {k:'ch4', s:'현장', w:'최윤 감독관', law:'', chapter:4, art:'site',
+   t:'준공 전 점검을 나왔습니다. 여기는 4년 전에 사람이 죽은 공장입니다. 그때도 서류는 깨끗했습니다.',
+   f:'',
+   a:{l:'남은 위험을 먼저 보여 준다', d:[7, -6, -5, 12], ok:1, stop:1,
+      o:'미조치 목록을 그대로 내밀었습니다. 감독관은 오래 들여다보고 아무 말도 하지 않았습니다.'},
+   b:{l:'정리된 곳부터 보여 준다', d:[-6, 5, 3, -11], ok:0,
+      o:'동선은 정리된 구역으로만 잡았습니다. 감독관은 지하 피트 쪽을 한 번 돌아봤습니다.'}}
+  ];
 
   /* ===== 현상 보고 (5일마다) ===== */
 
@@ -2038,9 +2246,17 @@ button{font:inherit;color:inherit}
     if(st.day > 60){ finish(true); return; }
 
     var pick = null;
+    var chap = chapOf(st.day);
+
+    // 국면이 바뀌는 날 첫 카드는 그 장을 여는 카드다
+    if(chap.n !== st.chap){
+      st.chap = chap.n;
+      var cc = CHAPTER_CARDS.filter(function(c){ return c.chapter === chap.n; })[0];
+      if(cc && !cc.used){ pick = cc; }
+    }
 
     // 닷새마다 본사 보고가 먼저 온다
-    if(st.day >= st.nextReport && st.lastReport !== st.day){
+    if(!pick && st.day >= st.nextReport && st.lastReport !== st.day){
       st.lastReport = st.day;
       st.nextReport = st.day + 4 + Math.floor(Math.random() * 3);   // 4~6일
       pick = buildReport();
@@ -2051,7 +2267,7 @@ button{font:inherit;color:inherit}
     if(!pick && st.seeds.length){
       var rk = riskNow();
       st.rolls++; st.pSum += rk.any; st.pFat += rk.f;      // 얼마를 걸었는지 적어 둔다
-      if(Math.random() < rk.any){
+      if(Math.random() < rk.any * chap.fo){
         var si = pickSeed(), seed = st.seeds[si];
         if(!seed.hits){
           /* 그 위반의 첫 발화 — 아차사고. 씨앗은 남고 확률도 그대로다. */
@@ -2099,6 +2315,7 @@ button{font:inherit;color:inherit}
       if(st.recent.length > 7) st.recent.shift();
     }
     if(pick.s === st.lastSubj) st.runSubj++; else { st.lastSubj = pick.s; st.runSubj = 1; }
+    if(pick.law) st.subj[pick.s] = (st.subj[pick.s] || 0) + 1;
     show(pick);
   }
 
@@ -2213,6 +2430,10 @@ button{font:inherit;color:inherit}
       }
     }
 
+    /* 국면마다 걸리는 압력이 다르다. 착공기는 예산, 골조기는 공정,
+       마감기는 안전, 준공기는 감독이 크게 움직인다. */
+    var chap = chapOf(st.day), mi;
+    for(mi = 0; mi < 4; mi++) if(chap.mul[mi] !== 1) d[mi] = Math.round(d[mi] * chap.mul[mi]);
     var twist = c.report ? null : rollTwist(d, ch.ok);
     d.forEach(function(v, i){ st.g[i] = Math.max(0, Math.min(100, st.g[i] + v)); });
     flashDelta(d, twist, spent);
@@ -2291,6 +2512,12 @@ button{font:inherit;color:inherit}
     var d = st.g.findIndex(function(v){ return v <= 0; });
     if(d >= 0){ st.deadBy = d; finish(false); return; }
     st.day++;
+    /* 하루가 넘어갈 때 그 장의 자연 증감과, 준공기의 누적 위반 감시가 걸린다 */
+    var ch2 = chapOf(st.day), k;
+    for(k = 0; k < 4; k++) if(ch2.drift[k]) st.g[k] = Math.max(0, Math.min(100, st.g[k] + ch2.drift[k]));
+    if(ch2.audit && st.viol.length){
+      st.g[3] = Math.max(0, st.g[3] - ch2.audit * st.viol.length);
+    }
     renderHud();
     setTimeout(function(){ next(); save(); try{ $('card').focus(); }catch(e){} }, 180);
   }
