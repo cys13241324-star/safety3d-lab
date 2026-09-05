@@ -93,6 +93,15 @@ def anchors(body):
     for m in re.finditer(r"(?:W|P)\((%s),\s*(%s),\s*(%s)" % (NUM, NUM, NUM), body):
         x, y, sc_ = (float(m.group(k)) for k in (1, 2, 3))
         xs.add(x); ys.update((y, y - 26 * sc_, y - 18 * sc_))
+    for m in re.finditer(r"DRUM\((%s),\s*(%s),\s*(%s)" % (NUM, NUM, NUM), body):
+        x, y, sc_ = (float(m.group(k)) for k in (1, 2, 3))
+        xs.update((x, x - 9 * sc_, x + 9 * sc_)); ys.update((y, y - 22 * sc_))
+    for m in re.finditer(r"DOC\((%s),\s*(%s),\s*(%s)" % (NUM, NUM, NUM), body):
+        x, y, sc_ = (float(m.group(k)) for k in (1, 2, 3))
+        xs.update((x, x - 11 * sc_, x + 11 * sc_)); ys.update((y, y - 15 * sc_, y + 13 * sc_))
+    for m in re.finditer(r"(?:PANEL|MACH)\((%s),\s*(%s),\s*(%s),\s*(%s)" % (NUM, NUM, NUM, NUM), body):
+        x, y, w, h = (float(m.group(k)) for k in (1, 2, 3, 4))
+        xs.update((x, x + w)); ys.update((y, y + h))
     for m in re.finditer(r"PG\('([^']*)'", body):
         v = [float(t) for t in re.findall(NUM, m.group(1))]
         for k in range(0, len(v) - 1, 2):
