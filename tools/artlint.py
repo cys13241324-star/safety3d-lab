@@ -54,13 +54,29 @@ def boxes(body):
         while k < len(body) and d:
             d += (body[k] == "(") - (body[k] == ")")
             k += 1
-        tail = re.findall(r"'([^']*)'\s*(?=[,)])", body[k - 40:k])
-        for t, ly, asc in zip(tail[-2:] if len(tail) > 1 else tail,
-                              [cy - r - 5, cy + r + 13][:len(tail[-2:])], [9.0, 9.0]):
-            if not t:
+        args, depth, cur, q = [], 0, "", False
+        for ch in body[mm_.end():k - 1]:
+            if ch == "'":
+                q = not q
+            if not q and ch in "([":
+                depth += 1
+            elif not q and ch in ")]":
+                depth -= 1
+            if ch == "," and depth == 0 and not q:
+                args.append(cur); cur = ""
+            else:
+                cur += ch
+        args.append(cur)
+        # DET(fx, fy, cx, cy, r, inner, tag, foot) — 여섯째부터가 이름표
+        for idx, ly in ((6, cy - r - 5), (7, cy + r + 13)):
+            if idx >= len(args):
                 continue
+            g = re.search(r"'([^']*)'", args[idx])
+            if not g or not g.group(1):
+                continue
+            t = g.group(1)
             w = width(t)
-            out.append((cx - w / 2, ly - asc, cx + w / 2, ly + DESC, t, "DET", ly))
+            out.append((cx - w / 2, ly - 9.0, cx + w / 2, ly + DESC, t, "DET", ly))
     return [b for b in out if b[4]]        # 빈 이름표는 뺀다
 
 
