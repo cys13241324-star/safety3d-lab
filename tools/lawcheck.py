@@ -122,6 +122,9 @@ BOOKS = [
     ("중대재해 처벌 등에 관한 법률", "중대재해처벌법"),
     ("중대재해처벌법", "중대재해처벌법"),
     ("산업안전보건법", "산업안전보건법"),
+    # 한 줄에 두 법령이 섞이면 뒤쪽은 줄여 쓴다 — 「… · 시행규칙 제73조제1항」
+    ("시행규칙", "시행규칙"),
+    ("시행령", "시행령"),
 ]
 
 
@@ -165,22 +168,27 @@ def main():
         if not lm or not lm.group(1):
             continue
         law = lm.group(1)
-        book = which(law, laws)
-        if book is None:
-            continue          # 우리가 원문을 갖고 있지 않은 법령
-        # 인용한 조문이 실재하는가
-        refs = []
-        for a in ART.finditer(law):
-            refs.append(a.group(1) + ("의" + a.group(2) if a.group(2) else ""))
+        # 「산업안전보건법 제25조 · 제26조 · 시행규칙 제25조제2항」처럼 한 줄에
+        # 두 법령이 섞여 있을 수 있다. 가운뎃점으로 잘라 토막마다 법령을 정하고,
+        # 법령 이름이 없는 토막은 바로 앞 것을 이어받는다.
+        refs, book = [], None
+        for part in law.split("·"):
+            b2 = which(part.strip(), laws)
+            if b2 is not None:
+                book = b2
+            if book is None:
+                continue
+            for a in ART.finditer(part):
+                refs.append((book, a.group(1) + ("의" + a.group(2) if a.group(2) else "")))
         if not refs:
-            continue
+            continue          # 우리가 원문을 갖고 있지 않은 법령
         checked += 1
         text = ""
-        for r in refs:
-            if r not in book["arts"]:
+        for bk, r in refs:
+            if r not in bk["arts"]:
                 missing.append((key, r, law))
             else:
-                text += book["arts"][r]
+                text += bk["arts"][r]
         if not text:
             continue
         # 숫자가 그 조문에 있는가. 밖에서 온 값이라고 적어 두었으면 묻지 않는다.
@@ -200,7 +208,7 @@ def main():
                 if not core:
                     core = re.search(r"([\d.,]+)([A-Za-z%°Ω]*)", nt)
                 if core and core.group(0) not in ntext:
-                    artbad.append((key, t, ",".join(refs)))
+                    artbad.append((key, t, ",".join(r for _b, r in refs)))
         fm = FF.search(chunk)
         if not fm:
             continue
@@ -220,7 +228,7 @@ def main():
                 core = re.match(r"([\d.,]+)([A-Za-z%°Ω]*)", nv)
                 probes = [core.group(0)] if core else [nv]
             if any(p and p not in ntext for p in probes):
-                unmatched.append((key, val, ",".join(refs)))
+                unmatched.append((key, val, ",".join(r for _b, r in refs)))
 
     print("")
     print("규칙을 인용한 카드 %d장 검사 · 출처를 밖으로 적어 둔 카드 %d장은 숫자 대조 제외"
