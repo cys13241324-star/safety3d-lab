@@ -861,6 +861,7 @@ button{font:inherit;color:inherit}
         v:1, g:st.g, day:st.day, tags:st.tags, seeds:st.seeds, viol:st.viol,
         okCount:st.okCount, lastReport:st.lastReport, snap:st.snap,
         pOk:st.pOk, pNo:st.pNo, reports:st.reports, cur:st.cur,
+        recent:st.recent, lastSubj:st.lastSubj, runSubj:st.runSubj,
         deck:DECK.filter(function(c){ return c.used; }).map(function(c){ return c.k; }),
         flav:FLAVOR.map(function(c){ return c.used ? 1 : 0; })
       }));
@@ -884,7 +885,8 @@ button{font:inherit;color:inherit}
 
   function reset(resume){
     st = {g:[62,58,60,60], day:1, tags:{}, seeds:[], viol:[], okCount:0, cur:null, dead:false,
-          lastReport:0, snap:[62,58,60,60], pOk:0, pNo:0, reports:0};
+          lastReport:0, snap:[62,58,60,60], pOk:0, pNo:0, reports:0,
+          recent:[], lastSubj:'', runSubj:0};
     DECK.forEach(function(c){ c.used = false; });
     FLAVOR.forEach(function(c){ c.used = false; });
 
@@ -894,6 +896,7 @@ button{font:inherit;color:inherit}
       st.seeds = resume.seeds || []; st.viol = resume.viol || []; st.okCount = resume.okCount || 0;
       st.lastReport = resume.lastReport || 0; st.snap = (resume.snap || resume.g).slice();
       st.pOk = resume.pOk || 0; st.pNo = resume.pNo || 0; st.reports = resume.reports || 0;
+      st.recent = resume.recent || []; st.lastSubj = resume.lastSubj || ''; st.runSubj = resume.runSubj || 0;
       var on = {}; (resume.deck || []).forEach(function(k){ on[k] = 1; });
       DECK.forEach(function(c){ c.used = !!on[c.k]; });
       (resume.flav || []).forEach(function(u, i){ if(FLAVOR[i]) FLAVOR[i].used = !!u; });
@@ -1017,10 +1020,27 @@ button{font:inherit;color:inherit}
     }
     if(!pick){
       var pool = DECK.filter(function(c){ return !c.used; });
-      if(!pool.length){ DECK.forEach(function(c){ c.used = false; }); pool = DECK.slice(); }
+      if(!pool.length){
+        DECK.forEach(function(c){ c.used = false; });
+        pool = DECK.filter(function(c){ return st.recent.indexOf(c.k) < 0; });
+        if(!pool.length) pool = DECK.slice();
+      }
+      // 최근에 나온 주제는 피한다
+      var fresh = pool.filter(function(c){ return st.recent.indexOf(c.k) < 0; });
+      if(fresh.length) pool = fresh;
+      // 같은 과목이 세 번 연달아 오지 않게 한다
+      if(st.runSubj >= 2){
+        var other = pool.filter(function(c){ return c.s !== st.lastSubj; });
+        if(other.length) pool = other;
+      }
       pick = pool[Math.floor(Math.random() * pool.length)];
     }
     pick.used = true;
+    if(pick.k){
+      st.recent.push(pick.k);
+      if(st.recent.length > 7) st.recent.shift();
+    }
+    if(pick.s === st.lastSubj) st.runSubj++; else { st.lastSubj = pick.s; st.runSubj = 1; }
     show(pick);
   }
 

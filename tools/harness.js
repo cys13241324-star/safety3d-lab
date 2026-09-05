@@ -136,12 +136,17 @@ function decide(pol){
 
 function runPolicy(pol, n){
   var days = [], causes = {}, won = 0, reports = 0, hits = 0;
+  var lastSubj = '', run = 0, maxRun = 0, seen = {}, dupes = 0;
   for(var g = 0; g < n; g++){
     press('bFresh');
     var guard = 0;
     while(!isOver() && guard++ < 500){
       if(ELS['card'].classList.contains('rep')) reports++;
       if(ELS['card'].classList.contains('hit')) hits++;
+      var sj = ELS['cSubj'].textContent;
+      if(sj === lastSubj){ run++; if(run > maxRun) maxRun = run; } else { lastSubj = sj; run = 1; }
+      var wh = ELS['cWho'].textContent + '|' + sj;
+      if(seen[wh]) dupes++; seen[wh] = 1;
       press(decide(pol));
       press('sGo');
     }
@@ -155,7 +160,7 @@ function runPolicy(pol, n){
   days.sort(function(a,b){ return a - b; });
   var sum = 0; for(var i = 0; i < days.length; i++) sum += days[i];
   return {mean: sum / n, med: days[Math.floor(n/2)], min: days[0], max: days[days.length-1],
-          won: won, rate: (won * 100 / n), causes: causes, reports: reports, hits: hits};
+          won: won, rate: (won * 100 / n), causes: causes, reports: reports, hits: hits, maxRun: maxRun};
 }
 
 var POLS = (WScript.Arguments.length > 2 && WScript.Arguments(2) === 'swap')
@@ -180,7 +185,7 @@ for(var pi = 0; pi < POLS.length; pi++){
   var r = results[POLS[pi]];
   var parts = [];
   for(var k in r.causes) if(r.causes.hasOwnProperty(k)) parts.push(k + ' ' + r.causes[k]);
-  WScript.Echo(NAME[POLS[pi]] + ' -- end causes: ' + parts.join(' / '));
+  WScript.Echo(NAME[POLS[pi]] + ' -- end causes: ' + parts.join(' / ') + '   | longest same-subject run: ' + r.maxRun);
 }
 
 /* ---------- resume check ---------- */
