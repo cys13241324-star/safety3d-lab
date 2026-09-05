@@ -99,6 +99,8 @@ button{font:inherit;color:inherit}
 #chapBanner{position:fixed;left:0;right:0;top:calc(50% - 60px);z-index:46;pointer-events:none;
   text-align:center;opacity:0;transform:translateY(10px)}
 #chapBanner.on{animation:fxBan 2.4s ease-out}
+#chapBanner i{display:block;width:min(300px,74vw);margin:0 auto 12px}
+#chapBanner i svg{display:block;width:100%;height:auto;opacity:.9}
 #chapBanner b{display:block;font-family:var(--display);font-weight:800;font-size:34px;
   letter-spacing:-.02em;color:var(--text);text-shadow:0 4px 24px rgba(0,0,0,.8)}
 #chapBanner span{display:block;margin-top:8px;font-size:13.5px;color:var(--muted);
@@ -452,7 +454,7 @@ button{font:inherit;color:inherit}
 </aside>
 
 <div id="flash" aria-hidden="true"></div>
-<div id="chapBanner" aria-hidden="true"><b id="cbT"></b><span id="cbS"></span></div>
+<div id="chapBanner" aria-hidden="true"><i id="cbA"></i><b id="cbT"></b><span id="cbS"></span></div>
 
 <div id="over"><div class="box">
   <div class="omark" id="oMark" aria-hidden="true"></div>
@@ -1435,6 +1437,34 @@ button{font:inherit;color:inherit}
     record: R(76, 10, 146, 76, '#1E293C', ST) + L('M76 10v76', ST, 3.4) +
       L('M98 30h104M98 44h104M98 58h74', ST, 1.2) +
       C(206, 66, 15, 'none', HI) + L('M198 66l6 7 11-13', HI, 2.4) + GL
+  };
+
+
+  /* ===== 국면 배너 그림 =====
+     판 300×54, 지면선 46. 2.4초만 떠 있으므로 선 몇 개로 그 국면이
+     무엇인지만 말한다. 카드 그림과 같은 어휘. */
+  var BL = L('M14 46H286', ST, 1.4);
+  var CA = {
+    /* 착공기 — 아무것도 없는 자리에 말뚝부터 박는다. 오른쪽은 아직 파선이다. */
+    1: BL + L('M56 46V20M96 46V12M136 46V24', ST, 2) +
+       L('M50 20h12M90 12h12M130 24h12', HI, 2.2) +
+       L('M180 46V28M220 46V28', ST, 1.6, '4 3') + L('M174 28h52', ST, 1.4, '4 3') +
+       W(256, 46, .9),
+    /* 골조기 — 비계가 서고 크레인이 돈다. 물량 전쟁. */
+    2: BL + L('M50 46V10M78 46V10M106 46V10M134 46V10', ST, 1.8) +
+       L('M44 18h96M44 32h96', ST, 1.4) +
+       L('M206 46V6', ST, 2.4) + L('M184 10h72', ST, 2) + L('M240 10v12', ST, 1.4) + R(234, 22, 12, 9, '#243044', ST) + W(160, 46, .9),
+    /* 마감기 — 공장 설비가 들어오고 우리 공사와 뒤엉킨다. */
+    3: BL + TANK(52, 12, 26, 34) + TANK(88, 18, 22, 28) +
+       L('M110 30H176', ST, 2) +
+       C(188, 30, 11, '#1E293C', ST) + L('M188 21v18M179 30h18', HI, 1.5) +
+       L('M216 46V12M248 46V12', ST, 1.6) + L('M210 12h44', ST, 1.8) +
+       SPARK(270, 26, .8),
+    /* 준공기 — 넘긴 것들이 서류로 돌아온다. */
+    4: BL + R(84, 4, 58, 42, '#1E293C', ST) + L('M94 16h38M94 25h38M94 34h24', ST, 1.1) +
+       R(152, 10, 58, 36, '#16202F', ST) + L('M162 22h38M162 31h38', ST, 1.1) +
+       C(240, 24, 15, 'none', HI) + C(240, 24, 11, 'none', HI) +
+       L('M231 20h18M231 28h18', HI, 2)
   };
 
   function artFor(c){
@@ -3335,6 +3365,8 @@ button{font:inherit;color:inherit}
   }
   function banner(ch){
     var b = $('chapBanner');
+    $('cbA').innerHTML = '<svg viewBox="0 0 300 54" preserveAspectRatio="xMidYMid meet" ' +
+      'role="img">' + (CA[ch.n] || CA[1]) + '</svg>';
     $('cbT').textContent = ch.n + '장 · ' + ch.name;
     $('cbS').textContent = ch.lead;
     b.className = '';
