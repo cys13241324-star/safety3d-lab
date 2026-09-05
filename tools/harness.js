@@ -34,7 +34,7 @@ if (typeof JSON === 'undefined') {
 }
 
 /* ---------- DOM stub ---------- */
-var HANDLERS = {}, TIMERS = [];
+var HANDLERS = {}, TIMERS = [], FOCUS = null;
 function classList(el) {
   return {
     add: function (c) { if ((' ' + el.className + ' ').indexOf(' ' + c + ' ') < 0) el.className = (el.className + ' ' + c).replace(/^\s+/, ''); },
@@ -50,6 +50,10 @@ function mkEl(id) {
     appendChild: function (c) { this.children.push(c); c.parentNode = this; this.firstChild = this.children[0]; return c; },
     removeChild: function (c) { for (var i = 0; i < this.children.length; i++) if (this.children[i] === c) { this.children.splice(i, 1); break; } this.firstChild = this.children[0] || null; },
     setPointerCapture: function () {},
+    setAttribute: function (k, v) { this['attr_' + k] = v; },
+    getAttribute: function (k) { return this.hasOwnProperty('attr_' + k) ? this['attr_' + k] : null; },
+    focus: function () { FOCUS = this.id; },
+    removeAttribute: function (k) { delete this['attr_' + k]; },
     addEventListener: function (ev, fn) { HANDLERS[id + ':' + ev] = fn; },
     querySelectorAll: function () { return []; }
   };
