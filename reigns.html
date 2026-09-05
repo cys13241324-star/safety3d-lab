@@ -3383,19 +3383,23 @@ button{font:inherit;color:inherit}
     $('fn').textContent = need > (st.money || 0)
       ? '오늘 조치에 ' + mny(need) + '만원이 듭니다 — 잔액으로는 모자랍니다'
       : (st.seeds.length
-          ? '미조치 ' + st.seeds.length + '건. 본사 보고에서 한 건당 ' + FIX_COST + '만원으로 시정합니다'
+          ? '미조치 ' + st.seeds.length + '건'
+            + (outCount() ? '(협력사 ' + outCount() + '건 포함)' : '')
+            + '. 본사 보고에서 한 건당 ' + FIX_COST + '만원으로 시정합니다'
           : '미조치 위험 없음. 기성마다 ' + mny(FUND_IN) + '만원이 들어옵니다');
   }
 
   /* 오늘 터질 위반 하나를 고른다. 위험이 크고 오래 묵은 것부터. */
-  function pickSeed(){
-    var best = 0, bw = -1;
+  /* mine 이 참이면 내가 남긴 것만 고른다 — 본사 시정 예산이 쓰이는 자리다. */
+  function pickSeed(mine){
+    var best = -1, bw = -1;
     for(var i = 0; i < st.seeds.length; i++){
       var sd = st.seeds[i];
+      if(mine && sd.out) continue;
       var w = (sd.w || 2) * (1 + Math.min(6, st.day - sd.day) * 0.2) * (0.55 + Math.random() * 0.9);
       if(w > bw){ bw = w; best = i; }
     }
-    return best;
+    return mine ? best : Math.max(0, best);
   }
 
   function renderHud(init){
@@ -3975,6 +3979,25 @@ button{font:inherit;color:inherit}
   /* 비용 배수는 쓰지 않는다 — 돈은 규정 카드의 경제로 남긴다. 자리는 남겨 둔다. */
   function condCost(){ var c = condOf(); return c && c.cost ? c.cost : 1; }
 
+  /* 내 결정과 무관한 위험. 협력사와 기존 공장 설비에서 오고, 내가 안 만들었어도
+     확률에는 똑같이 들어간다 — 도급인의 안전보건조치가 말하는 자리다.
+     out:1 로 표시해 두어 점수와 엔딩에서는 「내가 남긴 것」과 구분한다. */
+  var OUTTAG = ['contractor', 'walkway', 'stack', 'tbm', 'lux'];
+  function outCount(){
+    var c = 0;
+    for(var i = 0; i < st.seeds.length; i++) if(st.seeds[i].out) c++;
+    return c;
+  }
+  function mySeeds(){
+    var c = 0;
+    for(var i = 0; i < st.seeds.length; i++) if(!st.seeds[i].out) c++;
+    return c;
+  }
+  function seedOutside(){
+    var t = OUTTAG[Math.floor(Math.random() * OUTTAG.length)];
+    st.seeds.push({tag:t, day:st.day, w:1.2, fam:'acc', fat:1.2 * FAT_LO, hits:0, out:1});
+  }
+
   /* ===== 현상 보고 (5일마다) ===== */
 
   function buildReport(){
@@ -4277,9 +4300,13 @@ button{font:inherit;color:inherit}
 
     var fixed = 0;
     if(c.report && ch.fix){
-      while(st.seeds.length && st.money >= FIX_COST && fixed < 3){
+      /* 시정 예산은 우리 미조치에만 붙는다. 협력사 설비를 우리 관리비로
+         고칠 수는 없다 — 그렇게 두었더니 예산이 말라 완주율이 5 %가 됐다. */
+      while(mySeeds() && st.money >= FIX_COST && fixed < 3){
+        var pi = pickSeed(1);
+        if(pi < 0) break;
         st.money -= FIX_COST;
-        st.seeds.splice(pickSeed(), 1);
+        st.seeds.splice(pi, 1);
         fixed++;
       }
     }
@@ -4390,6 +4417,14 @@ button{font:inherit;color:inherit}
        것이 중요하지 크기가 중요한 것이 아니다. */
     if(st.day % 2 === 0)
       for(k = 0; k < 4; k++) if(ch2.drift[k]) st.g[k] = Math.max(0, Math.min(100, st.g[k] + ch2.drift[k]));
+    /* 닷새마다 협력사 쪽에서 한 건씩 온다. 두 건을 넘기지 않는다 —
+       계기판을 켜 두는 것이 목적이지 난이도를 올리는 것이 목적이 아니다. */
+    /* 협력사 위험은 우리 돈으로 못 고치는 대신 영원히 남지도 않는다.
+       그쪽 공정이 지나가면 사라진다. 그 사이 며칠을 확률과 함께 보내는 것이
+       이 장치가 만드는 유일한 부담이다. */
+    for(k = st.seeds.length - 1; k >= 0; k--)
+      if(st.seeds[k].out && st.day - st.seeds[k].day >= 7) st.seeds.splice(k, 1);
+    if(st.day >= 4 && st.day % 5 === 0 && outCount() < 2) seedOutside();
     /* 걸린 상황이 하루치를 민다. 대비했으면 절반이고, 날이 다 가면 풀린다. */
     if(st.cond && !COND[st.cond.k]) st.cond = null;   // 옛 저장본에 없어진 상황
     if(st.cond){
@@ -4506,7 +4541,7 @@ button{font:inherit;color:inherit}
   for(var _ek in E){ if(E.hasOwnProperty(_ek)) E[_ek].k = _ek; }
 
   function ending(won){
-    var g = st.g, V = st.viol.length, R = st.seeds.length, i;
+    var g = st.g, V = st.viol.length, R = mySeeds(), i;
     if(!won){
       /* 사람이 죽은 판을 「조기 교체」로 닫으면 바로 아래 결산 줄의 「중대재해 1건」과
          어긋난다. 죽음이 먼저다. */
@@ -4552,7 +4587,7 @@ button{font:inherit;color:inherit}
      (미조치), 저지른 것(전용), 그리고 사람이 다쳤는가. */
   function scoreOf(won){
     return Math.round(
-      12 * st.okCount - 30 * st.viol.length - 20 * st.seeds.length
+      12 * st.okCount - 30 * st.viol.length - 20 * mySeeds()
       - 60 * st.illegal - 120 * st.hurt - 40 * st.near - (st.fatal ? 400 : 0)
       + 5 * Math.min(60, st.day) + st.money / 40 + (won ? 250 : 0));
   }
