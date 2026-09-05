@@ -1360,8 +1360,8 @@ button{font:inherit;color:inherit}
       : (c.s === '아차사고' ? '아차사고' : (c.f ? c.f.split(' · ')[0] : c.s));
     var hurt = c.s === '사고'
       ? '<rect x="-40" y="0" width="400" height="132" fill="rgba(240,112,86,.10)"/>' +
-        '<path d="M296 14l14 24h-28z" fill="none" stroke="' + BD + '" stroke-width="2"/>' +
-        '<path d="M303 24v6M303 33v2" stroke="' + BD + '" stroke-width="2"/>'
+        '<path d="M334 12l15 26h-30z" fill="none" stroke="' + BD + '" stroke-width="2"/>' +
+        '<path d="M334 22v7M334 33v2" stroke="' + BD + '" stroke-width="2"/>'
       : '';
     return '<svg viewBox="-40 0 400 132" preserveAspectRatio="xMidYMid meet" role="img">' + body + hurt + '</svg>' +
       '<span class="cap">' + cap + '</span>';
