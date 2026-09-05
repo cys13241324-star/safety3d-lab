@@ -317,7 +317,10 @@ button{font:inherit;color:inherit}
 #cArt .dk{animation:dimIn .18s .08s backwards}
 #cArt .dt{animation:dimIn .3s .5s backwards}
 #cArt .spk{animation:sparkPulse 1.6s .6s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){#cArt .dl,#cArt .dk,#cArt .dt,#cArt .spk{animation:none}}
+@keyframes artIn{from{opacity:0;transform:translateY(5px)}}
+#cArt svg{animation:artIn .34s cubic-bezier(.2,.85,.3,1) backwards}
+@media (prefers-reduced-motion:reduce){
+  #cArt .dl,#cArt .dk,#cArt .dt,#cArt .spk,#cArt svg{animation:none}}
 
 /* ---------- 현상 보고 ---------- */
 #card.rep .say{min-height:0}
@@ -638,6 +641,11 @@ button{font:inherit;color:inherit}
   /* 원경 — 배경(#0E1520)에 겨우 얹힌 한 겹. 여기서 대비를 올리면
      앞의 치수선과 싸운다. 바깥 작업 장면에만 붙인다. */
   var FAR =
+    '<defs><linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#31506E" stop-opacity="0"/>' +
+    '<stop offset=".55" stop-color="#31506E" stop-opacity=".07"/>' +
+    '<stop offset="1" stop-color="#31506E" stop-opacity=".20"/></linearGradient></defs>' +
+    R(0, 18, 320, 90, 'url(#haze)', 'none') +
     '<g fill="#131C29" stroke="#182131" stroke-width="1">' +
     '<path d="M6 108V56h22v52zM30 108V70h16v38zM286 108V62h26v46zM268 108V82h18v26z"/></g>' +
     '<g stroke="#1B2534" stroke-width="1.6" fill="none" stroke-linecap="round">' +
@@ -686,7 +694,7 @@ button{font:inherit;color:inherit}
   gangway2: WATER + R(20, 20, 60, 88, '#1E293C') + L('M0 108H320', ST, 1.2) +
     L('M80 40L200 96', ST, 2.6) + L('M86 30L206 86', ST, 2.6) +
     L('M92 46l6 3M108 54l6 3M124 62l6 3M140 70l6 3M156 78l6 3', ST, 1.3) +
-    Dh(80, 86, 24, '너비 55 cm') + Dv(30, 46, 232, '방책 82 cm', 0) +
+    Dh(80, 86, 30, '너비 55 cm') + Dv(30, 46, 232, '방책 82 cm', 0) +
     W(150, 84, .8),
   pile2: FAR + GND + L('M60 108V14', ST, 3) + C(60, 20, 6, '#243044', ST) +
     C(196, 24, 6, '#243044', ST) + L('M66 20H190', HI, 1.6) +
@@ -868,7 +876,7 @@ button{font:inherit;color:inherit}
     TX(244, 36, '안전밸브', HI) + TX(46, 50, '정변위 펌프', TC) + TX(150, 100, '차단밸브', BD),
   valveset: GND + TANK(110, 44, 90, 64) + L('M134 44v-18M176 44v-18', ST, 2.4) +
     C(134, 22, 7, 'none', HI) + C(176, 22, 7, 'none', ST) +
-    TX(94, 14, '최고사용압력', HI) + TX(196, 14, '1.05배 이하', TC) +
+    TX(40, 20, '최고사용압력', HI) + TX(196, 20, '1.05배 이하', TC) +
     ARR(134, 40, 134, 30, HI, 1.2) + ARR(176, 40, 176, 30, ST, 1.2) + W(256, 108, .85),
   flamearr: GND + TANK(70, 46, 84, 62) + L('M112 46v-26', ST, 3.4) +
     R(104, 12, 16, 10, '#243044', HI) + L('M104 17h16', HI, 1.4) +
@@ -879,13 +887,13 @@ button{font:inherit;color:inherit}
     R(56, 68, 188, 40, 'rgba(227,181,77,.10)', 'none') + L('M56 68H244', HI, 2.2) +
     TX(70, 62, '내화 피복', HI) + TX(96, 20, '기둥 · 보 1단까지 내화', TC) +
     SPARK(96, 90, .85) + SPARK(196, 94, .65) + W(286, 108, .8),
-  dryer: GND + R(60, 20, 120, 88, '#1E293C') + L('M60 64H180', ST, 1.6) +
-    R(84, 74, 72, 34, '#243044') + L('M96 74v34M120 74v34M144 74v34', ST, 1) +
-    TX(64, 14, '독립된 단층건물', HI) + TX(196, 60, '내용적 1 ㎥ 이상', TC) +
+  dryer: GND + R(60, 30, 120, 78, '#1E293C', ST) + L('M60 68H180', ST, 1.6) +
+    R(84, 76, 72, 32, '#243044') + L('M96 76v32M120 76v32M144 76v32', ST, 1) +
+    TX(64, 24, '독립된 단층건물', HI) + TX(196, 60, '내용적 1 ㎥ 이상', TC) +
     SPARK(120, 92, .7) + W(240, 108, .85),
   genroom: GND + R(60, 34, 130, 74, '#1E293C') + R(70, 60, 26, 48, '#243044') +
     L('M150 34v-22', ST, 3) + L('M144 12h12', ST, 2) + R(196, 60, 14, 48, '#243044', HI) +
-    Dh(150, 196, 24, '창에서 1.5 m 이상') + TX(66, 100, '철판 1.5 mm 이상 문', HI) +
+    Dh(150, 196, 30, '창에서 1.5 m 이상') + TX(66, 100, '철판 1.5 mm 이상 문', HI) +
     TX(200, 46, '창', TC),
   acetylene: GND + TANK(56, 52, 30, 56) + TANK(92, 52, 30, 56) +
     L('M71 52v-8M107 52v-8', ST, 2) + L('M62 44h54', ST, 1.6) + TX(54, 34, '아세틸렌 · 산소', TC) +
@@ -929,14 +937,14 @@ button{font:inherit;color:inherit}
   forklift2: FAR + GND + R(150, 62, 76, 34, '#1E293C') + C(166, 102, 8, '#243044', ST) + C(214, 102, 8, '#243044', ST) +
     L('M150 62V20h76v42', HI, 2.2) + L('M162 20v42M186 20v42M210 20v42', HI, 1.3) +
     L('M150 20h76', HI, 2.4) + R(96, 40, 40, 56, '#243044') + L('M136 44h14M136 90h14', ST, 1.6) +
-    W(190, 88, .7) + TX(150, 14, '최대하중의 2배 견딜 것', HI),
+    W(190, 88, .7) + TX(30, 20, '최대하중의 2배 견딜 것', HI),
   sawblade2: GND + MACH(70, 70, 180, 38) + C(160, 70, 34, 'none', ST) +
     L('M126 70h68', ST, 1.2) + L('M160 36v34', HI, 2.6) +
     C(160, 34, 3.2, 'none', HI) + C(160, 70, 3.2, 'none', HI) +
     Dh(126, 194, 26, '지름 610 mm 초과') + TX(196, 56, '양단 고정식', HI) + W(280, 108, .85),
   boiler2: GND + TANK(90, 26, 76, 82) + L('M128 26V12', ST, 2) +
     L('M110 12h36', ST, 2) + C(112, 8, 5, 'none', HI) + C(144, 8, 5, 'none', HI) +
-    TX(160, 12, '1개는 1.05배 이하', HI) + TX(160, 30, '1개는 최고사용압력', TC) +
+    TX(178, 20, '1개는 1.05배 이하', HI) + TX(178, 38, '1개는 최고사용압력', TC) +
     W(250, 108, .85) + ARR(128, 44, 128, 20, HI, 1.4),
   chainblock: FAR + GND + L('M40 14H280', ST, 2.6) + L('M160 14v22', ST, 1.8) +
     '<path d="M152 36a8 9 0 1 0 16 0" fill="none" stroke="' + HI + '" stroke-width="2.4"/>' +
@@ -971,7 +979,7 @@ button{font:inherit;color:inherit}
     L('M42 88H128', DM, 1, '4 4') + TX(110, 104, '수평면과 20~30°', HI) +
     L('M146 34h8M146 88h8M150 34V54M150 64V88', HI, 1.1) +
     L('M143 58l14-6M143 68l14-6', HI, 1.2) + TX(162, 62, '10 m 이내마다', HI) +
-    L('M98 62L124 74', TC, 1.1) + TX(128, 84, '내민 길이 2 m 이상', HI),
+    L('M98 62L190 84', TC, 1.1) + TX(194, 92, '내민 길이 2 m 이상', HI),
   fall: FAR + GND + R(0, 34, 320, 7, '#1E293C', 'none') + L('M0 41H320', ST, 1.4) +
     W(160, 34, .8) +
     L('M46 62C110 62 110 89 160 89C210 89 210 62 274 62', HI, 2.6) +
@@ -1002,7 +1010,7 @@ button{font:inherit;color:inherit}
     L('M56 36H248M56 60H248M56 84H248', ST, 1.6) +
     L('M42 36H64M42 96H64', HI, 2.6) +
     R(64, 54, 66, 5, '#243044', ST) + W(96, 54, .8) +
-    Dh(64, 86, 26, '1.85 m') +
+    Dh(64, 86, 32, '1.85 m') +
     L('M64 36H252M64 96H252', DM, 1, '4 4') + Dv(36, 96, 256, '5 m', 0) +
     TX(150, 124, '벽이음 수직·수평 5 m', HI),
   stairs: FAR + GND +
@@ -1011,7 +1019,7 @@ button{font:inherit;color:inherit}
     L('M166 36v-6h8v-6h8v-6h8v-6h8', ST, 2.4) +
     L('M44 86L134 18M138 18h30', ST, 1.4) + L('M60 96V80M96 78V62M126 60V44', ST, 1.2) +
     W(96, 74, 1.7) +
-    Dv(36, 108, 26, '3 m 이내', 0) + Dh(136, 166, 24, '1.2 m 이상') +
+    Dv(36, 108, 26, '3 m 이내', 0) + Dh(136, 166, 30, '1.2 m 이상') +
     TX(196, 64, '계단참', HI) + TX(196, 88, '폭 1 m 이상', TC),
   // 경사선은 수직 56 : 수평 100 = 1 : 1.79 — 라벨과 형상이 같아야 한다
   trench: '<path d="M0 44H96L196 100H320V132H0Z" fill="#161F2E"/>' +
