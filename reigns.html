@@ -330,6 +330,9 @@ button{font:inherit;color:inherit}
 
 /* ---------- 현상 보고 ---------- */
 #card.rep .say{min-height:0}
+/* 보고 카드는 표가 본문이다. 그림판(104~124 px)을 두면 본문 자리가 남지 않는다 —
+   640 px 화면에서 206 px 짜리 본문에 19 px 만 내주고 있었다. */
+#card.rep .art{display:none}
 .rp{display:flex;flex-direction:column;gap:9px}
 .rp .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
   padding-bottom:8px;border-bottom:1px dashed var(--line-soft);font-size:13.5px}
