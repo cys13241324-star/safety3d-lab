@@ -23,21 +23,25 @@ HH = re.compile(r"hit:\[([^\]]*)\]")
 
 bad = 0
 seen = 0
-body = src[src.index("var DECK = ["):]
-body = body[:body.index("\n  ];")]
-for m in re.finditer(r"^  \{k:'([^']+)',", body, re.M):
-    start = m.start()
-    nxt = body.find("\n  {k:'", start + 1)
-    chunk = body[start:nxt if nxt > 0 else len(body)]
-    fm, hm = FF.search(chunk), HH.search(chunk)
-    if not fm or not hm:
+# DECK 과 FALLOUT 을 함께 본다. 사고 카드도 hit 을 달고, FALLOUT 의 열쇠는 req 다.
+for arr, kf in (("var DECK = [", "k"), ("var FALLOUT = [", "req")):
+    if arr not in src:
         continue
-    seen += 1
-    ems = len(re.findall(r"<em>", fm.group(1)))
-    hits = [int(x) for x in hm.group(1).split(",") if x.strip()]
-    if hits and max(hits) >= ems:
-        print("  %-12s hit=%s 인데 <em>은 %d개뿐" % (m.group(1), hits, ems))
-        bad += 1
+    body = src[src.index(arr):]
+    body = body[:body.index("\n  ];")]
+    for m in re.finditer(r"^  \{" + kf + r":'([^']+)',", body, re.M):
+        start = m.start()
+        nxt = body.find("\n  {" + kf + ":'", start + 1)
+        chunk = body[start:nxt if nxt > 0 else len(body)]
+        fm, hm = FF.search(chunk), HH.search(chunk)
+        if not fm or not hm:
+            continue
+        seen += 1
+        ems = len(re.findall(r"<em>", fm.group(1)))
+        hits = [int(x) for x in hm.group(1).split(",") if x.strip()]
+        if hits and max(hits) >= ems:
+            print("  %-12s hit=%s 인데 <em>은 %d개뿐" % (m.group(1), hits, ems))
+            bad += 1
 
 print("hit 을 단 카드 %d장 · 자리번호가 허공을 가리키는 곳: %d건" % (seen, bad))
 sys.exit(1 if bad else 0)

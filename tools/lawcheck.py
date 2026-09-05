@@ -139,13 +139,19 @@ def which(law, laws):
 
 
 def cards(src):
-    body = src[src.index("var DECK = ["):]
-    body = body[:body.index("\n  ];")]
-    for m in re.finditer(r"^  \{k:'([^']+)',", body, re.M):
-        start = m.start()
-        nxt = body.find("\n  {k:'", start + 1)
-        chunk = body[start:nxt if nxt > 0 else len(body)]
-        yield m.group(1), chunk
+    """DECK 과 FALLOUT 을 함께 훑는다. 사고 카드도 같은 조문을 같은 방식으로
+       인용하는데 예전에는 DECK 만 봐서 거기 남은 허구 수치(누전차단기 15 mA)를
+       못 잡았다. FALLOUT 의 열쇠는 k 가 아니라 req 다."""
+    for arr, kf in (("var DECK = [", "k"), ("var FALLOUT = [", "req")):
+        if arr not in src:
+            continue
+        body = src[src.index(arr):]
+        body = body[:body.index(chr(10) + "  ];")]
+        for m in re.finditer("^  \{%s:'([^']+)'," % kf, body, re.M):
+            start = m.start()
+            nxt = body.find(chr(10) + "  {%s:'" % kf, start + 1)
+            chunk = body[start:nxt if nxt > 0 else len(body)]
+            yield m.group(1), chunk
 
 
 def main():

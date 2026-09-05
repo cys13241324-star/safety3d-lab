@@ -20,7 +20,7 @@ for name, hard in (("artlint", True), ("anchor", True), ("lawcheck", True), ("hi
     r = subprocess.run([sys.executable, os.path.join(HERE, name + ".py")] + TARGET,
                        capture_output=True, text=True, encoding="utf-8")
     print((r.stdout or "").rstrip())
-    if r.stderr.strip():
+    if (r.stderr or "").strip():
         print(r.stderr.rstrip())
     if hard and r.returncode:
         bad += 1
