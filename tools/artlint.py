@@ -124,6 +124,15 @@ for n, (name, a0) in enumerate(scenes[:-1]):
             metres = float(g.group(1)) * UNIT[g.group(2)]
             if metres > 0 and px > 0:
                 got.append((px / metres, mm_.group(4)))
+    # 약속 3 — 6 px 미만 치수선은 읽을 수 없다. 지시선이나 상세원으로 뺀다.
+    for pat in (r"Dh\((-?[\d.]+),\s*(-?[\d.]+),", r"Dv\((-?[\d.]+),\s*(-?[\d.]+),"):
+        for mm_ in re.finditer(pat, body):
+            if any(x <= mm_.start() < y for x, y in skip):
+                continue
+            ln = abs(float(mm_.group(2)) - float(mm_.group(1)))
+            if ln < 6:
+                bad.append((name, "치수선 %.0f px — 6 px 미만" % ln,
+                            "지시선이나 상세원(DET)으로 뺀다"))
     if len(got) >= 2:
         lo = min(g[0] for g in got)
         hi = max(g[0] for g in got)
