@@ -127,6 +127,24 @@ function decide(pol){
     if(Math.random() < acc) return right;
     return right === 'chR' ? 'chL' : 'chR';
   }
+  // TRI = knows the rules AND triages: the fund cannot cover every card, so spend it
+  //       on what actually kills and let the cheap, low-severity ones slide.
+  //       This is the strategy the game is meant to reward.
+  if(pol.substr(0,3) === 'TRI'){
+    var acc2 = pol.length > 3 ? Number(pol.substr(3)) / 100 : 1;
+    var el = ELS['card'];
+    var sev = Number(el.dataset.sev || 0);
+    var cost = Number(el.dataset.cost || 0);
+    var fund = Number(el.dataset.fund || 0);
+    // Pay while the fund holds. When it does not: a diversion is illegal and costs
+    // oversight every time, so only commit one for a rule that actually kills.
+    // Cheaper, low-severity rules get skipped instead -- a small risk beats a crime.
+    var comply = (cost <= fund) || sev >= 14;
+    var side = (el.dataset.ok === 'r') ? 'chR' : 'chL';
+    if(!comply) side = (side === 'chR') ? 'chL' : 'chR';
+    if(Math.random() < acc2) return side;
+    return side === 'chR' ? 'chL' : 'chR';
+  }
   if(pol === 'L') return 'chL';
   if(pol === 'R') return 'chR';
   if(pol === 'RND') return Math.random() < 0.5 ? 'chL' : 'chR';
@@ -137,7 +155,7 @@ function decide(pol){
 }
 
 function runPolicy(pol, n){
-  var days = [], causes = {}, won = 0, reports = 0, hits = 0, sheets = 0;
+  var days = [], causes = {}, won = 0, reports = 0, hits = 0, sheets = 0, need = 0, ill = 0;
   var lastSubj = '', run = 0, maxRun = 0, seen = {}, dupes = 0;
   for(var g = 0; g < n; g++){
     press('bFresh');
@@ -149,11 +167,17 @@ function runPolicy(pol, n){
       if(sj === lastSubj){ run++; if(run > maxRun) maxRun = run; } else { lastSubj = sj; run = 1; }
       var wh = ELS['cWho'].textContent + '|' + sj;
       if(seen[wh]) dupes++; seen[wh] = 1;
+      var el0 = ELS['card'];
+      var n0 = Number(el0.dataset.need || 0);
       press(decide(pol));
       if(document.getElementById('sheet').classList.contains('on')) sheets++;
+      var el1 = ELS['card'];
+      if(Number(el1.dataset.need || 0) >= n0) { need += Number(el1.dataset.need || 0) - n0; }
       press('sGo');
     }
     if(guard >= 500) return {err: 'no end'};
+    // dataset.ill only refreshes on show(); read the run total once, after the game ends
+    ill += Number(ELS['card'].dataset.ill || 0);
     var d = Number(ELS['oDays'].textContent);
     days.push(d);
     if(d > 60) won++;
@@ -164,16 +188,18 @@ function runPolicy(pol, n){
   var sum = 0; for(var i = 0; i < days.length; i++) sum += days[i];
   return {mean: sum / n, med: days[Math.floor(n/2)], min: days[0], max: days[days.length-1],
           won: won, rate: (won * 100 / n), causes: causes, reports: reports, hits: hits,
-          maxRun: maxRun, sheets: sheets / n, cards: (sum / n)};
+          maxRun: maxRun, sheets: sheets / n, need: need / n, ill: ill / n, cards: (sum / n)};
 }
 
 var POLS = (WScript.Arguments.length > 2 && WScript.Arguments(2) === 'sides')
-  ? ['L', 'R', 'RND'] : ['ORA', 'ORA85', 'ORA70', 'ORA55', 'BAL', 'RND', 'L'];
-var NAME = {L:'always left (side-mash)', ORA:'knows 100%', ORA85:'knows 85%', ORA70:'knows 70%',
-            ORA55:'knows 55%', BAL:'balance the weakest', RND:'coin flip', R:'always right (side-mash)'};
+  ? ['L', 'R', 'RND'] : ['TRI', 'TRI85', 'TRI70', 'ORA', 'ORA85', 'ORA70', 'BAL', 'RND'];
+var NAME = {L:'always left (side-mash)', ORA:'comply always 100%', ORA85:'comply always 85%',
+            ORA70:'comply always 70%', ORA55:'comply always 55%',
+            TRI:'triage 100%', TRI85:'triage 85%', TRI70:'triage 70%',
+            BAL:'balance the weakest', RND:'coin flip', R:'always right (side-mash)'};
 WScript.Echo('');
-WScript.Echo('policy                    n    mean  median  min  max  reached 60d   sheets/run');
-WScript.Echo('---------------------------------------------------------------------------------');
+WScript.Echo('policy                    n    mean  median  min  max  reached 60d  sheets  need(M)  divert');
+WScript.Echo('------------------------------------------------------------------------------------------------');
 var results = {};
 for(var pi = 0; pi < POLS.length; pi++){
   var r = runPolicy(POLS[pi], GAMES);
@@ -183,7 +209,7 @@ for(var pi = 0; pi < POLS.length; pi++){
   var padr = function(v, w){ v = String(v); while(v.length < w) v = v + ' '; return v; };
   WScript.Echo(padr(NAME[POLS[pi]], 25) + pad(GAMES, 4) + pad(r.mean.toFixed(1), 8) + pad(r.med, 7) +
                pad(r.min, 5) + pad(r.max, 5) + pad(r.rate.toFixed(0) + '%', 12) +
-               pad(r.sheets.toFixed(1), 13));
+               pad(r.sheets.toFixed(1), 8) + pad(r.need.toFixed(0), 9) + pad(r.ill.toFixed(1), 8));
 }
 WScript.Echo('');
 for(var pi = 0; pi < POLS.length; pi++){
@@ -191,6 +217,23 @@ for(var pi = 0; pi < POLS.length; pi++){
   var parts = [];
   for(var k in r.causes) if(r.causes.hasOwnProperty(k)) parts.push(k + ' ' + r.causes[k]);
   WScript.Echo(NAME[POLS[pi]] + ' -- end causes: ' + parts.join(' / ') + '   | longest same-subject run: ' + r.maxRun);
+}
+
+/* ---------- traced single game (diagnostic) ---------- */
+if (WScript.Arguments.length > 2 && WScript.Arguments(2) === 'trace') {
+  press('bFresh');
+  var g = 0;
+  while (!isOver() && g++ < 200) {
+    var e = ELS['card'];
+    WScript.Echo('day ' + ELS['mDay'].textContent +
+      '  g[' + gauge(0) + ',' + gauge(1) + ',' + gauge(2) + ',' + gauge(3) + ']' +
+      '  fund ' + e.dataset.fund + '  need ' + e.dataset.need + '  ill ' + e.dataset.ill +
+      '  cost ' + e.dataset.cost + '  subj ' + ELS['cSubj'].textContent);
+    press(decide('ORA'));
+    press('sGo');
+  }
+  WScript.Echo('END ' + ELS['oTag'].textContent + ' :: ' + ELS['oDesc'].textContent);
+  WScript.Quit(0);
 }
 
 /* ---------- resume check ---------- */

@@ -34,6 +34,42 @@ button{font:inherit;color:inherit}
 
 /* ---------- 게이지 ---------- */
 #hud{width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex:none}
+
+/* ---------- 계기판 — 관리비 잔액과 오늘의 위험 확률 ----------
+   미조치 위반이 쌓이면 그것이 오늘 하루에 얼마의 확률로 터지는지 숫자로 뜬다.
+   감추지 않는다. 얼마를 걸고 있는지 알아야 거는 것이 도박이 아니라 판단이 된다.
+   색만으로 뜻을 지지 않도록 단계마다 글리프와 말이 함께 바뀐다. */
+#gear{width:100%;margin-top:9px;padding:9px 12px 10px;border-radius:10px;
+  background:var(--panel2);border:1px solid var(--line-soft);flex:none}
+#gear .fund{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding-bottom:8px;
+  margin-bottom:9px;border-bottom:1px solid var(--line-soft)}
+#gear .fund .k{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--dim);
+  white-space:nowrap}
+#gear .fund .v{font-size:15.5px;font-weight:700;color:var(--text);margin-left:auto;
+  white-space:nowrap}
+#gear .fund .v u{text-decoration:none;font-size:10.5px;font-weight:500;color:var(--muted);margin-left:3px}
+#gear .fund .note{font-size:10.5px;color:var(--dim);width:100%;order:3;margin-top:5px}
+#gear.low .fund .v{color:var(--warn)}
+#gear.out .fund .v{color:var(--bad)}
+#gear .mrow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+#gear .m{--c:var(--ok)}
+#gear .m.b1{--c:var(--warn)}
+#gear .m.b2{--c:#EC835A}
+#gear .m.b3{--c:var(--bad)}
+#gear .m .lb{display:flex;justify-content:space-between;align-items:baseline;gap:5px;margin-bottom:4px}
+#gear .m .n{font-size:10.5px;color:var(--muted);white-space:nowrap}
+#gear .m .p{font-size:13.5px;font-weight:700;color:var(--text)}
+#gear .m .tk{height:5px;border-radius:3px;background:rgba(255,255,255,.08);
+  background:color-mix(in srgb, var(--c) 24%, transparent);overflow:hidden}
+#gear .m .fl{height:100%;border-radius:3px;width:0;background:var(--c);
+  transition:width .5s cubic-bezier(.2,.8,.3,1), background .5s ease}
+#gear .m .st{margin-top:4px;font-size:10px;color:var(--muted);white-space:nowrap}
+#gear .m .st b{color:var(--c);font-weight:700}
+.lack{color:var(--warn);font-weight:600}
+@media (max-width:430px){
+  #gear .mrow{gap:8px}
+  #gear .m .n{font-size:9.5px}
+}
 .g{display:flex;flex-direction:column;gap:5px}
 .g .lb{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;letter-spacing:.02em;color:var(--muted)}
 .g .lb b{font-family:var(--mono);font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--dim)}
@@ -207,6 +243,7 @@ button{font:inherit;color:inherit}
 
 <div id="app">
   <div id="hud"></div>
+  <div id="gear"></div>
   <div id="meta"><span id="mDay">1일차</span><span class="site" id="mSite">현장 개설</span><button class="fresh" id="bFresh" type="button">새 현장</button></div>
   <div id="board">
     <div id="card" role="group" aria-labelledby="cWho" tabindex="-1">
@@ -546,7 +583,7 @@ button{font:inherit;color:inherit}
   var G = [
     {n:'근로자 안전', dead:'중대재해가 발생했습니다.'},
     {n:'공정률',     dead:'공기를 맞추지 못해 교체되었습니다.'},
-    {n:'예산',       dead:'산업안전보건관리비가 바닥났습니다.'},
+    {n:'공사비',     dead:'공사비가 말라 현장이 멈췄습니다.'},
     {n:'감독기관',   dead:'작업중지명령이 내려졌습니다.'}
   ];
 
@@ -938,7 +975,8 @@ button{font:inherit;color:inherit}
     if(!st || st.dead) return;
     try{
       localStorage.setItem(RUN, JSON.stringify({
-        v:1, g:st.g, day:st.day, tags:st.tags, seeds:st.seeds, viol:st.viol,
+        v:2, g:st.g, day:st.day, tags:st.tags, seeds:st.seeds, viol:st.viol,
+        money:st.money, illegal:st.illegal, hurt:st.hurt,
         okCount:st.okCount, lastReport:st.lastReport, snap:st.snap,
         pOk:st.pOk, pNo:st.pNo, reports:st.reports, cur:st.cur, nextReport:st.nextReport,
         recent:st.recent, lastSubj:st.lastSubj, runSubj:st.runSubj,
@@ -951,7 +989,7 @@ button{font:inherit;color:inherit}
   function loadRun(){
     try{
       var r = JSON.parse(localStorage.getItem(RUN) || 'null');
-      return (r && r.v === 1 && r.day >= 1 && r.day <= 60 && r.g && r.g.length === 4 && r.cur) ? r : null;
+      return (r && r.v === 2 && r.day >= 1 && r.day <= 60 && r.g && r.g.length === 4 && r.cur) ? r : null;
     }catch(e){ return null; }
   }
   function noteMiss(list){          // 판을 넘어 쌓이는 「놓친 규정」
@@ -967,7 +1005,8 @@ button{font:inherit;color:inherit}
     locked = false;
     st = {g:[62,58,60,60], day:1, tags:{}, seeds:[], viol:[], okCount:0, cur:null, dead:false,
           lastReport:0, snap:[62,58,60,60], pOk:0, pNo:0, reports:0,
-          recent:[], lastSubj:'', runSubj:0, nextReport:5};
+          recent:[], lastSubj:'', runSubj:0, nextReport:5,
+          money:FUND0, illegal:0, hurt:0, fatal:'', spent:0, need:0};
     DECK.forEach(function(c){ c.used = false; });
     FLAVOR.forEach(function(c){ c.used = false; });
 
@@ -978,6 +1017,8 @@ button{font:inherit;color:inherit}
       st.lastReport = resume.lastReport || 0; st.snap = (resume.snap || resume.g).slice();
       st.pOk = resume.pOk || 0; st.pNo = resume.pNo || 0; st.reports = resume.reports || 0;
       st.nextReport = resume.nextReport || (st.day + 5);
+      st.money = typeof resume.money === 'number' ? resume.money : FUND0;
+      st.illegal = resume.illegal || 0; st.hurt = resume.hurt || 0;
       st.recent = resume.recent || []; st.lastSubj = resume.lastSubj || ''; st.runSubj = resume.runSubj || 0;
       var on = {}; (resume.deck || []).forEach(function(k){ on[k] = 1; });
       DECK.forEach(function(c){ c.used = !!on[c.k]; });
@@ -990,6 +1031,110 @@ button{font:inherit;color:inherit}
   }
 
   /* ===== 게이지 그리기 ===== */
+  /* ===== 위험과 돈 =========================================================
+     규정을 지키면 안전을 사지만 관리비가 나간다. 어기면 돈과 일정을 벌지만
+     위험이 쌓인다. 쌓인 위험은 사라지지 않고 매일 굴려진다 — 화면에 떠 있는
+     그 확률 그대로다. 어느 쪽도 공짜가 아니어야 줄타기가 된다. */
+
+  var FUND0 = 3400;          // 착공 시 계상된 안전보건관리비 (만원)
+  var FUND_IN = 390;         // 기성(본사 보고)마다 들어오는 돈
+  var FIX_COST = 150;        // 위험 한 건을 실제로 시정하는 데 드는 돈
+  /* 60일을 전부 규정대로 가면 약 9,900만원이 든다. 들어오는 돈은 3,800 + 12회 x 400
+     = 8,600만원뿐이다. 15 % 가 모자라므로 다 지키려 들면 후반에 반드시 마른다.
+     모자란 만큼은 위험이 작은 카드에서 덜어 내야 한다 — 그것이 이 판이 가르치는 일이다. */
+
+  var K_ACC = 70;            // 재해 확률의 완만함. 클수록 천천히 오른다
+  var K_TOX = 45;            // 중독은 건수가 적은 대신 가파르다
+  var FAT_CAP = 0.35;        // 재해가 났을 때 사람이 죽는 비율의 천장
+  var FAT_HI = 0.45;         // 안전손실 14 이상인 규정을 어겼을 때의 치명도
+  var FAT_LO = 0.12;         // 그 밖
+
+  // 중독·질식으로 가는 계열. 나머지는 재해로 간다.
+  var TOXTAG = {confined:1, gasweld:1, staticflow:1, chemdist:1, exgap:1, caisson:1};
+
+  function mny(v){
+    var t = String(Math.max(0, Math.round(v))), o = '', c = 0;
+    for(var i = t.length - 1; i >= 0; i--){
+      o = t.charAt(i) + o;
+      if(++c % 3 === 0 && i > 0) o = ',' + o;
+    }
+    return o;
+  }
+
+  /* 그 카드를 규정대로 조치하는 데 드는 돈. 위반했을 때 안전이 크게 깎이는
+     카드일수록 위험하고, 위험한 것을 막는 데는 돈이 더 든다. */
+  function costOf(c){
+    if(!c || !c.law || c.report || !c.b) return 0;
+    return Math.round((60 + 12 * Math.abs(c.b.d[0])) / 10) * 10;
+  }
+
+  /* 미조치 위반이 만들어 내는 오늘 하루의 확률.
+     a 재해 · t 중독/질식 · f 그중 사람이 죽는 경우(중대재해) */
+  function riskNow(){
+    var acc = 0, tox = 0, fat = 0;
+    for(var i = 0; i < st.seeds.length; i++){
+      var sd = st.seeds[i], w = sd.w || 2;
+      if(sd.fam === 'tox') tox += w; else acc += w;
+      fat += sd.fat || 0;
+    }
+    var pA = 1 - Math.exp(-acc / K_ACC);
+    var pT = 1 - Math.exp(-tox / K_TOX);
+    var any = pA + pT - pA * pT;
+    var ratio = (acc + tox) > 0 ? Math.min(FAT_CAP, fat / (acc + tox)) : 0;
+    return {a:pA, t:pT, f:any * ratio, any:any, ratio:ratio};
+  }
+
+  var RK = [{k:'a', n:'재해 발생', cap:0.45}, {k:'t', n:'중독·질식', cap:0.30},
+            {k:'f', n:'중대재해', cap:0.22}];
+  var BAND_G = ['·', '\u25B8', '\u25B2', '\u26A0'];
+  var BAND_T = ['낮음', '주의', '높음', '심각'];
+
+  function renderGear(init){
+    if(init){
+      $('gear').innerHTML =
+        '<div class="fund"><span class="k">안전보건관리비</span>' +
+        '<span class="v" id="fv">0<u>만원</u></span>' +
+        '<span class="note" id="fn"></span></div>' +
+        '<div class="mrow">' + RK.map(function(r, i){
+          return '<div class="m b0" id="rk' + i + '">' +
+            '<div class="lb"><span class="n">' + r.n + '</span>' +
+            '<span class="p" id="rp' + i + '">0 %</span></div>' +
+            '<div class="tk"><div class="fl" id="rf' + i + '"></div></div>' +
+            '<div class="st"><b id="rg' + i + '">·</b> <span id="rs' + i + '">낮음</span></div>' +
+          '</div>';
+        }).join('') + '</div>';
+    }
+    var r = riskNow(), i;
+    for(i = 0; i < RK.length; i++){
+      var p = r[RK[i].k];
+      var band = p < 0.03 ? 0 : (p < 0.10 ? 1 : (p < 0.20 ? 2 : 3));
+      $('rp' + i).textContent = (p * 100).toFixed(p < 0.10 ? 1 : 0) + ' %';
+      $('rf' + i).style.width = Math.min(100, p / RK[i].cap * 100) + '%';
+      $('rk' + i).className = 'm b' + band;
+      $('rg' + i).textContent = BAND_G[band];
+      $('rs' + i).textContent = BAND_T[band];
+    }
+    $('fv').innerHTML = mny(st.money) + '<u>만원</u>';
+    var need = costOf(st.cur);
+    $('gear').className = st.money <= 0 ? 'out' : (st.money < 600 ? 'low' : '');
+    $('fn').textContent = need > (st.money || 0)
+      ? '오늘 조치에 ' + mny(need) + '만원이 듭니다 — 잔액으로는 모자랍니다'
+      : (st.seeds.length
+          ? '미조치 ' + st.seeds.length + '건. 본사 보고에서 한 건당 ' + FIX_COST + '만원으로 시정합니다'
+          : '미조치 위험 없음. 기성마다 ' + mny(FUND_IN) + '만원이 들어옵니다');
+  }
+
+  /* 오늘 터질 위반 하나를 고른다. 위험이 크고 오래 묵은 것부터. */
+  function pickSeed(){
+    var best = 0, bw = -1;
+    for(var i = 0; i < st.seeds.length; i++){
+      var sd = st.seeds[i];
+      var w = (sd.w || 2) * (1 + Math.min(6, st.day - sd.day) * 0.2) * (0.55 + Math.random() * 0.9);
+      if(w > bw){ bw = w; best = i; }
+    }
+    return best;
+  }
+
   function renderHud(init){
     if(init){
       $('hud').innerHTML = G.map(function(g, i){
@@ -1006,6 +1151,7 @@ button{font:inherit;color:inherit}
       $('gv' + i).textContent = (v <= 22 ? '⚠ ' : '') + Math.round(v);
     });
     $('mDay').textContent = st.day + '일차';
+    renderGear(init);
   }
 
   function flashDelta(d){
@@ -1049,18 +1195,20 @@ button{font:inherit;color:inherit}
     var risks = st.seeds.map(function(s){ return {n:NM[s.tag] || s.tag, d:st.day - s.day}; });
     var diff = st.g.map(function(v, i){ return Math.round(v - st.snap[i]); });
     st.reports++;
+    st.money += FUND_IN;          // 기성에 따라 안전보건관리비가 들어온다
     return {
       s:'보고', w:'본사 안전보건팀', art:'report', law:'', f:'',
-      t:'', report:{ok:st.pOk, no:st.pNo, diff:diff, risks:risks, day:st.day},
-      a:{l:'미조치 위험까지 그대로 올린다', d:[6,-5,-6,9], ok:1, clear:2,
-         o:'숨기지 않은 보고서에는 조치 예산이 붙습니다. 위험 항목 일부가 그 자리에서 처리됐습니다.'},
+      t:'', report:{ok:st.pOk, no:st.pNo, diff:diff, risks:risks, day:st.day,
+                    fund:FUND_IN, money:st.money},
+      a:{l:'미조치 위험까지 그대로 올린다', d:[6,-5,-6,9], ok:1, fix:1,
+         o:'숨기지 않은 보고서에는 조치 예산이 붙습니다.'},
       b:{l:'진행 위주로 정리해 올린다', d:[-5,8,5,-7], ok:0,
          o:'표는 깔끔해졌습니다. 현장에 남은 것은 그대로입니다.'}
     };
   }
 
   function reportHtml(r){
-    var names = ['안전', '공정', '예산', '감독'];
+    var names = ['안전', '공정', '공사비', '감독'];
     var dl = r.diff.map(function(v, i){
       var c = v > 0 ? 'up' : (v < 0 ? 'dn' : 'z');
       return '<span class="' + c + '">' + names[i] + ' ' + (v > 0 ? '+' : '') + v + '</span>';
@@ -1072,6 +1220,8 @@ button{font:inherit;color:inherit}
       : '<div class="clean">미조치 위험 없음. 지난 닷새는 깨끗합니다.</div>';
     return '<div class="rp">' +
       '<div class="row"><span class="k">지난 닷새 판정</span><span class="v">충족 ' + r.ok + ' · 미달 ' + r.no + '</span></div>' +
+      '<div class="row"><span class="k">기성 · 관리비</span><span class="v"><span class="up">+' +
+        mny(r.fund) + '만</span> · 잔액 ' + mny(r.money) + '만원</span></div>' +
       '<div class="row"><span class="k">게이지 증감</span><span class="v">' + dl + '</span></div>' +
       risk + '</div>';
   }
@@ -1090,12 +1240,22 @@ button{font:inherit;color:inherit}
       pick = buildReport();
     }
 
-    // 3일 넘게 묵은 씨앗이 있으면 사고로 돌려준다
-    var ripe = st.seeds.filter(function(s){ return st.day - s.day >= 3; });
-    if(!pick && ripe.length && Math.random() < 0.45){
-      var seed = ripe[Math.floor(Math.random() * ripe.length)];
-      st.seeds = st.seeds.filter(function(s){ return s !== seed; });   // 씨앗은 무조건 소비한다
-      pick = FALLOUT.filter(function(c){ return c.req === seed.tag; })[0] || genericFallout(seed.tag);
+    /* 오늘의 위험을 굴린다. 계기판에 떠 있던 그 확률 그대로다.
+       터지면 그 위반은 소비되고, 그중 일부는 사람이 죽는 자리로 간다. */
+    if(!pick && st.seeds.length){
+      var rk = riskNow();
+      if(Math.random() < rk.any){
+        var si = pickSeed(), seed = st.seeds[si];
+        st.seeds.splice(si, 1);
+        st.hurt++;
+        if(Math.random() < rk.ratio){
+          st.fatal = NM[seed.tag] || seed.tag;
+          st.deadBy = 0;
+          finish(false);
+          return;
+        }
+        pick = FALLOUT.filter(function(c){ return c.req === seed.tag; })[0] || genericFallout(seed.tag);
+      }
     }
     if(!pick && Math.random() < 0.16){
       var fl = FLAVOR.filter(function(c){ return !c.used; });
@@ -1142,6 +1302,10 @@ button{font:inherit;color:inherit}
     } else {
       $('cSay').textContent = pick.t;
       $('cTopic').innerHTML = pick.law ? '<b>' + pick.law.split(' ')[0] + '</b> ' + pick.law.split(' ').slice(1).join(' ') : '법으로 정해진 사항이 아닙니다. 판단은 당신 몫입니다.';
+      /* 어느 쪽이 준수인지는 말하지 않는다. 다만 오늘 조치할 돈이 없다는 것은 미리 알려 준다. */
+      if(costOf(pick) > st.money){
+        $('cTopic').innerHTML += ' <span class="lack">· 관리비 부족 — 오늘 조치하려면 공사비 전용(위법)</span>';
+      }
     }
     // 준수 선택이 늘 왼쪽이면 카드를 안 읽고 게이지만 봐도 이긴다. 매번 섞는다.
     st.flip = Math.random() < 0.5;
@@ -1150,7 +1314,13 @@ button{font:inherit;color:inherit}
     $('chRt').textContent = RC.l;
     $('pickL').textContent = LC.l;
     $('pickR').textContent = RC.l;
-    cardEl.dataset.ok = st.flip ? 'r' : 'l';   // tools/harness.js 가 읽는 시험용 표시
+    // tools/harness.js 가 읽는 시험용 표시. 게임 진행에는 쓰이지 않는다.
+    cardEl.dataset.ok = st.flip ? 'r' : 'l';                    // 준수가 선 쪽
+    cardEl.dataset.sev = pick.b ? Math.abs(pick.b.d[0]) : 0;    // 어겼을 때의 위험도
+    cardEl.dataset.cost = costOf(pick);                          // 지키는 데 드는 돈
+    cardEl.dataset.fund = st.money;                              // 관리비 잔액
+    cardEl.dataset.need = st.need;                               // 여기까지 필요했던 총액
+    cardEl.dataset.ill = st.illegal;                             // 전용 횟수
     $('mSite').textContent = pick.s === '사고' ? '사고 대응' : pick.s;
 
     say(st.day + '일차. ' + pick.w + '. ' + (pick.report ? '현상 보고입니다.' : pick.t) +
@@ -1180,36 +1350,77 @@ button{font:inherit;color:inherit}
     cardEl.className = 'fly' + curExtra;
     cardEl.style.transform = 'translateX(' + (side * 520) + 'px) rotate(' + (side * 22) + 'deg)';
 
-    ch.d.forEach(function(v, i){ st.g[i] = Math.max(0, Math.min(100, st.g[i] + v)); });
-    flashDelta(ch.d);
-    renderHud();
+    /* 규정대로 하려면 돈이 든다. 관리비가 마르면 공사비를 끌어다 쓸 수밖에 없고,
+       그것은 목적 외 사용 — 위법이다. 감독기관이 가장 먼저 안다. */
+    var d = ch.d.slice(), spent = 0, diverted = false;
+    if(ch.ok && !c.report){
+      spent = costOf(c);
+      if(spent){
+        st.need += spent;
+        if(st.money >= spent){ st.money -= spent; st.spent += spent; }
+        else {
+          /* 목적 외 사용은 한 번이면 넘어가도 되풀이하면 적발된다.
+             실제로도 시정명령과 과태료가 따라붙는 자리다. 그래서 값이 점점 커진다. */
+          diverted = true; spent = st.money; st.spent += spent; st.money = 0; st.illegal++;
+          d[3] -= 5 + Math.min(16, 3 * st.illegal); d[2] -= 3;
+        }
+      }
+    }
+
+    /* 본사 보고에서 사실대로 올리면 조치 예산이 붙는다.
+       다만 돈이 없으면 정직해도 고치지 못한다. 그것이 이 판의 조임쇠다. */
+    var fixed = 0;
+    if(c.report && ch.fix){
+      while(st.seeds.length && st.money >= FIX_COST && fixed < 3){
+        st.money -= FIX_COST;
+        st.seeds.splice(pickSeed(), 1);
+        fixed++;
+      }
+    }
+
+    d.forEach(function(v, i){ st.g[i] = Math.max(0, Math.min(100, st.g[i] + v)); });
+    flashDelta(d);
 
     if(ch.ok) st.okCount++;
-    if(ch.tag){ st.tags[ch.tag] = true; st.seeds.push({tag:ch.tag, day:st.day}); }
+    /* 어긴 것은 위험 점수로 쌓인다. 그 카드에서 안전이 얼마나 깎이는지가 곧 위험도다.
+       vdt 5 부터 confined 18 까지, 어느 규정이 얼마나 위험한지가 확률에 그대로 실린다. */
+    if(ch.tag){
+      var sev = Math.abs(ch.d[0]);
+      st.tags[ch.tag] = true;
+      var w = sev / 4;
+      st.seeds.push({tag:ch.tag, day:st.day, w:w,
+                     fam:(TOXTAG[ch.tag] ? 'tox' : 'acc'),
+                     fat:w * (sev >= 14 ? FAT_HI : FAT_LO)});
+    }
     if(!ch.ok && c.law){ st.viol.push({law:c.law, f:c.f, hit:c.hit, k:c.w}); }
 
-    if(c.report){
-      if(ch.clear && st.seeds.length) st.seeds.splice(0, ch.clear);
-      st.pOk = 0; st.pNo = 0; st.snap = st.g.slice();
-    } else if(ch.ok) st.pOk++; else st.pNo++;
+    if(c.report){ st.pOk = 0; st.pNo = 0; st.snap = st.g.slice(); }
+    else if(ch.ok) st.pOk++; else st.pNo++;
+
+    renderHud();
 
     /* ===== 기준을 지켰으면 아무것도 띄우지 않는다 =====
        이 게임은 암기가 목적이지만, 매 카드마다 설명창이 뜨면 게임이 아니라
        문제집이 된다. 배우는 자리는 팝업이 아니라 선택의 결과여야 한다.
        그래서 시트는 틀렸을 때만 올린다. 다만 사고 카드와 본사 보고는
        드물고(판당 각 5회 안팎) 판을 가르는 자리라 그대로 둔다. */
-    var quiet = ch.ok && !c.report && c.s !== '사고';
+    var quiet = ch.ok && !c.report && c.s !== '사고' && !diverted;
     if(quiet){
       say('기준 충족. ' + ch.o);
-      hint(ch.o, 2200);
+      hint(ch.o + (spent ? '   관리비 -' + mny(spent) + '만' : ''), 2200);
       setTimeout(advance, 620);
       return;
     }
 
-    $('sV').className = 'verdict ' + (ch.ok ? 'ok' : 'no');
-    $('sV').textContent = (ch.ok ? '✓ ' : '✕ ') + (c.report ? (ch.ok ? '사실대로 보고' : '다듬어 보고')
+    $('sV').className = 'verdict ' + (ch.ok && !diverted ? 'ok' : 'no');
+    $('sV').textContent = diverted ? '⚠ 공사비 전용 (목적 외 사용)'
+      : (ch.ok ? '✓ ' : '✕ ') + (c.report ? (ch.ok ? '사실대로 보고' : '다듬어 보고')
       : (c.law ? (ch.ok ? '기준 충족' : '기준 미달') : (ch.ok ? '무리 없음' : '무리한 결정')));
-    $('sOut').textContent = ch.o;
+    $('sOut').textContent = ch.o
+      + (diverted ? ' 관리비가 비어 공사비를 끌어 썼습니다. 안전보건관리비는 목적이 정해진 돈입니다.' : '')
+      + (fixed ? ' 조치 예산이 붙어 ' + fixed + '건을 그 자리에서 시정했습니다.' : '')
+      + (c.report && ch.fix && !fixed && st.seeds.length
+          ? ' 정직하게 올렸지만 시정할 돈이 없습니다. 위험은 그대로 남았습니다.' : '');
     $('sStd').innerHTML = markHit(c) || (c.report
       ? '보고는 <em>닷새</em>마다 옵니다. 올린 위험만 조치 예산이 붙고, 남긴 위험은 사고 카드로 돌아옵니다.'
       : '이 결정에 걸린 수치 기준은 없습니다. 남는 것은 사람과 일정입니다.');
@@ -1251,11 +1462,13 @@ button{font:inherit;color:inherit}
       $('oTitle').className = 'win';
       $('oDesc').textContent = '아무도 다치지 않고 현장을 닫았습니다. 지킨 기준이 그대로 기록에 남습니다.';
     } else {
-      $('oTag').textContent = G[st.deadBy].n + ' 소진';
+      $('oTag').textContent = st.fatal ? '중대재해' : G[st.deadBy].n + ' 소진';
       $('oTag').style.color = 'var(--bad)';
-      $('oTitle').textContent = G[st.deadBy].dead;
+      $('oTitle').textContent = st.fatal ? '사람이 죽었습니다.' : G[st.deadBy].dead;
       $('oTitle').className = '';
-      $('oDesc').textContent = '숫자가 먼저 무너진 자리에서 사람이 다칩니다. 아래는 이번 현장에서 넘긴 기준입니다.';
+      $('oDesc').textContent = st.fatal
+        ? '「' + st.fatal + '」을(를) 넘긴 자리에서 났습니다. 확률은 계기판에 떠 있었습니다.'
+        : '숫자가 먼저 무너진 자리에서 사람이 다칩니다. 아래는 이번 현장에서 넘긴 기준입니다.';
     }
     wipe();
     $('oDays').textContent = st.day;
@@ -1267,6 +1480,8 @@ button{font:inherit;color:inherit}
       ? list.map(function(v){ return '<li><b>' + v.law + '</b><br>' + markHit(v) + '</li>'; }).join('')
       : '<li style="border-color:var(--ok)">넘긴 기준이 없습니다.</li>';
 
+    $('oDesc').textContent += ' 재해 ' + st.hurt + '건 · 관리비 잔액 ' + mny(st.money) + '만원'
+      + (st.illegal ? ' · 공사비 전용 ' + st.illegal + '회(위법)' : '') + '.';
     var total = noteMiss(list);
     if(total) $('oDesc').textContent += ' 지금까지 이 자리에서 넘긴 조문은 모두 ' + total + '개입니다.';
     box.classList.add('on');

@@ -645,6 +645,13 @@ SIGN_FINAL = Sign(pP=5, pB=5, pC=2, pB2=12, pV=4, pay=0.45)
 RULES_FINAL = Rules(consume_seed=True, generic_fo=True)
 
 if __name__ == "__main__":
+    print("!" * 74)
+    print("!! 이 시뮬레이터는 게이지 네 개만 모형으로 삼는다.")
+    print("!! 2026-09-05 에 들어간 안전보건관리비(재화)와 위험 확률 굴림은 모르므로,")
+    print("!! 여기서 나오는 60일 도달률은 지금 판의 값이 아니다.")
+    print("!! 밸런스는 tools/harness.js 로 재라 — 그쪽은 shipped 코드를 그대로 돌린다.")
+    print("!" * 74)
+    print()
     mode = sys.argv[1] if len(sys.argv) > 1 else "current"
     N = int(sys.argv[2]) if len(sys.argv) > 2 else 20000
     {"current": mode_current, "new": mode_new, "grid": mode_grid,
