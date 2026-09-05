@@ -46,6 +46,21 @@ def boxes(body):
         w, ly = width(t), (y1 + y2) / 2 + 4
         lx = x - 7 - w if left else x + 7
         out.append((lx, ly - ASC, lx + w, ly + DESC, t, "Dv", ly))
+    # 상세원의 배율(위)·측정값(아래) 이름표. 좌표가 계산식이라 위의 정규식엔 안 걸린다.
+    for mm_ in re.finditer(r"DET\(\s*(-?[\d.]+),\s*(-?[\d.]+),\s*(-?[\d.]+),"
+                           r"\s*(-?[\d.]+),\s*(-?[\d.]+),", body):
+        cx, cy, r = float(mm_.group(3)), float(mm_.group(4)), float(mm_.group(5))
+        k, d = mm_.end(), 1
+        while k < len(body) and d:
+            d += (body[k] == "(") - (body[k] == ")")
+            k += 1
+        tail = re.findall(r"'([^']*)'\s*(?=[,)])", body[k - 40:k])
+        for t, ly, asc in zip(tail[-2:] if len(tail) > 1 else tail,
+                              [cy - r - 5, cy + r + 13][:len(tail[-2:])], [9.0, 9.0]):
+            if not t:
+                continue
+            w = width(t)
+            out.append((cx - w / 2, ly - asc, cx + w / 2, ly + DESC, t, "DET", ly))
     return [b for b in out if b[4]]        # 빈 이름표는 뺀다
 
 
@@ -73,8 +88,55 @@ for n, (name, a) in enumerate(scenes[:-1]):
             if w > 0 and h > 0 and w * h > 12:
                 bad.append((name, "이름표 겹침 %d px²" % round(w * h), "%s ⨯ %s" % (at, bt)))
 
-print("장면 %d개 검사 · 문제 %d건" % (len(scenes) - 1, len(bad)))
+
+# ── 축척 — 한 판 안의 치수선이 같은 px/m 를 가리키는가 (감사 기준 「가」)
+UNIT = {"mm": .001, "cm": .01, "m": 1.0}
+LEN = re.compile(r"([\d.]+)\s*(mm|cm|m)(?![\w/㎥㎠])")
+SCALE_TOL = 1.6
+
+
+def det_spans(body):
+    """DET( ... ) 의 괄호 범위. 그 안의 치수는 일부러 다른 배율이라 뺀다."""
+    out = []
+    for mm_ in re.finditer(r"DET\(", body):
+        k, d = mm_.end(), 1
+        while k < len(body) and d:
+            d += (body[k] == "(") - (body[k] == ")")
+            k += 1
+        out.append((mm_.start(), k))
+    return out
+
+
+scale = []
+for n, (name, a0) in enumerate(scenes[:-1]):
+    body = sc[a0:scenes[n + 1][1]]
+    skip = det_spans(body)
+    got = []
+    for pat in (r"Dh\((-?[\d.]+),\s*(-?[\d.]+),\s*(-?[\d.]+),\s*'([^']*)'",
+                r"Dv\((-?[\d.]+),\s*(-?[\d.]+),\s*(-?[\d.]+),\s*'([^']*)'"):
+        for mm_ in re.finditer(pat, body):
+            if any(x <= mm_.start() < y for x, y in skip):
+                continue
+            g = LEN.search(mm_.group(4))
+            if not g:
+                continue
+            px = abs(float(mm_.group(2)) - float(mm_.group(1)))
+            metres = float(g.group(1)) * UNIT[g.group(2)]
+            if metres > 0 and px > 0:
+                got.append((px / metres, mm_.group(4)))
+    if len(got) >= 2:
+        lo = min(g[0] for g in got)
+        hi = max(g[0] for g in got)
+        if hi / lo > SCALE_TOL:
+            scale.append((name, hi / lo, got))
+
+print("장면 %d개 검사 · 이름표 문제 %d건 · 축척 어긋남 %d건"
+      % (len(scenes) - 1, len(bad), len(scale)))
 for name, why, t in bad:
     print("  %-13s %-24s %s" % (name, why, t))
+for name, r, got in scale:
+    print("  %-13s 축척 %.1f배 어긋남      %s"
+          % (name, r, " · ".join("%s → %.0f px/m" % (t, p) for p, t in got)))
+    print("  %-13s   (한 판에 px/m 이 둘이면 잘못 그렸거나, 상세원으로 떼거나, 파단선으로 끊어야 한다)" % "")
 
-sys.exit(1 if bad else 0)
+sys.exit(1 if (bad or scale) else 0)
