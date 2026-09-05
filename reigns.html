@@ -96,10 +96,18 @@ button{font:inherit;color:inherit}
 #log li{padding-left:10px;border-left:2px solid var(--line);font-size:12.5px;line-height:1.5}
 #log li.ok{border-left-color:var(--ok)} #log li.no{border-left-color:var(--bad)}
 #log li .t{display:flex;gap:6px;align-items:baseline}
-#log li .m{font-family:var(--mono);font-size:10.5px;color:var(--dim);flex:none}
+#log li .m{font-family:var(--mono);font-size:10.5px;color:var(--dim);flex:none;font-weight:700}
+#log li.ok .m{color:var(--ok)} #log li.no .m{color:var(--bad)}
 #log li .n{color:var(--text);font-weight:600}
 #log li .v{color:var(--warn);font-family:var(--mono);font-size:11.5px}
-#log li .l{color:var(--dim);font-family:var(--mono);font-size:10.5px}
+#log li .l{color:var(--dim);font-family:var(--mono);font-size:10.5px;margin-top:3px}
+#log li .v2{color:var(--muted);font-size:11.5px}
+#log li.nu{border-left-color:var(--line)}
+#log li .dl{display:flex;flex-wrap:wrap;gap:3px 4px;margin-top:4px}
+#log li .dl span{font-family:var(--mono);font-size:10px;padding:1px 5px;border-radius:4px;
+  background:var(--panel2);border:1px solid var(--line-soft);white-space:nowrap}
+#log li .dl .u{color:var(--ok)} #log li .dl .d{color:var(--bad)}
+#log li .dl b{color:var(--warn);margin-left:2px}
 #log .empty{margin:0;padding:16px 14px;font-size:12px;color:var(--dim);line-height:1.6}
 @media (min-width:1160px){
   #log{transform:none;visibility:visible;box-shadow:none}
@@ -1896,25 +1904,49 @@ button{font:inherit;color:inherit}
     return out.join(' · ');
   }
 
-  function pushLog(c, ok){
-    if(!c.law) return;
-    st.log.push({d:st.day, ok:ok ? 1 : 0,
-                 n:(c.f ? c.f.split(' · ')[0].replace(/<[^>]+>/g, '') : c.s),
-                 v:hitVals(c), l:c.law});
+  var GSHORT = ['안전', '공정', '공사비', '감독'];
+
+  function pushLog(c, ok, d, spent, twist){
+    /* 규정 카드는 충족·미달로 세고, 보고와 현장 카드는 세지 않되 기록에는 남긴다 —
+       그 둘도 게이지를 크게 흔들기 때문에 빠지면 기록이 앞뒤가 안 맞는다. */
+    var kind = c.law ? 'law' : (c.report ? 'rep' : 'site');
+    var name = c.law ? (c.f ? c.f.split(' · ')[0].replace(/<[^>]+>/g, '') : c.s)
+             : (c.report ? '본사 보고' : (c.w || c.s));
+    st.log.push({d:st.day, ok:ok ? 1 : 0, k:kind, n:name,
+                 v:(c.law ? hitVals(c) : ''), l:(c.law || ''),
+                 g:(d || [0, 0, 0, 0]).slice(), m:(spent || 0),
+                 tw:(twist ? twist.i : -1)});
     if(st.log.length > 120) st.log.shift();
     renderLog();
+  }
+
+  function deltaHtml(e){
+    var out = [], i;
+    for(i = 0; i < 4; i++){
+      var v = (e.g || [])[i] || 0;
+      if(!v) continue;
+      out.push('<span class="' + (v > 0 ? 'u' : 'd') + '">' + GSHORT[i] + ' '
+        + (v > 0 ? '+' : '') + v + (e.tw === i ? '<b>×2</b>' : '') + '</span>');
+    }
+    if(e.m) out.push('<span class="d">관리비 −' + mny(e.m) + '만</span>');
+    return out.length ? '<div class="dl">' + out.join('') + '</div>' : '';
   }
 
   function renderLog(){
     var ok = 0, no = 0, i, out = [];
     for(i = st.log.length - 1; i >= 0; i--){
-      var e = st.log[i];
-      if(e.ok) ok++; else no++;
-      out.push('<li class="' + (e.ok ? 'ok' : 'no') + '">' +
-        '<div class="t"><span class="m">' + (e.ok ? '✓' : '✕') + ' ' + e.d + '일</span>' +
+      var e = st.log[i], law = e.k === 'law';
+      if(law){ if(e.ok) ok++; else no++; }
+      var mark = law ? (e.ok ? '✓' : '✕') : (e.k === 'rep' ? '\u25A6' : '\u25CB');
+      out.push('<li class="' + (law ? (e.ok ? 'ok' : 'no') : 'nu') + '">' +
+        '<div class="t"><span class="m">' + mark + ' ' + e.d + '일</span>' +
         '<span class="n">' + e.n + '</span></div>' +
         (e.v ? '<div class="v">' + e.v + '</div>' : '') +
-        '<div class="l">' + e.l + '</div></li>');
+        (!law ? '<div class="v2">' + (e.k === 'rep'
+            ? (e.ok ? '사실대로 올렸습니다' : '다듬어 올렸습니다')
+            : (e.ok ? '무리 없이 넘겼습니다' : '무리한 결정')) + '</div>' : '') +
+        deltaHtml(e) +
+        (e.l ? '<div class="l">' + e.l + '</div>' : '') + '</li>');
     }
     $('logList').innerHTML = out.join('');
     $('logEmpty').hidden = !!st.log.length;
@@ -2198,7 +2230,7 @@ button{font:inherit;color:inherit}
                      hits:(c.s === '사고' ? 1 : 0)});   // 사고를 겪고도 넘겼으면 경고는 이미 끝났다
     }
     if(!ch.ok && c.law){ st.viol.push({law:c.law, f:c.f, hit:c.hit, k:c.w}); }
-    pushLog(c, ch.ok);
+    pushLog(c, ch.ok, d, spent, twist);
     /* 엔딩이 읽는 세 가지 — 사고 앞에서 강행했는가, 보고를 다듬었는가, 스스로 멈췄는가 */
     if(c.s === '사고' && !ch.ok) st.forced++;
     if(c.report && !ch.ok) st.hidden++;
