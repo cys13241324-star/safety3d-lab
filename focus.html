@@ -36,6 +36,14 @@ h1{font-family:var(--display);font-weight:700;font-size:32px;letter-spacing:-.02
 .bar u{position:absolute;top:0;bottom:0;width:1px;background:var(--line);text-decoration:none}
 .ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
 .perSub{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px;margin-top:16px}
+.next{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line-soft)}
+.next .lb{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.next .row{display:flex;flex-wrap:wrap;gap:8px}
+.next button{font:inherit;font-size:12.5px;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer;text-align:left;line-height:1.35}
+.next button:hover{border-color:var(--warn)}
+.next button b{font-family:var(--mono);font-weight:600;color:var(--warn);display:block;font-size:14px}
+.next button em{font-style:normal;color:var(--dim);font-size:11px}
+.next .done{color:var(--ok);font-size:12.5px}
 .ps{background:var(--panel2);border:1px solid var(--line-soft);border-radius:8px;padding:9px 11px}
 .ps .n{font-size:12px;color:var(--muted);margin-bottom:5px}
 .ps .v{font-family:var(--mono);font-size:15px;font-weight:600}
@@ -128,6 +136,7 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
     </div>
     <div class="ticks"><span>0%</span><span>상위 200주제 = 37%</span><span>326주제 = 47%</span><span>100%</span></div>
     <div class="perSub" id="perSub"></div>
+    <div class="next" id="next"></div>
   </section>
 
   <div class="ctl">
@@ -184,6 +193,32 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
          + '<div class="sb"><i style="width:' + r.toFixed(1) + '%"></i></div></div>';
     });
     document.getElementById('perSub').innerHTML = h;
+    renderNext(pc);
+  }
+
+  /* 「다음 N개를 더 하면 몇 %p」 — 목록이 빈도 순이라 안 외운 것의 앞쪽이 곧 다음 차례다.
+     외운 개수로는 얼마나 남았는지 가늠이 안 되므로 늘어날 기출 비중으로 적는다. */
+  function renderNext(pc){
+    var todo = [];
+    for (var i = 0; i < T.length && todo.length < 200; i++) {
+      if (!done[T[i].m]) todo.push(T[i]);
+    }
+    var box = document.getElementById('next');
+    if (!todo.length) {
+      box.innerHTML = '<div class="done">1,966개를 다 표시했습니다.</div>';
+      return;
+    }
+    var h = '<div class="lb">다음 목표</div><div class="row">';
+    [10, 25, 50, 100].forEach(function(n){
+      if (todo.length < n && n !== 10) return;
+      var take = todo.slice(0, Math.min(n, todo.length)), w = 0;
+      for (var i = 0; i < take.length; i++) w += take[i].q;
+      var gain = w / D.tot * 100;
+      h += '<button type="button" data-n="' + take.length + '">'
+         + '<b>+' + gain.toFixed(1) + '%p</b>'
+         + take.length + '개 더 · 누적 <em>' + (pc + gain).toFixed(1) + '%</em></button>';
+    });
+    box.innerHTML = h + '</div>';
   }
 
   function filtered(){
@@ -283,6 +318,21 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
     kw = e.target.value; shown = PAGE; render();
   });
   moreB.addEventListener('click', function(){ shown += PAGE; render(); });
+
+  document.getElementById('next').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    onlyTodo = true; kind = ''; subj = ''; kw = '';
+    document.getElementById('q').value = '';
+    shown = Math.max(PAGE, Number(b.dataset.n) || PAGE);
+    document.querySelectorAll('#subTabs .tab').forEach(function(t){
+      t.setAttribute('aria-pressed', t.dataset.v === '');
+    });
+    document.querySelectorAll('#kindTabs .tab').forEach(function(t){
+      t.setAttribute('aria-pressed', t.dataset.v === '__todo');
+    });
+    render();
+    document.getElementById('list').scrollIntoView({block:'start'});
+  });
 
   list.addEventListener('click', function(e){
     if (e.target.closest('.go')) return;          /* 이어가기 링크는 그대로 */
