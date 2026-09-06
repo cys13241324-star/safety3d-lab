@@ -266,8 +266,10 @@ def pair_questions(html, qa, url_of):
                 % (url_of(y, r, n), y, r, n, t, li))
         else:
             out.append('<div class="qa"><div class="qs">%s</div></div>' % li)
-    body = ('<div class="qaset"><div class="qalb">문항이 짚은 곳 — %d</div>%s</div>'
-            % (len(items), "".join(out)))
+    # 접어 둔다. 「글이 너무 많다」의 절반이 여기였다 — 문항은 확인용이지 첫 줄이
+    # 아니다. 몇 개인지는 접힌 채로도 보인다.
+    body = ('<details class="qaset"><summary>실제 문항 %d개에서 짚은 곳</summary>'
+            '%s</details>' % (len(items), "".join(out)))
     return body + html[m.end():]
 
 
@@ -296,6 +298,41 @@ def fold_repeat(html):
     folded = ('<details class="dup"><summary>글로 된 요약 — 아래 표와 같은 내용</summary>'
               + last.group(0) + "</details>")
     return html[:last.start()] + folded + html[last.end():]
+
+
+# 해설이 오는 순서는 회차 원문의 순서(해설 → 암기 → 이론 → 표)이지 **읽는 순서**가
+# 아니다. 수험생이 실제로 하는 일은 이렇다 — 무엇으로 갈리는지 잡고 → 외울 것을
+# 외우고 → 진짜 문제로 확인한다. 그래서 다시 세운다.
+#
+#   ① 암기   1,956 주제(99 %)에 있다. 가장 값어치 있는 한 줄인데 맨 밑에 있었다.
+#   ② 그림
+#   ③ 표     1,603 주제(82 %). 갈리는 자리를 한눈에 보여 준다.
+#   ④ 산문
+#   ⑤ 문항   증거는 뒤에 둔다.
+MNEM = re.compile(r"<p><strong>◈\s*암기</strong>(.*?)</p>", re.S)
+TBL = re.compile(r'<div class="ch">.*?</div>\s*<div class="tw">.*?</table></div>', re.S)
+QASET = re.compile(r'<details class="qaset">.*?</details>', re.S)
+DUP = re.compile(r'<details class="dup">.*?</details>', re.S)
+
+
+def restructure(html):
+    if not html:
+        return html
+    mn = ""
+    m = MNEM.search(html)
+    if m:
+        mn = ('<div class="mnem"><span>암기</span><p>%s</p></div>' % m.group(1).strip())
+        html = html[:m.start()] + html[m.end():]
+    tbl = "".join(TBL.findall(html))
+    html = TBL.sub("", html)
+    qa = "".join(QASET.findall(html))
+    html = QASET.sub("", html)
+    dup = "".join(DUP.findall(html))
+    html = DUP.sub("", html)
+    rest = html.strip()
+    if rest:
+        rest = '<div class="prose">%s</div>' % rest
+    return mn + tbl + rest + dup + qa
 
 
 def cbt_url(y, r, n):
@@ -327,7 +364,7 @@ def build():
         yc = collections.Counter(int(y) for y, r, n in qs)
         data.append({"i": i, "s": subj, "m": mid, "q": v["fq"], "k": v["kind"],
                      "c": v["ch"], "f": slim(v["front"]),
-                     "b": fold_repeat(pair_questions(slim(v["back"]), v["qa"], cbt_url)),
+                     "b": restructure(fold_repeat(pair_questions(slim(v["back"]), v["qa"], cbt_url))),
                      "fig": figs_focus.fig_for(mid),
                      "n": [["%s %s회 #%s" % (y, r, n), cbt_url(y, r, n)] for y, r, n in qs],
                      "y": [yc.get(yy, 0) for yy in YEARS],
@@ -463,12 +500,15 @@ input[type=search]{font:inherit;font-size:14px;padding:7px 12px;border-radius:8p
 ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 li{background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;overflow:hidden}
 li.done{border-color:var(--ok);background:var(--ok-soft)}
+li.open{border-color:var(--line);background:var(--panel)}
+li.open .hd{border-bottom:1px solid var(--line-soft)}
+li.open.done{border-color:var(--ok)}
 .hd{display:grid;grid-template-columns:40px 58px 1fr auto;gap:10px;align-items:center;padding:10px 12px;cursor:pointer}
 .rk{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:right}
 .fq{font-family:var(--mono);font-size:12.5px;color:var(--warn);white-space:nowrap}
 .fq b{font-size:15px;font-weight:600}
 .ttl{min-width:0}
-.ttl .m{font-weight:500;overflow-wrap:anywhere}
+.ttl .m{font-size:14.5px;font-weight:500;color:var(--text);overflow-wrap:anywhere;line-height:1.4}
 .ttl .sub{font-size:11.5px;color:var(--dim);margin-top:2px}
 /* 행 안의 두 그림. 숫자만 늘어놓으면 눈이 못 훑는다.
    ㆍ빈도 막대 — 길이 하나로 위아래 차이를 본다
@@ -483,7 +523,7 @@ li.done{border-color:var(--ok);background:var(--ok-soft)}
 .chip.f{color:var(--accent);border-color:var(--accent)}
 .ck{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--line);background:transparent;color:transparent;cursor:pointer;font-size:15px;line-height:1;flex:none}
 li.done .ck{border-color:var(--ok);color:var(--ok)}
-.bd{display:none;padding:0 14px 14px 14px;border-top:1px solid var(--line-soft)}
+.bd{display:none;padding:2px 16px 16px 16px}
 li.open .bd{display:block}
 /* 그림. 여섯이 나란히 서고 좁으면 두 줄, 더 좁으면 한 줄로 접힌다. */
 .figset{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
@@ -505,9 +545,13 @@ li.open .bd{display:block}
 @media (max-width:560px){.figset.one{grid-template-columns:1fr}}
 /* 표를 글로 옮긴 문단은 접어 둔다 — 지우지는 않는다 */
 /* 문항이 짚은 곳. 조각마다 그 답이 붙어 있던 문제를 앞에 세운다. */
-.qaset{margin:12px 0 4px}
-.qalb{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--dim);margin-bottom:8px}
+.qaset{margin:16px 0 4px;border-top:1px solid var(--line-soft);padding-top:12px}
+.qaset>summary{font-size:12.5px;color:var(--dim);cursor:pointer;list-style:none}
+.qaset>summary::-webkit-details-marker{display:none}
+.qaset>summary::before{content:'▸ ';color:var(--dim)}
+.qaset[open]>summary{margin-bottom:10px}
+.qaset[open]>summary::before{content:'▾ '}
+.qaset>summary:hover{color:var(--muted)}
 .qa{margin:0 0 8px;padding:9px 11px;border:1px solid var(--line-soft);border-radius:8px;
   background:var(--panel2)}
 .qq{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;margin-bottom:6px}
@@ -524,7 +568,39 @@ li.open .bd{display:block}
 .dup summary::before{content:'▸ ';color:var(--dim)}
 .dup[open] summary::before{content:'▾ '}
 .dup p{margin:8px 0 0;color:var(--muted);font-size:13.5px}
-.bd .q{font-weight:600;margin:12px 0 8px}
+/* ── 해설의 위계 ───────────────────────────────────────────────────────
+   보이는 것이 다 같은 무게면 어디를 볼지 알 수 없다. 굵게 쓰는 자리는 하나다.
+
+   ① 암기   1,956 주제(99 %)에 있는 한 줄. **이 판에서 유일하게 큰 것.**
+   ② 표     갈리는 자리. 값에 표시가 붙는다.
+   ③ 산문   받쳐 주는 말. 물린다.
+   ④ 문항   접어 둔다 — 확인용이지 첫 줄이 아니다.
+
+   원문의 <strong> 은 용어, <u> 는 **외울 값**이다(각각 11,870 · 16,492 곳).
+   뜻이 이미 나뉘어 있는데 둘 다 밋밋하게 두고 있었다. <u> 를 살린다. */
+.bd .q{font-size:16px;font-weight:600;margin:13px 0 2px;line-height:1.5;color:var(--text)}
+
+.mnem{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;
+  margin:14px 0 16px;padding:12px 15px 12px 13px;border-left:3px solid var(--warn);
+  border-radius:0 10px 10px 0;background:var(--warn-soft)}
+.mnem>span{font-size:11.5px;font-weight:600;color:var(--warn);padding-top:3px;white-space:nowrap}
+.mnem p{margin:0;font-size:15px;line-height:1.75;color:var(--text)}
+.mnem u{text-decoration:none;border-bottom:2px solid var(--warn);padding-bottom:1px}
+.mnem strong{font-weight:600}
+
+/* 외울 값에 표시를 붙인다. 밑줄 한 줄은 글 무더기 안에서 안 보인다. */
+.bd .a u{text-decoration:none;background:var(--warn-soft);color:var(--text);
+  padding:1px 4px;margin:0 -1px;border-radius:4px;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.bd .a strong{color:var(--text);font-weight:600}
+
+.prose{margin:12px 0 0;font-size:13.5px;line-height:1.75;color:var(--dim)}
+.prose p{margin:0 0 7px}
+.prose strong{color:var(--muted)}
+.prose u{background:none;padding:0;color:var(--muted);
+  border-bottom:1px solid var(--line)}
+
+.bd .a .ch{margin:16px 0 6px;font-weight:600;color:var(--text);font-size:13.5px}
 .bd .a{color:var(--muted);font-size:14px;line-height:1.7}
 .bd .a strong{color:var(--text)}
 .bd .a u{text-decoration:none;border-bottom:1px solid var(--warn-line);color:var(--text)}
@@ -535,7 +611,7 @@ li.open .bd{display:block}
 .bd .a td,.bd .a th{border:1px solid var(--line-soft)!important;padding:5px 9px!important;vertical-align:middle}
 .bd .a th{background:var(--panel2)!important;color:var(--text)}
 .bd .a td{color:var(--muted)}
-.bd .a td u,.bd .a th u{color:var(--text)}
+.bd .a td u,.bd .a th u{color:var(--text);background:var(--warn-soft);padding:1px 5px;border-radius:4px;font-weight:500}
 .bd .a .tw{overflow-x:auto;max-width:100%}
 .bd .a .ch{margin:12px 0 2px;font-weight:700;color:var(--text)}
 
@@ -843,7 +919,7 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
         +   '<span class="ttl"><span class="m">' + esc(x.m) + '</span>'
         +     '<span class="sub"><span class="chip">' + esc(D.short[x.s] || x.s) + '</span>'
         +     '<span class="chip' + (x.k === '공식형' ? ' f' : '') + '">' + esc(x.k) + '</span>'
-        +     esc(x.c) + ' · ' + x.n.length + '문항 출제' + yrsHtml(x) + '</span></span>'
+        +     esc(x.c) + yrsHtml(x) + '</span></span>'
         +   '<button class="ck" type="button" aria-label="외웠음 표시" aria-pressed="' + d + '">✓</button>'
         + '</div>'
         + '<div class="bd"><div class="q">' + x.f + '</div>'
