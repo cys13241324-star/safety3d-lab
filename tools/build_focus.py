@@ -149,10 +149,12 @@ def load_cbt():
             subj = CANON.get((c.get("subject") or "").strip(),
                              (c.get("subject") or "").strip())
             key = (subj, mid)
-            e = topics.setdefault(key, {"fq": 0, "q": [], "kind": c.get("kind", ""),
+            e = topics.setdefault(key, {"fq": 0, "q": [], "qa": [],
+                                        "kind": c.get("kind", ""),
                                         "ch": c.get("chapter", ""),
                                         "front": "", "back": ""})
             e["q"].append((y, r, q.get("n")))
+            e["qa"].append((y, r, q.get("n"), q.get("t") or "", q.get("sol") or ""))
             if not e["front"]:
                 e["front"] = c.get("front") or ""
             if len(c.get("back") or "") > len(e["back"]):
@@ -223,6 +225,52 @@ TABLE_AT = re.compile(r'<div class="ch">.*?</div>\s*<div class="tw"><table>(.*?)
 ROW1 = re.compile(r"<tr><td[^>]*>(.*?)</td>", re.S)
 
 
+# 해설 맨 앞의 `<ul><li>…</li></ul>` 은 **이 주제를 쓰는 여러 문항의 답 설명**을
+# 이어 붙인 것이다. 한 문항 안에서는 멀쩡하지만 한자리에 모으면 주어를 잃는다 —
+# 「접선물림점이다.」 만 남으면 무엇이 접선물림점인지 알 길이 없다.
+#
+# 그런데 그 조각은 어느 문항 `sol` 의 앞부분이다(1,143 개 중 1,136 개, 99.4 %).
+# 그러니 잃어버린 문제를 되돌려 줄 수 있다. 붙지 않는 것은 그대로 둔다.
+UL_HEAD = re.compile(r"^\s*<ul>(.*?)</ul>", re.S)
+LI = re.compile(r"<li>(.*?)</li>", re.S)
+
+
+def _flat(x):
+    return re.sub(r"\s+", "", re.sub(r"<[^>]+>", "", x or ""))
+
+
+def pair_questions(html, qa, url_of):
+    """조각마다 그 답이 붙어 있던 문제를 되돌려 준다."""
+    m = UL_HEAD.match(html or "")
+    if not m:
+        return html
+    items = LI.findall(m.group(1))
+    if not items:
+        return html
+    flat = [(y, r, n, t, _flat(sol)) for y, r, n, t, sol in qa]
+    out, used = [], set()
+    for li in items:
+        key = _flat(li)[:60]
+        hit = None
+        for y, r, n, t, sol in flat:
+            if key and sol.startswith(key) and (y, r, n) not in used:
+                hit = (y, r, n, t)
+                used.add((y, r, n))
+                break
+        if hit:
+            y, r, n, t = hit
+            out.append(
+                '<div class="qa"><div class="qq">'
+                '<a href="%s" target="_blank" rel="noopener">%s %s회 #%s ↗</a>'
+                '<span>%s</span></div><div class="qs">%s</div></div>'
+                % (url_of(y, r, n), y, r, n, t, li))
+        else:
+            out.append('<div class="qa"><div class="qs">%s</div></div>' % li)
+    body = ('<div class="qaset"><div class="qalb">문항이 짚은 곳 — %d</div>%s</div>'
+            % (len(items), "".join(out)))
+    return body + html[m.end():]
+
+
 def fold_repeat(html):
     if not html or "<table" not in html:
         return html
@@ -279,7 +327,7 @@ def build():
         yc = collections.Counter(int(y) for y, r, n in qs)
         data.append({"i": i, "s": subj, "m": mid, "q": v["fq"], "k": v["kind"],
                      "c": v["ch"], "f": slim(v["front"]),
-                     "b": fold_repeat(slim(v["back"])),
+                     "b": fold_repeat(pair_questions(slim(v["back"]), v["qa"], cbt_url)),
                      "fig": figs_focus.fig_for(mid),
                      "n": [["%s %s회 #%s" % (y, r, n), cbt_url(y, r, n)] for y, r, n in qs],
                      "y": [yc.get(yy, 0) for yy in YEARS],
@@ -456,6 +504,20 @@ li.open .bd{display:block}
 .nb em{grid-column:1/-1;font-style:normal;font-size:11px;color:var(--dim)}
 @media (max-width:560px){.figset.one{grid-template-columns:1fr}}
 /* 표를 글로 옮긴 문단은 접어 둔다 — 지우지는 않는다 */
+/* 문항이 짚은 곳. 조각마다 그 답이 붙어 있던 문제를 앞에 세운다. */
+.qaset{margin:12px 0 4px}
+.qalb{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:8px}
+.qa{margin:0 0 8px;padding:9px 11px;border:1px solid var(--line-soft);border-radius:8px;
+  background:var(--panel2)}
+.qq{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;margin-bottom:6px}
+.qq a{font-family:var(--mono);font-size:11px;color:var(--dim);text-decoration:none;
+  border:1px solid var(--line-soft);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.qq a:hover{border-color:var(--warn);color:var(--text)}
+.qq span{font-size:13px;color:var(--text);font-weight:500}
+.qs{font-size:13.5px;color:var(--muted);line-height:1.65}
+.qs strong{color:var(--text)}
+.qs u{text-decoration:none;border-bottom:1px solid var(--warn-line);color:var(--text)}
 .dup{margin:10px 0;border-left:2px solid var(--line-soft);padding-left:10px}
 .dup summary{font-size:12px;color:var(--dim);cursor:pointer;list-style:none}
 .dup summary::-webkit-details-marker{display:none}
