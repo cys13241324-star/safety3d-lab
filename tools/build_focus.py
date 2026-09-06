@@ -318,6 +318,13 @@ h1{font-family:var(--display);font-weight:700;font-size:32px;letter-spacing:-.02
 .next button b{font-family:var(--mono);font-weight:600;color:var(--warn);display:block;font-size:14px}
 .next button em{font-style:normal;color:var(--dim);font-size:11px}
 .next .done{color:var(--ok);font-size:12.5px}
+.plan{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line-soft)}
+.plan .lb{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.plan .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
+.plan label{color:var(--dim);font-size:12.5px}
+.plan input[type=date]{font:inherit;font-size:13px;padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--text)}
+.plan b{color:var(--warn);font-family:var(--mono);font-weight:600}
+.plan .warn{color:var(--bad)}
 .ps{background:var(--panel2);border:1px solid var(--line-soft);border-radius:8px;padding:9px 11px}
 .ps .n{font-size:12px;color:var(--muted);margin-bottom:5px}
 .ps .v{font-family:var(--mono);font-size:15px;font-weight:600}
@@ -411,6 +418,14 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
     <div class="ticks"><span>0%</span><span>상위 200주제 = 37%</span><span>326주제 = 47%</span><span>100%</span></div>
     <div class="perSub" id="perSub"></div>
     <div class="next" id="next"></div>
+    <div class="plan" id="plan">
+      <div class="lb">시험까지</div>
+      <div class="row">
+        <label for="dday">시험일</label>
+        <input type="date" id="dday" aria-describedby="planOut">
+        <span id="planOut">날짜를 넣으면 하루 몇 개씩 해야 하는지 계산합니다.</span>
+      </div>
+    </div>
   </section>
 
   <div class="ctl">
@@ -468,6 +483,7 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
     });
     document.getElementById('perSub').innerHTML = h;
     renderNext(pc);
+    renderPlan();
   }
 
   /* 「다음 N개를 더 하면 몇 %p」 — 목록이 빈도 순이라 안 외운 것의 앞쪽이 곧 다음 차례다.
@@ -592,6 +608,39 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
     kw = e.target.value; shown = PAGE; render();
   });
   moreB.addEventListener('click', function(){ shown += PAGE; render(); });
+
+  /* 시험까지 며칠 남았고 하루 몇 개씩 해야 하는지. 「다음 10개」가 얼마를 벌어
+     주는지는 알려 줘도, 그것을 언제까지 몇 번 해야 하는지는 안 알려 준다. */
+  var DDAY = 'safety_focus_dday';
+  function renderPlan(){
+    var el = document.getElementById('planOut'), inp = document.getElementById('dday');
+    var v = inp.value;
+    if(!v){ el.textContent = '날짜를 넣으면 하루 몇 개씩 해야 하는지 계산합니다.'; return; }
+    var t = new Date(v + 'T00:00:00'), now = new Date();
+    now.setHours(0,0,0,0);
+    var days = Math.round((t - now) / 86400000);
+    var todo = 0, w = 0;
+    for(var i = 0; i < T.length; i++){ if(!done[T[i].m]){ todo++; w += T[i].q; } }
+    if(days < 0){ el.innerHTML = '<span class="warn">시험일이 지났습니다.</span>'; return; }
+    if(days === 0){ el.innerHTML = '<b>오늘</b>입니다. 남은 ' + todo.toLocaleString() + '개는 오늘 몫이 아닙니다 — 체크한 것만 보고 가십시오.'; return; }
+    var per = Math.ceil(todo / days);
+    var g326 = Math.max(0, 326 - (T.length - todo));
+    var msg = '<b>' + days + '일</b> 남았습니다. 남은 ' + todo.toLocaleString() + '개를 다 하려면 하루 <b>' + per.toLocaleString() + '개</b>';
+    if(g326 > 0){
+      msg += ' · 상위 326개(기출 47 %)까지만 하면 하루 <b>' + Math.ceil(g326 / days) + '개</b>';
+    } else {
+      msg += ' · 상위 326개는 이미 넘었습니다';
+    }
+    el.innerHTML = msg;
+  }
+  (function(){
+    var inp = document.getElementById('dday');
+    try{ var v = localStorage.getItem(DDAY); if(v) inp.value = v; }catch(e){}
+    inp.addEventListener('change', function(){
+      try{ localStorage.setItem(DDAY, inp.value); }catch(e){}
+      renderPlan();
+    });
+  }());
 
   document.getElementById('next').addEventListener('click', function(e){
     var b = e.target.closest('button'); if (!b) return;
