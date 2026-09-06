@@ -95,6 +95,7 @@ SHORT = {"안전관리론": "안전관리",
          "전기위험방지기술": "전기",
          "화학설비위험방지기술": "화학",
          "건설안전기술": "건설"}
+YEARS = [2021, 2022, 2023, 2024, 2025, 2026]
 ORDER = ["안전관리론", "인간공학 및 시스템안전공학", "기계위험방지기술",
          "전기위험방지기술", "화학설비위험방지기술", "건설안전기술"]
 
@@ -238,9 +239,11 @@ def build():
             ngm += 1
         if t3:
             ng3 += 1
+        yc = collections.Counter(int(y) for y, r, n in qs)
         data.append({"i": i, "s": subj, "m": mid, "q": v["fq"], "k": v["kind"],
                      "c": v["ch"], "f": slim(v["front"]), "b": slim(v["back"]),
                      "n": [["%s %s회 #%s" % (y, r, n), cbt_url(y, r, n)] for y, r, n in qs],
+                     "y": [yc.get(yy, 0) for yy in YEARS],
                      "g": g[0], "gt": g[1], "t3": t3, "t3n": t3n})
 
     per = collections.Counter()
@@ -248,10 +251,19 @@ def build():
         per[d["s"]] += d["q"]
     marks = [(n, round(sum(d["q"] for d in data[:n]) / tot * 100, 1))
              for n in (50, 100, 200, 326, 500, 800)]
+    # 누적 곡선. 1,966 점을 다 실을 까닭이 없어 120 점으로 고르게 줄인다.
+    acc, cum = 0, []
+    step = max(1, len(data) // 120)
+    for i, d in enumerate(data):
+        acc += d["q"]
+        if i % step == 0 or i == len(data) - 1:
+            cum.append([i + 1, round(acc / tot * 100, 2)])
 
     payload = json.dumps({"t": data, "tot": tot, "nq": nq, "nr": len(rounds),
                           "per": dict(per), "order": ORDER, "short": SHORT,
-                          "ver": VER},
+                          "ver": VER, "years": YEARS, "cum": cum,
+                          "qmax": max(d["q"] for d in data),
+                          "marks": [list(m) for m in marks]},
                          ensure_ascii=False, separators=(",", ":"))
     payload = payload.replace("</", "<\\/").replace("<!--", "<\\!--")
 
@@ -309,6 +321,29 @@ h1{font-family:var(--display);font-weight:700;font-size:32px;letter-spacing:-.02
 .bar i{display:block;height:100%;background:var(--warn);width:0;transition:width .3s}
 .bar u{position:absolute;top:0;bottom:0;width:1px;background:var(--line);text-decoration:none}
 .ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+/* 누적 곡선. 한 계열뿐이라 범례가 없다 — 캡션이 무엇을 그렸는지 말한다.
+   선 2px · 채움은 같은 색 10 % · 격자는 실선 hairline 으로 뒤로 물린다. */
+.pareto{margin:18px 0 0;padding:0}
+.pareto figcaption{font-size:12px;color:var(--muted);margin:0 0 8px}
+.pwrap{overflow-x:auto}
+.pareto svg{display:block;width:100%;min-width:320px;height:auto;overflow:visible}
+.pareto .grid{stroke:var(--line-soft);stroke-width:1;fill:none}
+.pareto .axis{fill:var(--dim);font-family:var(--mono);font-size:9.5px}
+.pareto .fill{fill:var(--warn);opacity:.10}
+.pareto .line{fill:none;stroke:var(--warn);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.pareto .mk{stroke:var(--line);stroke-width:1;fill:none}
+.pareto .dot{fill:var(--warn);stroke:var(--panel);stroke-width:2}
+.pareto .lbl{fill:var(--text);font-size:10.5px;font-family:var(--mono)}
+.pareto .you{stroke:var(--ok);stroke-width:1.5;fill:none;stroke-dasharray:none}
+.pareto .youl{fill:var(--ok);font-size:10px;font-family:var(--mono)}
+.pareto .hit{fill:transparent;cursor:crosshair}
+.pareto .cross{stroke:var(--dim);stroke-width:1;fill:none;opacity:0}
+.pareto .cdot{fill:var(--text);stroke:var(--panel);stroke-width:2;opacity:0}
+.legend{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:0 0 10px;padding:9px 12px;border:1px solid var(--line-soft);border-radius:8px;background:var(--panel);font-size:12px;color:var(--dim);line-height:1.6}
+.legend b{color:var(--muted);font-weight:600}
+.legend em{font-style:normal;color:var(--warn)}
+.phint{margin-top:6px;font-size:12px;color:var(--muted)}
+.phint b{color:var(--warn);font-family:var(--mono);font-weight:600}
 .perSub{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px;margin-top:16px}
 .next{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line-soft)}
 .next .lb{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
@@ -341,13 +376,22 @@ input[type=search]{font:inherit;font-size:14px;padding:7px 12px;border-radius:8p
 ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 li{background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;overflow:hidden}
 li.done{border-color:var(--ok);background:var(--ok-soft)}
-.hd{display:grid;grid-template-columns:44px 52px 1fr auto;gap:10px;align-items:center;padding:10px 12px;cursor:pointer}
+.hd{display:grid;grid-template-columns:40px 58px 1fr auto;gap:10px;align-items:center;padding:10px 12px;cursor:pointer}
 .rk{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:right}
 .fq{font-family:var(--mono);font-size:12.5px;color:var(--warn);white-space:nowrap}
 .fq b{font-size:15px;font-weight:600}
 .ttl{min-width:0}
 .ttl .m{font-weight:500;overflow-wrap:anywhere}
 .ttl .sub{font-size:11.5px;color:var(--dim);margin-top:2px}
+/* 행 안의 두 그림. 숫자만 늘어놓으면 눈이 못 훑는다.
+   ㆍ빈도 막대 — 길이 하나로 위아래 차이를 본다
+   ㆍ연도 칸 — 2021~2026 여섯 칸. **아직도 나오는 주제인지**가 여기서 보인다 */
+.fqwrap{display:flex;flex-direction:column;gap:3px}
+.fqbar{height:4px;border-radius:0 2px 2px 0;background:var(--warn);opacity:.85;min-width:2px}
+.yrs{display:inline-flex;align-items:flex-end;gap:2px;height:11px;margin-left:7px;vertical-align:-1px}
+.yrs i{width:3px;background:var(--line);border-radius:1px 1px 0 0}
+.yrs i.on{background:var(--accent)}
+.yrs i.hot{background:var(--warn)}
 .chip{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--panel2);border:1px solid var(--line-soft);color:var(--muted);margin-right:5px}
 .chip.f{color:var(--accent);border-color:var(--accent)}
 .ck{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--line);background:transparent;color:transparent;cursor:pointer;font-size:15px;line-height:1;flex:none}
@@ -387,7 +431,7 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
 @media (max-width:560px){
   .wrap{padding:20px 12px 80px}
   h1{font-size:26px}
-  .hd{grid-template-columns:38px 46px 1fr auto;gap:8px;padding:9px 10px}
+  .hd{grid-template-columns:32px 50px 1fr auto;gap:8px;padding:9px 10px}
   .prog{padding:16px}
   .prog .pc{font-size:32px}
 }
@@ -416,6 +460,14 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
       <i id="bar"></i><u style="left:37%"></u><u style="left:47.3%"></u>
     </div>
     <div class="ticks"><span>0%</span><span>상위 200주제 = 37%</span><span>326주제 = 47%</span><span>100%</span></div>
+
+    <figure class="pareto">
+      <figcaption>빈도 순으로 쌓은 누적 기출 비중 — 앞이 가파르다</figcaption>
+      <div class="pwrap"><svg id="pareto" viewBox="0 0 640 172" role="img"
+        aria-label="주제를 출제빈도 순으로 쌓았을 때의 누적 기출 비중. 상위 200개가 37 %, 326개가 47 %."></svg></div>
+      <div class="phint" id="phint">상위 <b>200</b>개가 기출의 <b>37 %</b></div>
+    </figure>
+
     <div class="perSub" id="perSub"></div>
     <div class="next" id="next"></div>
     <div class="plan" id="plan">
@@ -436,6 +488,10 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
     <input type="search" id="q" placeholder="주제 검색" aria-label="주제 검색">
     <span class="cnt" id="cnt"></span>
   </div>
+
+  <p class="legend"><span class="yrs" aria-hidden="true"><i class="on" style="height:5px"></i><i class="on" style="height:8px"></i><i style="height:1px"></i><i class="hot" style="height:6px"></i><i class="hot" style="height:11px"></i><i class="hot" style="height:4px"></i></span>
+    행 오른쪽 여섯 칸은 <b>2021 → 2026</b> 해마다 몇 번 나왔는지입니다. 낮은 칸은 그해 안 나온 것이고,
+    <em>진한 칸</em>이 2025·2026 입니다 — <b>아직도 나오는 주제인지</b>가 여기서 보입니다.</p>
 
   <ol id="list"></ol>
   <button class="more" id="more" type="button" hidden>더 보기</button>
@@ -484,10 +540,100 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
     document.getElementById('perSub').innerHTML = h;
     renderNext(pc);
     renderPlan();
+    drawPareto(pc);
   }
 
   /* 「다음 N개를 더 하면 몇 %p」 — 목록이 빈도 순이라 안 외운 것의 앞쪽이 곧 다음 차례다.
      외운 개수로는 얼마나 남았는지 가늠이 안 되므로 늘어날 기출 비중으로 적는다. */
+  /* ── 누적 곡선 ────────────────────────────────────────────────────────────
+     x 는 주제 순위(1..1966)를 그대로 선형으로 둔다. 로그로 펴면 앞쪽이 편해
+     보이지만, **앞이 가파르다는 것 자체가 이 그림의 말**이라 펴면 안 된다.
+     한 계열뿐이므로 범례는 없고, 값표는 200·326 두 자리에만 단다. */
+  var PL = {l:44, r:620, t:16, b:130};
+  function px(i){ return PL.l + (i - 1) / (T.length - 1) * (PL.r - PL.l); }
+  function py(v){ return PL.b - v / 100 * (PL.b - PL.t); }
+
+  function drawPareto(pc){
+    var svg = document.getElementById('pareto');
+    if(!svg || !D.cum || !D.cum.length) return;
+    var C = D.cum, h = '';
+    /* 격자 — 뒤로 물린 실선 */
+    [25, 50, 75, 100].forEach(function(v){
+      h += '<path class="grid" d="M' + PL.l + ' ' + py(v).toFixed(1)
+         + 'H' + PL.r + '"/>'
+         + '<text class="axis" x="' + (PL.l - 6) + '" y="' + (py(v) + 3.5).toFixed(1)
+         + '" text-anchor="end">' + v + '%</text>';
+    });
+    /* 채움과 선 */
+    var d = 'M' + px(C[0][0]).toFixed(1) + ' ' + py(C[0][1]).toFixed(1);
+    for(var i = 1; i < C.length; i++){
+      d += 'L' + px(C[i][0]).toFixed(1) + ' ' + py(C[i][1]).toFixed(1);
+    }
+    h += '<path class="fill" d="' + d + 'L' + PL.r + ' ' + PL.b + 'H' + PL.l + 'Z"/>';
+    h += '<path class="line" d="' + d + '"/>';
+    /* 값표는 두 자리만 — 흩뿌리면 안 읽힌다 */
+    /* 두 값표가 곡선 위 가까운 데 앉아 서로 4px 까지 붙는다. 하나는 점 아래로,
+       하나는 위로 갈라 28px 를 벌린다. 글자는 겹치면 둘 다 못 읽는다. */
+    (D.marks || []).forEach(function(m){
+      if(m[0] !== 200 && m[0] !== 326) return;
+      var x = px(m[0]), y = py(m[1]), below = (m[0] === 200);
+      h += '<path class="mk" d="M' + x.toFixed(1) + ' ' + PL.b + 'V' + y.toFixed(1) + '"/>'
+         + '<circle class="dot" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="4"/>'
+         + '<text class="lbl" x="' + (x + 9).toFixed(1) + '" y="'
+         + (below ? y + 16 : y - 8).toFixed(1)
+         + '">' + m[0] + '개 · ' + m[1] + '%</text>';
+    });
+    /* 지금 덮은 만큼을 가로줄로 */
+    if(pc > 0.05){
+      var yy = py(Math.min(100, pc));
+      h += '<path class="you" d="M' + PL.l + ' ' + yy.toFixed(1) + 'H' + PL.r + '"/>'
+         + '<text class="youl" x="' + PL.r + '" y="' + (yy - 6).toFixed(1)
+         + '" text-anchor="end">지금 ' + pc.toFixed(1) + '%</text>';
+    }
+    /* x 축 눈금 */
+    [1, 500, 1000, 1500, T.length].forEach(function(v){
+      h += '<text class="axis" x="' + px(v).toFixed(1) + '" y="' + (PL.b + 16)
+         + '" text-anchor="middle">' + (v === 1 ? '1위' : v.toLocaleString()) + '</text>';
+    });
+    h += '<text class="axis" x="' + PL.l + '" y="' + (PL.b + 32) + '">주제 순위 (빈도 순)</text>';
+    /* 짚어 보기 */
+    h += '<path class="cross" id="pcx" d="M0 ' + PL.t + 'V' + PL.b + '"/>'
+       + '<circle class="cdot" id="pcd" r="4"/>'
+       + '<rect class="hit" id="phit" x="' + PL.l + '" y="' + PL.t + '" width="'
+       + (PL.r - PL.l) + '" height="' + (PL.b - PL.t) + '"/>';
+    svg.innerHTML = h;
+    wirePareto();
+  }
+
+  function wirePareto(){
+    var svg = document.getElementById('pareto'), hit = document.getElementById('phit');
+    if(!hit) return;
+    var cx = document.getElementById('pcx'), cd = document.getElementById('pcd'),
+        hint = document.getElementById('phint'), C = D.cum;
+    function at(e){
+      var r = svg.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width * 640;
+      var i = Math.round((x - PL.l) / (PL.r - PL.l) * (T.length - 1)) + 1;
+      i = Math.max(1, Math.min(T.length, i));
+      var j = 0;
+      while(j < C.length - 1 && C[j + 1][0] < i) j++;
+      var v = C[j][1];
+      cx.setAttribute('d', 'M' + px(i).toFixed(1) + ' ' + PL.t + 'V' + PL.b);
+      cx.style.opacity = 1;
+      cd.setAttribute('cx', px(i).toFixed(1));
+      cd.setAttribute('cy', py(v).toFixed(1));
+      cd.style.opacity = 1;
+      hint.innerHTML = '상위 <b>' + i.toLocaleString() + '</b>개가 기출의 <b>'
+                     + v.toFixed(1) + ' %</b>';
+    }
+    hit.addEventListener('mousemove', at);
+    hit.addEventListener('touchmove', function(e){ if(e.touches[0]) at(e.touches[0]); });
+    hit.addEventListener('mouseleave', function(){
+      cx.style.opacity = 0; cd.style.opacity = 0;
+      hint.innerHTML = '상위 <b>200</b>개가 기출의 <b>37 %</b>';
+    });
+  }
+
   function renderNext(pc){
     var todo = [];
     for (var i = 0; i < T.length && todo.length < 200; i++) {
@@ -525,6 +671,22 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
   function esc(s){ return (s || '').replace(/[<>&"]/g, function(c){
     return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
 
+  /* 2021~2026 여섯 칸. 높이는 그해 출제 수, 색은 최근일수록 진하게.
+     빈 해는 1px 밑줄만 남겨 「그 해엔 안 나왔다」를 말한다. */
+  function yrsHtml(x){
+    if(!x.y) return '';
+    var mx = Math.max.apply(null, x.y) || 1, h = '<span class="yrs" aria-hidden="true">';
+    for(var i = 0; i < x.y.length; i++){
+      var v = x.y[i], ht = v === 0 ? 1 : Math.round(3 + v / mx * 8), st = ' style="height:';
+      /* 클래스 이름을 변수에 담아 이어 붙이면 파일에 `class="on"` 이 한 번도 안
+         적힌다. 검사기도 사람도 그것을 못 찾는다. 그대로 적는다. */
+      if(v === 0)                  h += '<i' + st + '1px"></i>';
+      else if(D.years[i] >= 2025)  h += '<i class="hot"' + st + ht + 'px"></i>';
+      else                         h += '<i class="on"' + st + ht + 'px"></i>';
+    }
+    return h + '</span>';
+  }
+
   function goHtml(x){
     var h = '<div class="go"><div class="lb">이어가기</div><div class="qs">';
     for (var i = 0; i < x.n.length; i++) {
@@ -550,11 +712,12 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
       h += '<li class="' + (d ? 'done' : '') + '" data-m="' + esc(x.m) + '">'
         + '<div class="hd" role="button" tabindex="0" aria-expanded="false">'
         +   '<span class="rk mono">' + (x.i + 1) + '</span>'
-        +   '<span class="fq mono"><b>' + x.q + '</b>회</span>'
+        +   '<span class="fqwrap"><span class="fq mono"><b>' + x.q + '</b>회</span>'
+        +     '<span class="fqbar" style="width:' + Math.max(6, x.q / D.qmax * 100).toFixed(0) + '%"></span></span>'
         +   '<span class="ttl"><span class="m">' + esc(x.m) + '</span>'
         +     '<span class="sub"><span class="chip">' + esc(D.short[x.s] || x.s) + '</span>'
         +     '<span class="chip' + (x.k === '공식형' ? ' f' : '') + '">' + esc(x.k) + '</span>'
-        +     esc(x.c) + ' · ' + x.n.length + '문항 출제</span></span>'
+        +     esc(x.c) + ' · ' + x.n.length + '문항 출제' + yrsHtml(x) + '</span></span>'
         +   '<button class="ck" type="button" aria-label="외웠음 표시" aria-pressed="' + d + '">✓</button>'
         + '</div>'
         + '<div class="bd"><div class="q">' + x.f + '</div><div class="a">' + x.b + '</div>'
