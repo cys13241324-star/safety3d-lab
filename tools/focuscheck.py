@@ -302,8 +302,10 @@ def main():
 
     eat(s)
     for x in T:
-        eat(x["b"])
-        eat(x["f"])
+        # 마크업을 실어 오는 필드를 다 본다. 새 필드를 더하면 여기도 더해야 한다 —
+        # fig 를 더하고 잊었더니 figset·hz 가 「안 쓰는 규칙」으로 잡혔다.
+        for k in ("b", "f", "fig"):
+            eat(x.get(k))
     # 스크립트가 `'chip' + ' f'` 처럼 이어 붙이는 것과 classList 로 다는 것
     for m in re.finditer(r"classList" + BS + r".(?:add|toggle|remove)" + BS + r"(\s*['\"]([^'\"]+)", s):
         if NAME.match(m.group(1)):

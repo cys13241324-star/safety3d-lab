@@ -36,6 +36,7 @@ python tools/build_focus.py   focus.html 을 회차와 암기 은행에서 다�
 python tools/focuscheck.py    지어낸 focus.html 이 성한지 여섯 갈래로 본다
 python tools/linkcheck.py     여섯 페이지가 서로 이어지는지 · 해시가 대상에 있는지
 python tools/classcheck.py    클래스가 마크업과 CSS 양쪽에 붙어 있는지
+python tools/figcheck.py      빈출 지도의 그림이 성한지 (좌표·id·태그)
 python tools/check.py         reigns 검사기 모음 (artlint · anchor · lawcheck · hitcheck · shape · onobj)
 python tools/sim-balance.py   밸런스 몬테카를로 (게이지 넷만 모형으로 삼는 구버전)
 cscript //nologo tools/harness.js reigns.html 300    shipped 코드를 그대로 돌리는 하네스

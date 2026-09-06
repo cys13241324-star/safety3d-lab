@@ -33,6 +33,8 @@ import re
 import sys
 import urllib.parse
 
+import figs_focus
+
 try:
     sys.stdout.reconfigure(encoding="utf-8")
 except (AttributeError, OSError):
@@ -213,6 +215,41 @@ def slim(html):
     return html
 
 
+# 해설이 같은 말을 세 번 한다. 회차 원문이 「해설 → 암기 → 관련이론 → 표」를 이어
+# 붙여 오는데, **관련이론 산문이 바로 뒤 표를 글로 옮긴 것**인 경우가 많다.
+# 표의 첫 칸 이름이 그 문단에 다 들어 있으면 그 문단은 표를 되풀이한 것이다.
+# 지우지는 않는다 — 접어 두고 「글로 된 요약」이라 이름을 붙인다.
+TABLE_AT = re.compile(r'<div class="ch">.*?</div>\s*<div class="tw"><table>(.*?)</table>', re.S)
+ROW1 = re.compile(r"<tr><td[^>]*>(.*?)</td>", re.S)
+
+
+def fold_repeat(html):
+    if not html or "<table" not in html:
+        return html
+    m = TABLE_AT.search(html)
+    if not m:
+        return html
+    labels = [re.sub(r"<[^>]+>", "", x).strip() for x in ROW1.findall(m.group(1))]
+    labels = [x for x in labels if len(x) >= 2]
+    if len(labels) < 3:
+        return html
+    # 표 바로 앞 문단
+    head = html[:m.start()]
+    pm = list(re.finditer(r"<p>(.*?)</p>", head, re.S))
+    if not pm:
+        return html
+    last = pm[-1]
+    txt = re.sub(r"<[^>]+>", "", last.group(1))
+    if last.end() < len(head) - 40:          # 표에 붙어 있지 않으면 딴 이야기다
+        return html
+    hit = sum(1 for L in labels if L in txt)
+    if hit < len(labels) * 0.8:              # 표를 되풀이한 것이 아니다
+        return html
+    folded = ('<details class="dup"><summary>글로 된 요약 — 아래 표와 같은 내용</summary>'
+              + last.group(0) + "</details>")
+    return html[:last.start()] + folded + html[last.end():]
+
+
 def cbt_url(y, r, n):
     folder = "CBT_%s_%s회" % (y, r)
     fname = "%s_%s회_학습.html" % (y, r)
@@ -241,7 +278,9 @@ def build():
             ng3 += 1
         yc = collections.Counter(int(y) for y, r, n in qs)
         data.append({"i": i, "s": subj, "m": mid, "q": v["fq"], "k": v["kind"],
-                     "c": v["ch"], "f": slim(v["front"]), "b": slim(v["back"]),
+                     "c": v["ch"], "f": slim(v["front"]),
+                     "b": fold_repeat(slim(v["back"])),
+                     "fig": figs_focus.fig_for(mid),
                      "n": [["%s %s회 #%s" % (y, r, n), cbt_url(y, r, n)] for y, r, n in qs],
                      "y": [yc.get(yy, 0) for yy in YEARS],
                      "g": g[0], "gt": g[1], "t3": t3, "t3n": t3n})
@@ -398,6 +437,31 @@ li.done{border-color:var(--ok);background:var(--ok-soft)}
 li.done .ck{border-color:var(--ok);color:var(--ok)}
 .bd{display:none;padding:0 14px 14px 14px;border-top:1px solid var(--line-soft)}
 li.open .bd{display:block}
+/* 그림. 여섯이 나란히 서고 좁으면 두 줄, 더 좁으면 한 줄로 접힌다. */
+.figset{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;margin:12px 0 4px}
+.hz{margin:0;padding:9px 8px 7px;border:1px solid var(--line-soft);border-radius:9px;
+  background:var(--panel2)}
+.hz svg{display:block;width:100%;height:auto}
+.hz figcaption{margin-top:5px;text-align:center;line-height:1.35}
+.hz figcaption b{display:block;font-size:12.5px;color:var(--text);font-weight:600}
+.hz figcaption span{font-size:11px;color:var(--dim);font-family:var(--mono)}
+/* 그림 하나에 숫자 몇 개가 딸리는 꼴. 그림은 왼쪽, 숫자는 오른쪽. */
+.figset.one{grid-template-columns:minmax(180px,1fr) minmax(200px,1.2fr)}
+.numset{display:flex;flex-direction:column;gap:5px;align-content:start}
+.nb{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:baseline;
+  padding:7px 10px;border:1px solid var(--line-soft);border-radius:7px;background:var(--panel2)}
+.nb b{font-size:12.5px;font-weight:500;color:var(--muted)}
+.nb i{font-style:normal;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--warn)}
+.nb em{grid-column:1/-1;font-style:normal;font-size:11px;color:var(--dim)}
+@media (max-width:560px){.figset.one{grid-template-columns:1fr}}
+/* 표를 글로 옮긴 문단은 접어 둔다 — 지우지는 않는다 */
+.dup{margin:10px 0;border-left:2px solid var(--line-soft);padding-left:10px}
+.dup summary{font-size:12px;color:var(--dim);cursor:pointer;list-style:none}
+.dup summary::-webkit-details-marker{display:none}
+.dup summary::before{content:'▸ ';color:var(--dim)}
+.dup[open] summary::before{content:'▾ '}
+.dup p{margin:8px 0 0;color:var(--muted);font-size:13.5px}
 .bd .q{font-weight:600;margin:12px 0 8px}
 .bd .a{color:var(--muted);font-size:14px;line-height:1.7}
 .bd .a strong{color:var(--text)}
@@ -720,7 +784,9 @@ footer{margin-top:36px;color:var(--dim);font-family:var(--mono);font-size:11.5px
         +     esc(x.c) + ' · ' + x.n.length + '문항 출제' + yrsHtml(x) + '</span></span>'
         +   '<button class="ck" type="button" aria-label="외웠음 표시" aria-pressed="' + d + '">✓</button>'
         + '</div>'
-        + '<div class="bd"><div class="q">' + x.f + '</div><div class="a">' + x.b + '</div>'
+        + '<div class="bd"><div class="q">' + x.f + '</div>'
+        +   (x.fig || '')
+        +   '<div class="a">' + x.b + '</div>'
         +   goHtml(x)
         + '</div></li>';
     }
