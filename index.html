@@ -51,6 +51,7 @@ h1{font-family:var(--display);font-weight:700;font-size:36px;letter-spacing:-.02
 @media (prefers-reduced-motion: reduce){.bg img{animation:none}}
 .wrap{position:relative;z-index:1}
 footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
+.viz.focus{display:flex;align-items:flex-end;gap:4px;padding:0 14px 14px;position:relative} .viz.focus i{flex:1;border-radius:2px 2px 0 0;background:var(--warn);opacity:.9} .viz.focus i:nth-child(n+5){background:var(--line);opacity:1} .viz.focus s{position:absolute;top:12px;right:14px;font-family:var(--mono);font-size:10.5px;color:var(--warn);text-decoration:none} .viz.focus s::before{content:'상위 200주제 = 37%'}
 .viz.game{position:relative;overflow:hidden} .viz.game .road{position:absolute;left:50%;bottom:0;width:78%;height:100%;transform:translateX(-50%);background:var(--line);opacity:.55;clip-path:polygon(44% 0,56% 0,100% 100%,0 100%)} .viz.game .sign{position:absolute;left:50%;top:18%;width:38%;height:44%;transform:translateX(-50%);background:var(--panel);border:1.5px solid var(--warn);border-radius:3px} .viz.game .sign:after{content:"";position:absolute;left:12%;right:30%;top:28%;height:2px;background:var(--line);box-shadow:0 9px 0 var(--line),0 18px 0 var(--line)} .viz.game .lamp{position:absolute;left:calc(50% + 21%);top:10%;width:9px;height:9px;border-radius:50%;background:var(--warn);box-shadow:0 0 10px var(--warn)}
 .viz.reigns{background:linear-gradient(180deg,#131C2C 0%,#0E1522 100%)}
 .viz.reigns .bar{position:absolute;top:12px;height:4px;border-radius:2px;opacity:.9} .viz.reigns .b0{left:8%;width:16%;background:#5CC08A} .viz.reigns .b1{left:28%;width:14%;background:#7FA6E0} .viz.reigns .b2{left:48%;width:16%;background:#E3B54D} .viz.reigns .b3{left:70%;width:9%;background:#B58FE0}
@@ -118,7 +119,15 @@ html{overscroll-behavior-y:contain}
       <h2>안전관리자의 하루</h2>
       <div class="viz reigns" aria-hidden="true"><i class="bar b0"></i><i class="bar b1"></i><i class="bar b2"></i><i class="bar b3"></i><i class="cd"></i><i class="ar l"></i><i class="ar r"></i></div>
       <p>규정을 지킬지 공기를 지킬지, 카드를 좌우로 밀어 결정합니다. 근로자 안전·공정률·예산·감독기관 네 게이지 중 하나라도 바닥나면 그날로 끝납니다. 넘긴 기준은 며칠 뒤 사고 카드로 돌아옵니다.</p>
-      <div class="nums"><div><b>40</b>규정 카드</div><div><b>10</b>사고 카드</div><div><b>60</b>일 준공</div></div>
+      <div class="nums"><div><b>115</b>규정 카드</div><div><b>10</b>사고 카드</div><div><b>60</b>일 준공</div></div>
+      <span class="go">들어가기 →</span>
+    </a>
+    <a class="tile focus" href="focus.html?v=09070100" aria-label="빈출 지도 들어가기">
+      <div class="k">06 · 우선순위</div>
+      <h2>빈출 지도</h2>
+      <div class="viz focus" aria-hidden="true"><i style="height:74%"></i><i style="height:62%"></i><i style="height:58%"></i><i style="height:48%"></i><i style="height:44%"></i><i style="height:36%"></i><i style="height:31%"></i><i style="height:27%"></i><i style="height:22%"></i><i style="height:18%"></i><i style="height:15%"></i><i style="height:12%"></i><i style="height:9%"></i><i style="height:7%"></i><s></s></div>
+      <p>기출 24회차를 헤아려 주제를 출제빈도 순으로 세웠습니다. 외운 것을 체크하면 그것이 기출의 몇 %를 덮는지 계산합니다. 진도를 개수가 아니라 <b>덮은 출제비중</b>으로 재는 곳입니다.</p>
+      <div class="nums"><div><b>1,966</b>주제</div><div><b>2,880</b>문항 집계</div><div><b>200</b>개면 37%</div></div>
       <span class="go">들어가기 →</span>
     </a>
   </div>
