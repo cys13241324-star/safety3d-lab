@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0A1018">
+<meta name="theme-color" content="#0A1018" id="mTheme">
+<script>(function(){try{var t=localStorage.getItem('safety_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <title>안전관리자의 하루</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +25,35 @@
   --display:"Gothic A1","IBM Plex Sans KR",sans-serif;
   color-scheme:dark;
 }
+
+/* 형제 다섯은 safety_theme 을 읽어 밝은 판으로 바뀌는데 이 페이지만 어두운 채였다
+   (ux.md D11). 다만 **카드와 종료 화면은 어두운 무대로 남긴다** — 현장 그림 SVG 가
+   색을 날로 334곳 박고 있고 그중 300곳이 DOC() 안이라, 밝은 쪽으로 칠하려면 그림을
+   통째로 다시 그려야 한다. 밝은 종이 위의 어두운 화면은 사진과 같아서 그렇게 두는
+   편이 읽기도 낫다. 그 안에서 쓰는 글자·선 색만 되돌린다. */
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#F1F4F9; --panel:#FFFFFF; --panel2:#E8EDF4;
+  --line:#C6D0DE; --line-soft:#DCE3EC;
+  --text:#14202E; --muted:#4A5568; --dim:#5C6B82;
+  --safe:#1F6B45; --pace:#2F5FA8; --coin:#8A6210; --gov:#6B4A9E;
+  --bad:#A8391F; --ok:#1F6B45; --warn:#8A6210;
+}
+:root[data-theme="light"] #card,
+:root[data-theme="light"] #over{
+  --text:#E8EEF8; --muted:#8C99B0; --dim:#7E8BA2;
+  --line:#33425C; --line-soft:#1E2938; --panel2:#182234;
+  --warn:#E3B54D; --bad:#F07056; --ok:#5CC08A;
+}
+/* 배경 그림은 어두운 하늘색이라 밝은 종이 위에서는 더 죽인다 */
+:root[data-theme="light"] #scene svg.on{opacity:.14}
+/* 팔레트 변수를 안 거치고 색을 박아 둔 자리 넷. 어두운 판만 보고 고른 값이라
+   밝은 종이 위에서는 따로 준다. */
+:root[data-theme="light"] .g .track{background:#D5DCE7}
+:root[data-theme="light"] .ch{border-color:var(--line)}
+:root[data-theme="light"] .ch:hover{background:#E3EAF3}
+/* 시트 단추 — 밝은 판의 --warn(#8A6210) 위에 #1A1200 은 3.39:1 로 안 읽힌다 */
+:root[data-theme="light"] #sheet .go{color:#FFFFFF}
 *{box-sizing:border-box} [hidden]{display:none!important}
 html,body{height:100%}
 /* iOS Safari 에서 height:100% 는 툴바가 없는 큰 뷰포트로 계산된다. 툴바가 떠 있으면
@@ -562,6 +592,7 @@ button{font:inherit;color:inherit}
   <span class="sp"></span>
   <a class="b" href="lab.html?v=09041852">3D 실습장</a>
   <a class="b" href="focus.html?v=09041852">빈출 지도</a>
+  <button class="b bTheme" type="button">밝은 모드</button>
   <button class="b" id="bReset" type="button">처음부터</button>
 </header>
 
@@ -5116,6 +5147,35 @@ button{font:inherit;color:inherit}
     if(saved) hint('이어서 ' + saved.day + '일차부터 — 처음부터 하려면 「새 현장」');
   }catch(e){ wipe(); reset(); }
 })();
+</script>
+
+<!-- 사이트 공통 테마. index.html 과 같은 열쇠(safety_theme)를 읽고 쓴다.
+     본편 스크립트와 떨어뜨려 둔 까닭은, 판이 깨져도 테마 단추는 살아 있어야
+     밝은 모드로 맞춰 둔 사람이 이 페이지만 눈부시지 않기 때문이다. -->
+<script>
+(function(){
+  function cur(){ return document.documentElement.getAttribute('data-theme') || 'dark'; }
+  function sync(){
+    var d = cur() === 'dark';
+    var m = document.getElementById('mTheme');
+    if(m) m.setAttribute('content', d ? '#0A1018' : '#F1F4F9');
+    var bs = document.querySelectorAll('.bTheme');
+    for(var i = 0; i < bs.length; i++){
+      bs[i].textContent = d ? '밝은 모드' : '어두운 모드';
+      bs[i].setAttribute('aria-pressed', String(d));
+    }
+  }
+  var bs = document.querySelectorAll('.bTheme');
+  for(var i = 0; i < bs.length; i++){
+    bs[i].addEventListener('click', function(){
+      var t = cur() === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      try{ localStorage.setItem('safety_theme', t); }catch(e){}
+      sync();
+    });
+  }
+  sync();
+}());
 </script>
 </body>
 </html>

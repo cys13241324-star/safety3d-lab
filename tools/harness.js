@@ -97,7 +97,10 @@ function readUtf8(path) {
   var t = s.ReadText(); s.Close(); return t;
 }
 var SRC = readUtf8(WScript.Arguments(0));
-var m = SRC.match(/<script>\r?\n([\s\S]*)\r?\n<\/script>/);
+// Non-greedy. The page now has more than one <script> block (the site theme
+// toggle sits at the end). A greedy match ran to the LAST </script> and pulled
+// a closing tag and an HTML comment into eval, which failed at init.
+var m = SRC.match(/<script>\r?\n([\s\S]*?)\r?\n<\/script>/);
 if (!m) { WScript.Echo('FAIL: no <script> block found'); WScript.Quit(1); }
 
 try { eval(m[1]); }
