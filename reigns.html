@@ -278,6 +278,8 @@ button{font:inherit;color:inherit}
   background:var(--panel2);border:1px solid var(--line-soft)}
 #sheet .delta .up{color:var(--ok)} #sheet .delta .dn{color:var(--bad)}
 #sheet .delta .z{color:var(--dim)}
+#sheet .jump{display:block;margin-top:12px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);color:var(--warn);text-decoration:none;font-size:13px}
+#sheet .jump:hover,#sheet .jump:focus-visible{border-color:var(--warn);background:var(--warn-soft)}
 #sheet .std{margin-top:14px;padding:12px 14px;border-radius:9px;background:var(--panel2);
   border:1px solid var(--line-soft)}
 #sheet .std .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--dim);display:block;margin-bottom:5px}
@@ -596,6 +598,7 @@ button{font:inherit;color:inherit}
   <div class="delta" id="sDelta"></div>
   <div class="std"><span class="k">규정 기준</span><span class="v" id="sStd"></span></div>
   <div class="law" id="sLaw"></div>
+  <a class="jump" id="sJump" hidden>3D 실습장에서 이 수치를 만져 본다 →</a>
   <button class="go" id="sGo" type="button">다음 날</button>
 </div>
 
@@ -3582,7 +3585,9 @@ button{font:inherit;color:inherit}
       $('hud').innerHTML = G.map(function(g, i){
         return '<div class="g" data-k="' + i + '">' +
           '<div class="lb"><span>' + g.n + '</span><b id="gv' + i + '">0</b></div>' +
-          '<div class="track"><div class="fill" id="gf' + i + '"></div></div>' +
+          '<div class="track" id="gt' + i + '" role="progressbar" aria-valuemin="0" ' +
+            'aria-valuemax="100" aria-valuenow="0" aria-label="' + g.n + '">' +
+            '<div class="fill" id="gf' + i + '"></div></div>' +
           '<span class="dlt" id="gd' + i + '"></span>' +
         '</div>';
       }).join('');
@@ -3592,6 +3597,12 @@ button{font:inherit;color:inherit}
       var g = $('gf' + i).parentNode.parentNode;
       g.classList.toggle('low', v <= 22);
       $('gv' + i).textContent = (v <= 22 ? '⚠ ' : '') + Math.round(v);
+      /* 색과 ⚠ 만으로는 화면을 못 읽는 사람에게 안 간다. 낭독기가 읽을 값을 같이 둔다. */
+      var t = $('gt' + i);
+      if(t){
+        t.setAttribute('aria-valuenow', Math.round(v));
+        t.setAttribute('aria-valuetext', Math.round(v) + (v <= 22 ? ' — 바닥에 가깝다' : ''));
+      }
     });
     $('mDay').innerHTML = st.day + '일차 <i>' + chapOf(st.day).name + '</i>';
     renderGear(init);
@@ -4686,6 +4697,7 @@ button{font:inherit;color:inherit}
       : '이 결정에 걸린 수치 기준은 없습니다. 남는 것은 사람과 일정입니다.');
     $('sLaw').textContent = c.law || '';
     $('sLaw').hidden = !c.law;
+    showJump(c);
     $('sheet').classList.add('on');
     $('sheet').setAttribute('aria-hidden', 'false');
     say($('sV').textContent + '. ' + ch.o + ' 기준: ' + hitSay(c) + (c.law ? '. 근거 ' + c.law : ''));
@@ -4693,6 +4705,21 @@ button{font:inherit;color:inherit}
 
     var d = st.g.findIndex(function(v){ return v <= 0; });
     $('sGo').textContent = d >= 0 ? '결과를 본다' : '다음 날';
+  }
+
+  /* 시트에서 3D 실습장으로 건너간다.
+     덱 카드 키 스물하나가 lab.html 의 topic id 와 글자까지 같다. 사고 카드는 art
+     에 그 태그를 달고 온다. 「1:1.8이 뭐지」까지 온 사람이 그 자리에서 값을 만져
+     볼 수 있어야 한다 — 사이트를 하나의 학습 루프로 묶는 마지막 한 칸이다. */
+  var LAB3D = {net:1, fall:1, rail:1, ladder:1, ramp:1, plank:1, scaffold:1,
+               stairs:1, trench:1, shore:1, powerline:1, roller:1, grinder:1,
+               press:1, approach:1, chemdist:1, gasweld:1, elcb:1, wirerope:1,
+               lux:1, vdt:1};
+  function showJump(c){
+    var el = $('sJump'), k = (c && (c.k || c.art || c.req)) || '';
+    if(!LAB3D[k]){ el.hidden = true; el.removeAttribute('href'); return; }
+    el.href = 'lab.html?v=09041852#topic=' + k;
+    el.hidden = false;
   }
 
   /* 시트를 닫고 하루를 넘긴다. 시트를 띄우지 않은 카드도 이리로 온다. */
