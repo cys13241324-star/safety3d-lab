@@ -184,6 +184,34 @@ def load_memo():
     return out
 
 
+# 회차 원문의 표는 셀마다 인라인 style 을 달고 온다. 28,226 곳에 2.4 MB 다.
+# 그 가운데 테두리·여백·배경은 어차피 이 페이지 CSS 가 !important 로 덮으므로
+# 실어 보낼 까닭이 없다. **text-align 만은 남긴다** — center 11,192 · left 12,225 로
+# 섞여 있어 한 값으로 몰면 표가 어그러진다.
+DROP = re.compile(r"(?:border|padding|vertical-align|background|border-collapse"
+                  r"|font-size|margin|font-weight)\s*:[^;\"]*;?")
+CELL = re.compile(r'(<(?:td|th)\b[^>]*?)\sstyle="([^"]*)"')
+
+
+def slim(html):
+    """해설에서 덮어쓸 인라인 style 을 걷는다. 뜻이 바뀌는 것은 남긴다."""
+    if not html:
+        return html
+
+    def cell(m):
+        rest = DROP.sub("", m.group(2)).strip().strip(";")
+        return m.group(1) + (' style="%s"' % rest if rest else "")
+
+    html = CELL.sub(cell, html)
+    # 표 자체의 style 은 셋 다 덮으므로 통째로 뗀다
+    html = re.sub(r'<table\b[^>]*?\sstyle="[^"]*"', "<table", html)
+    # 가로 스크롤 감싸개와 소제목은 클래스로 바꾼다
+    html = html.replace('<div style="overflow-x:auto">', '<div class="tw">')
+    html = html.replace('<div style="margin:12px 0 2px;font-weight:700">',
+                        '<div class="ch">')
+    return html
+
+
 def cbt_url(y, r, n):
     folder = "CBT_%s_%s회" % (y, r)
     fname = "%s_%s회_학습.html" % (y, r)
@@ -211,7 +239,7 @@ def build():
         if t3:
             ng3 += 1
         data.append({"i": i, "s": subj, "m": mid, "q": v["fq"], "k": v["kind"],
-                     "c": v["ch"], "f": v["front"], "b": v["back"],
+                     "c": v["ch"], "f": slim(v["front"]), "b": slim(v["back"]),
                      "n": [["%s %s회 #%s" % (y, r, n), cbt_url(y, r, n)] for y, r, n in qs],
                      "g": g[0], "gt": g[1], "t3": t3, "t3n": t3n})
 
@@ -323,7 +351,8 @@ li.open .bd{display:block}
 .bd .a th{background:var(--panel2)!important;color:var(--text)}
 .bd .a td{color:var(--muted)}
 .bd .a td u,.bd .a th u{color:var(--text)}
-.bd .a>div[style*="overflow"]{max-width:100%}
+.bd .a .tw{overflow-x:auto;max-width:100%}
+.bd .a .ch{margin:12px 0 2px;font-weight:700;color:var(--text)}
 
 /* 이어가기 */
 .go{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line-soft)}
