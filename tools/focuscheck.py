@@ -5,7 +5,7 @@
 
 `build_focus.py` 가 3.6 MB 짜리 한 장을 만든다. 회차 원문에서 해설을 그대로
 실어 오고, 링크를 세 갈래로 달고, 표 스타일을 걷어 낸다. 그 과정에서 조용히
-망가질 수 있는 자리를 여섯 가지로 나눠 본다.
+망가질 수 있는 자리를 일곱 가지로 나눠 본다.
 
   ① 자료      window.__D 가 JSON 으로 읽히는가 · 주제 수와 가중합이 맞는가
   ② 해설      태그가 짝을 이루는가 (1,966 개 전수)
@@ -13,6 +13,12 @@
   ④ 스타일    걷어야 할 인라인이 남았는가 · text-align 은 살아 있는가
   ⑤ 스크립트  괄호가 닫히는가
   ⑥ CSS       덮어쓰기 규칙이 들어 있는가
+  ⑦ 클래스 짝  마크업과 CSS 가 서로 붙어 있는가
+
+⑦ 은 화면을 못 보는 자리에서 눈 대신 쓰는 것이다. 클래스를 썼는데 규칙이 없으면
+붙이려던 모양이 안 붙고, 규칙만 있고 안 쓰면 지우다 만 것이거나 이름을 잘못 적은
+것이다. 스타일이 아니라 스크립트 손잡이로만 쓰는 이름(.bTheme)은 규칙이 없는
+것이 정상이라, 선택자로 쓰였는지를 보고 가른다.
 
 경고다 — 종료코드는 항상 0. 잡힌 것은 보고 판단한다.
 """
@@ -196,6 +202,44 @@ def main():
         say(k in css, "%s 규칙" % why)
     # 테마 기억은 <head> 부트 스크립트에 있다. 본문 전체에서 본다.
     say("safety_theme" in s, "형제 페이지와 같은 테마 기억(safety_theme)")
+
+    # ⑦ 마크업과 CSS 가 서로 붙어 있는가
+    print("\n⑦ 클래스 짝")
+    # 클래스는 세 군데에서 나온다 — 마크업 · 스크립트가 짜는 문자열 · 해설 HTML.
+    # 해설은 JSON 안에 있어 파일 본문을 훑는 것만으로는 안 잡힌다.
+    # perSub·topRow 처럼 대문자가 섞인 이름이 있다. 소문자만 받으면 앞부분에서 잘린다.
+    NAME = re.compile(r"^[a-zA-Z][a-zA-Z0-9_-]*$")
+    names = set()
+
+    def eat(txt):
+        for m in re.finditer(r"""class=["']([^"']*)["']""", txt or ""):
+            for w in m.group(1).split():
+                if NAME.match(w):
+                    names.add(w)
+
+    eat(s)
+    for x in T:
+        eat(x["b"])
+        eat(x["f"])
+    # 스크립트가 `'chip' + ' f'` 처럼 이어 붙이는 것과 classList 로 다는 것
+    for m in re.finditer(r"classList" + BS + r".(?:add|toggle|remove)" + BS + r"(\s*['\"]([^'\"]+)", s):
+        if NAME.match(m.group(1)):
+            names.add(m.group(1))
+    for m in re.finditer(r"['\"]\s([a-zA-Z][a-zA-Z0-9_-]*)['\"]\s*:", s):   # ? ' f' : ''
+        names.add(m.group(1))
+
+    ruled = set(re.findall(r"" + BS + r".([a-zA-Z][a-zA-Z0-9_-]*)", css))
+    dead = sorted(r for r in ruled if r not in names)
+    say(not dead, "규칙만 있고 아무 데서도 안 쓰는 클래스 %d개%s"
+        % (len(dead), "  " + str(dead[:8]) if dead else ""))
+    # 스타일이 아니라 **스크립트 손잡이**로만 쓰는 이름이 있다(.bTheme 처럼
+    # index.html 도 규칙 없이 querySelectorAll 로만 잡는다). 선택자로 쓰였으면
+    # 규칙이 없는 것이 정상이다.
+    hooks = {m for m in names if ("'." + m + "'") in s or ('".' + m + '"') in s}
+    naked = sorted(n for n in names
+                   if n not in ruled and n not in hooks and not n.startswith("katex"))
+    say(not naked, "쓰는데 규칙이 없는 클래스 %d개%s"
+        % (len(naked), "  " + str(naked[:8]) if naked else ""))
 
     print("\n" + ("=== 검사 통과 ===" if not bad else "=== 잡힌 것 %d건 — 보고 판단할 것 ===" % bad))
 
