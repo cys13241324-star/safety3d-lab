@@ -239,6 +239,22 @@ def _flat(x):
     return re.sub(r"\s+", "", re.sub(r"<[^>]+>", "", x or ""))
 
 
+def uniq_ids(fig, i):
+    """그림의 marker id 에 주제 번호를 붙인다.
+
+    한 주제 이름이 과목 둘에 걸리면(「사다리식 통로의 구조」가 건설과 기계에
+    있다) 같은 그림이 문서에 두 번 들어간다. 그러면 id 가 겹치고 `url(#id)` 는
+    앞엣것만 가리키므로 뒤 그림의 화살촉이 사라진다. 그림을 만드는 쪽이 아니라
+    **찍히는 쪽**에서 유일하게 만든다.
+    """
+    if not fig:
+        return fig
+    for m in set(re.findall(r'<marker id="([A-Za-z0-9_]+)"', fig)):
+        fig = fig.replace('id="%s"' % m, 'id="%s_%d"' % (m, i))
+        fig = fig.replace('url(#%s)' % m, 'url(#%s_%d)' % (m, i))
+    return fig
+
+
 def pair_questions(html, qa, url_of):
     """조각마다 그 답이 붙어 있던 문제를 되돌려 준다."""
     m = UL_HEAD.match(html or "")
@@ -365,7 +381,7 @@ def build():
         data.append({"i": i, "s": subj, "m": mid, "q": v["fq"], "k": v["kind"],
                      "c": v["ch"], "f": slim(v["front"]),
                      "b": restructure(fold_repeat(pair_questions(slim(v["back"]), v["qa"], cbt_url))),
-                     "fig": figs_focus.fig_for(mid),
+                     "fig": uniq_ids(figs_focus.fig_for(mid), i),
                      "n": [["%s %s회 #%s" % (y, r, n), cbt_url(y, r, n)] for y, r, n in qs],
                      "y": [yc.get(yy, 0) for yy in YEARS],
                      "g": g[0], "gt": g[1], "t3": t3, "t3n": t3n})
@@ -406,6 +422,13 @@ def build():
     print("  파레토: " + " · ".join("상위%d→%.1f%%" % m for m in marks))
     print("  이어짐 — 기출 %d(100%%) · 암기 묶음 %d(%.0f%%) · 3D %d(%.0f%%)"
           % (len(data), ngm, ngm / len(data) * 100, ng3, ng3 / len(data) * 100))
+    # 그림은 주제 수가 아니라 **기출 비중**으로 세야 뜻이 있다. 1,966개 중
+    # 29개라도 그 29개가 상위에 있으면 실제로 만나는 화면의 몫은 훨씬 크다.
+    fg = [d for d in data if d["fig"]]
+    print("  그림 — 주제 %d개(%.0f%%) · 기출 비중 %.1f%% · 상위 50 중 %d개"
+          % (len(fg), len(fg) / len(data) * 100,
+             sum(d["q"] for d in fg) / tot * 100,
+             sum(1 for d in data[:50] if d["fig"])))
 
 
 TEMPLATE = r"""<!doctype html>
@@ -540,6 +563,8 @@ li.open .bd{display:block}
 .hz figcaption span{font-size:11px;color:var(--dim);font-family:var(--mono)}
 /* 그림 하나에 숫자 몇 개가 딸리는 꼴. 그림은 왼쪽, 숫자는 오른쪽. */
 .figset.one{grid-template-columns:minmax(180px,1fr) minmax(200px,1.2fr)}
+/* 딸린 숫자가 없는 한 장짜리. 폭을 놓아두면 혼자 판을 다 먹는다. */
+.figset.solo{grid-template-columns:minmax(0,300px)}
 .numset{display:flex;flex-direction:column;gap:5px;align-content:start}
 .nb{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:baseline;
   padding:7px 10px;border:1px solid var(--line-soft);border-radius:7px;background:var(--panel2)}

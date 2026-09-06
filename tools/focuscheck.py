@@ -286,8 +286,26 @@ def main():
     # 테마 기억은 <head> 부트 스크립트에 있다. 본문 전체에서 본다.
     say("safety_theme" in s, "형제 페이지와 같은 테마 기억(safety_theme)")
 
-    # ⑦ 마크업과 CSS 가 서로 붙어 있는가
-    print("\n⑦ 클래스 짝")
+    # ⑦ 그림은 **문서 전체**에서 봐야 한다. figcheck.py 는 그림을 한 번씩만
+    # 보는데, 한 주제 이름이 과목 둘에 걸리면(「사다리식 통로의 구조」가 건설과
+    # 기계에 있다) 같은 그림이 두 번 찍히고 그때서야 id 가 겹친다.
+    print("\n⑦ 그림")
+    figs = [x for x in T if x.get("fig")]
+    say(True, "그림이 붙은 주제 %d개 · 기출 비중 %.1f %%"
+        % (len(figs), sum(x["q"] for x in figs) / D["tot"] * 100))
+    body = "".join(x["fig"] for x in figs)
+    ids = re.findall(r'<marker id="([A-Za-z0-9_]+)"', body)
+    dup = sorted({i for i in ids if ids.count(i) > 1})
+    say(not dup, "화살촉 id %d개 — 겹치는 것 %s" % (len(ids), dup or "없음"))
+    used = set(re.findall(r"url\(#([A-Za-z0-9_]+)\)", body))
+    say(not (used - set(ids)), "가리키는 곳이 없는 url(#id) — %s"
+        % (sorted(used - set(ids)) or "없음"))
+    svg = body.count("<svg")
+    say(svg == body.count("</svg>") and svg == body.count("<figure"),
+        "svg %d개 = figure %d개" % (svg, body.count("<figure")))
+
+    # ⑧ 마크업과 CSS 가 서로 붙어 있는가
+    print("\n⑧ 클래스 짝")
     # 클래스는 세 군데에서 나온다 — 마크업 · 스크립트가 짜는 문자열 · 해설 HTML.
     # 해설은 JSON 안에 있어 파일 본문을 훑는 것만으로는 안 잡힌다.
     # perSub·topRow 처럼 대문자가 섞인 이름이 있다. 소문자만 받으면 앞부분에서 잘린다.

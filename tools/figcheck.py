@@ -11,6 +11,9 @@
   · **겹치는 id** — `<marker>` 는 `url(#id)` 로 부르는데 id 는 문서 전체에서
     유일해야 한다. 그림 여섯이 같은 id 를 쓰면 첫 번째 것만 붙는다.
   · **태그 균형**
+  · **글자가 그림 밖으로 나갔는가** — 좌표가 안에 있어도 글자는 밖으로 흐른다.
+    한글은 글자당 약 1.0em, 로마자·숫자는 약 0.55em 으로 잡아 폭을 셈하고
+    text-anchor 를 따라 왼쪽·오른쪽 끝을 낸다.
 
 경고다 — 종료코드는 항상 0.
 """
@@ -62,3 +65,32 @@ for name in F.FIGS:
              "OK" if ok and not st else "어긋남", out[:3] or "없음"))
 dup = [i for i in set(allids) if allids.count(i) > 1]
 print("\n문서 전체 id 중복:", dup or "없음")
+
+def wide(t, size):
+    """글자 폭을 어림한다. 한글은 한 칸, 그 밖은 반 칸으로 친다."""
+    w = 0.0
+    for ch in t:
+        if ch == " ":
+            w += 0.28
+        elif ord(ch) > 0x2000:
+            w += 1.0
+        else:
+            w += 0.55
+    return w * size
+
+
+TXT = re.compile(r'<text x="([-\d.]+)" y="([-\d.]+)"[^>]*?font-size="([\d.]+)"'
+                 r'[^>]*?text-anchor="(\w+)"[^>]*?>(.*?)</text>', re.S)
+over = []
+for name in F.FIGS:
+    for m in TXT.finditer(F.fig_for(name)):
+        x, size = float(m.group(1)), float(m.group(3))
+        anchor, t = m.group(4), re.sub(r"<[^>]+>", "", m.group(5))
+        w = wide(t, size)
+        lo = x - w / 2 if anchor == "middle" else (x - w if anchor == "end" else x)
+        if lo < -1 or lo + w > 121:
+            over.append((name, t, round(lo, 1), round(lo + w, 1)))
+print("")
+print("글자가 그림 밖으로 — %d건" % len(over))
+for n, t, a, b in over[:14]:
+    print("   · %-16s %-24s %s ~ %s" % (n, t[:24], a, b))
