@@ -14,6 +14,7 @@
   ⑤ 스크립트  괄호가 닫히는가
   ⑥ CSS       덮어쓰기 규칙이 들어 있는가
   ⑦ 클래스 짝  마크업과 CSS 가 서로 붙어 있는가
+  ⑧ 내용      링크를 따라가 그 문항이 정말 그 주제인가 (--deep · 몇 초 걸린다)
 
 ⑦ 은 화면을 못 보는 자리에서 눈 대신 쓰는 것이다. 클래스를 썼는데 규칙이 없으면
 붙이려던 모양이 안 붙고, 규칙만 있고 안 쓰면 지우다 만 것이거나 이름을 잘못 적은
@@ -99,6 +100,88 @@ def balance(t):
             st.pop()
         i += 1
     return "" if not st else "안 닫힌 괄호 " + "".join(st)
+
+
+CANON = {"화학설비위험방지": "화학설비위험방지기술", "기계위험방지": "기계위험방지기술",
+         "전기위험방지": "전기위험방지기술", "인간공학": "인간공학 및 시스템안전공학"}
+
+
+def _bank(src):
+    """회차 파일에서 D 객체 한 덩어리를 떠 온다."""
+    m = re.search(r"(?:const|let|var)" + BS + r"s+D" + BS + r"s*=" + BS + r"s*{", src)
+    if not m:
+        return None
+    st, d = m.end() - 1, 0
+    for j in range(st, len(src)):
+        if src[j] in "[{":
+            d += 1
+        elif src[j] in "]}":
+            d -= 1
+            if d == 0:
+                try:
+                    return json.loads(src[st:j + 1])
+                except ValueError:
+                    return None
+    return None
+
+
+def deep(T):
+    """링크를 실제로 따라간다 — 구조가 아니라 **내용**이 맞는지.
+
+    ③ 은 가리키는 파일이 있는지까지만 본다. 그 번호의 문항이 정말 그 주제인지는
+    회차를 열어 봐야 안다. 24회차를 다 읽으므로 몇 초 걸린다.
+    """
+    print("")
+    print("⑧ 링크를 따라간 내용 (--deep)")
+    rounds = {}
+    for f in sorted(CBT.glob("CBT_*/*_CBT.html")):
+        m = re.search(r"CBT_(" + BS + r"d{4})_(" + BS + r"d)회", str(f))
+        if not m or (m.group(1), m.group(2)) in rounds:
+            continue
+        D2 = _bank(f.read_text(encoding="utf-8", errors="ignore"))
+        if D2:
+            rounds[(m.group(1), m.group(2))] = D2
+
+    n = wrong = miss = 0
+    ex = []
+    for x in T:
+        for label, url in x["n"]:
+            n += 1
+            m = re.match(r"https://[^/]+/sanup-safety-cbt/(.+?)/(.+?)#q(" + BS + r"d+)$", url)
+            rm = re.search(r"CBT_(" + BS + r"d{4})_(" + BS + r"d)회",
+                           urllib.parse.unquote(m.group(1)))
+            D2 = rounds.get((rm.group(1), rm.group(2)))
+            if not D2:
+                miss += 1
+                continue
+            q = next((z for z in D2["q"] if str(z.get("n")) == m.group(3)), None)
+            c = (D2.get("cards") or {}).get(q.get("card")) if q else None
+            if not c:
+                miss += 1
+                continue
+            subj = CANON.get((c.get("subject") or "").strip(),
+                             (c.get("subject") or "").strip())
+            if (c.get("mid") or "").strip() != x["m"] or subj != x["s"]:
+                wrong += 1
+                if len(ex) < 5:
+                    ex.append("%s -> %s (그 문항은 %s)" % (x["m"], label, c.get("mid")))
+    say(not wrong and not miss,
+        "링크 %d개를 따라갔다 — 주제·과목이 어긋난 것 %d · 문항을 못 찾은 것 %d"
+        % (n, wrong, miss))
+    for e in ex:
+        print("      " + e)
+
+    re2 = {}
+    for D2 in rounds.values():
+        for c in (D2.get("cards") or {}).values():
+            mid = (c.get("mid") or "").strip()
+            if not mid:
+                continue
+            subj = CANON.get((c.get("subject") or "").strip(),
+                             (c.get("subject") or "").strip())
+            re2[(subj, mid)] = re2.get((subj, mid), 0) + int(c.get("fq") or 1)
+    d = [x for x in T if re2.get((x["s"], x["m"])) != x["q"]]
+    say(not d, "출제빈도를 다시 세어 어긋난 주제 %d개" % len(d))
 
 
 def main():
@@ -240,6 +323,9 @@ def main():
                    if n not in ruled and n not in hooks and not n.startswith("katex"))
     say(not naked, "쓰는데 규칙이 없는 클래스 %d개%s"
         % (len(naked), "  " + str(naked[:8]) if naked else ""))
+
+    if "--deep" in sys.argv[1:]:
+        deep(T)
 
     print("\n" + ("=== 검사 통과 ===" if not bad else "=== 잡힌 것 %d건 — 보고 판단할 것 ===" % bad))
 
