@@ -26,6 +26,8 @@ def section(src, name):
     j = src.index("\n  ];", i)
     return src[i:j]
 
+# 키에 숫자가 붙은 카드(forklift2·frame2 …)가 생긴 뒤로 [A-Za-z]+ 로는 13장을
+# 못 읽어 파서가 죽어 있었다. tag 도 같은 꼴이라 잡혀도 사고 씨앗이 빠진다.
 def split_cards(sec):
     idxs = [m.start() for m in re.finditer(r"\n  \{", sec)]
     return [sec[s:(idxs[n+1] if n+1 < len(idxs) else len(sec))] for n, s in enumerate(idxs)]
@@ -38,7 +40,7 @@ def opt(block, which):
         seg = seg[:nx]
     d = [int(x) for x in re.search(r"d:\[([-0-9,\s]+)\]", seg).group(1).split(",")]
     ok = int(re.search(r"ok:(\d)", seg).group(1))
-    tg = re.search(r"tag:'([A-Za-z]+)'", seg)
+    tg = re.search(r"tag:'([A-Za-z0-9_]+)'", seg)
     cl = re.search(r"clear:(\d)", seg)
     return {"d": d, "ok": ok, "tag": tg.group(1) if tg else None,
             "clear": int(cl.group(1)) if cl else 0}
@@ -48,11 +50,11 @@ def parse():
         src = f.read()
     deck, fallout, flavor = [], [], []
     for b in split_cards(section(src, "DECK")):
-        deck.append({"k": re.search(r"k:'([A-Za-z]+)'", b).group(1),
+        deck.append({"k": re.search(r"k:'([A-Za-z0-9_]+)'", b).group(1),
                      "s": re.search(r"s:'([^']+)'", b).group(1),
                      "law": True, "a": opt(b, "a"), "b": opt(b, "b")})
     for b in split_cards(section(src, "FALLOUT")):
-        fallout.append({"req": re.search(r"req:'([A-Za-z]+)'", b).group(1),
+        fallout.append({"req": re.search(r"req:'([A-Za-z0-9_]+)'", b).group(1),
                         "k": None, "s": "사고", "law": True,
                         "a": opt(b, "a"), "b": opt(b, "b")})
     for b in split_cards(section(src, "FLAVOR")):

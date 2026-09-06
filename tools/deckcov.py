@@ -70,9 +70,33 @@ def block(s, name, op="{"):
     return None
 
 
+# 조사를 안 떼면 「강관비계의 구조」가 「강관비계 · 기둥 간격 …」 카드에 안 걸린다.
+# 낱말 자체로 끝나는 일이 드문 것만 뗀다. 「안정도」의 도, 「경로」의 로, 「길이」의
+# 이처럼 명사 끝에 흔한 글자를 떼면 없는 낱말이 생겨 오히려 헛걸린다.
+JOSA1 = "의를을은는가와과에"
+JOSA2 = ("에서", "으로", "에는", "에도", "부터", "까지", "이나", "라는", "이란", "으로서")
+
+
 def toks(x):
+    """조사를 뗀 낱말만 남긴다.
+
+    두 꼴을 다 담으면(「강관비계의」와 「강관비계」) 낱말 수가 늘어 겹침 비율의
+    분모가 커지고, 그래서 되레 점수가 떨어진다. 양쪽을 같은 규칙으로 줄이므로
+    바꿔 담는 것이 맞다.
+    """
     x = re.sub(r"<[^>]+>", " ", x or "")
-    return {w for w in re.findall(r"[가-힣A-Za-z0-9]{2,}", x) if w not in STOP}
+    out = set()
+    for w in re.findall(r"[가-힣A-Za-z0-9]{2,}", x):
+        if len(w) >= 4:
+            for j in JOSA2:
+                if w.endswith(j):
+                    w = w[:-len(j)]
+                    break
+        if len(w) >= 3 and w[-1] in JOSA1:
+            w = w[:-1]
+        if len(w) >= 2 and w not in STOP:
+            out.add(w)
+    return out
 
 
 def load_topics():
