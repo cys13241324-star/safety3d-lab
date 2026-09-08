@@ -32,6 +32,15 @@ h1{font-family:var(--display);font-weight:700;font-size:36px;letter-spacing:-.02
 .tile p{margin:0 0 16px;color:var(--muted);max-width:40ch}
 .tile .nums{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:18px} .tile .nums b{font-weight:600;color:var(--text);margin-right:3px}
 .tile .go{display:inline-block;font-weight:600;color:var(--warn)}
+/* 점검 중 타일: 위쪽에 공사 줄무늬, 오른쪽 위에 배지, 본문은 음영. 배지와 줄무늬는 흐리지 않는다 */
+.tile.off{cursor:default}
+.tile.off:hover,.tile.off:focus-visible{border-color:var(--line);transform:none}
+.tile.off > *:not(.maint){opacity:.38;filter:saturate(.2)}
+.tile.off .go{color:var(--dim);font-weight:500}
+.tile.off::before{content:'';position:absolute;left:0;right:0;top:0;height:9px;background:repeating-linear-gradient(135deg,var(--warn) 0 13px,rgba(0,0,0,.5) 13px 26px)}
+.tile.off .maint{position:absolute;right:20px;top:22px;z-index:1;display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;font-size:14.5px;letter-spacing:-.01em;color:var(--warn);background:var(--panel);border:1.5px solid var(--warn);border-radius:999px;padding:5px 14px 5px 11px;white-space:nowrap}
+.tile.off .maint b{font-size:15px;line-height:1;font-weight:400}
+@media (max-width:600px){.tile.off .maint{right:14px;top:16px;font-size:13.5px;padding:4px 11px 4px 9px}}
 
 
 .viz{height:84px;margin:0 0 18px;pointer-events:none;border-radius:8px;border:1px solid var(--line);background:var(--panel2);position:relative;overflow:hidden}
@@ -82,7 +91,7 @@ html{overscroll-behavior-y:contain}
   <h1>산업안전기사 학습실</h1>
   <p class="lede">역대 2,880문항을 분석하여 만든 여섯 가지 공부 도구입니다.</p>
   <div class="grid">
-    <a class="tile lab" href="lab.html?v=09081119" aria-label="3D 규격 실습장 들어가기">
+    <a class="tile lab" href="lab.html?v=09081239" aria-label="3D 규격 실습장 들어가기">
       <div class="k">01 · 규정 수치</div>
       <h2>3D 규격 실습장</h2>
       <div class="viz lab" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><em></em><s></s></div>
@@ -90,7 +99,7 @@ html{overscroll-behavior-y:contain}
       <div class="nums"><div><b>40</b>주제</div><div><b>6</b>과목</div><div><b>5</b>문항씩 기출</div></div>
       <span class="go">들어가기 →</span>
     </a>
-    <a class="tile memo" href="memo.html?v=09081119" aria-label="암기 은행 들어가기">
+    <a class="tile memo" href="memo.html?v=09081239" aria-label="암기 은행 들어가기">
       <div class="k">02 · 암기</div>
       <h2>암기 은행</h2>
       <div class="viz memo" aria-hidden="true"><span>모래 1:1.8</span><span>경암 1:0.5</span><span class="h"><b>훅</b>모일팔·흙일이·연일영·경영오</span><span>30 mA</span><span>0.03초</span></div>
@@ -98,15 +107,16 @@ html{overscroll-behavior-y:contain}
       <div class="nums"><div><b>165</b>묶음</div><div><b>613</b>암기법</div><div><b>485</b>빈칸 카드</div></div>
       <span class="go">들어가기 →</span>
     </a>
-    <a class="tile palace" href="palace.html?v=09081119" aria-label="암기 순찰로 들어가기">
+    <div class="tile palace off" role="group" aria-disabled="true" aria-label="암기 순찰로 — 점검 중이라 지금은 들어갈 수 없습니다">
+      <span class="maint"><b>🚧</b>점검 중</span>
       <div class="k">03 · 장소 기억</div>
       <h2>암기 순찰로</h2>
       <div class="viz palace" aria-hidden="true"><i class="z" style="left:6%;background:rgba(127,166,224,.25)"></i><i class="z" style="left:36%;background:rgba(240,163,91,.25)"></i><i class="z" style="left:66%;background:rgba(92,192,138,.25)"></i><i class="p" style="left:14%"></i><i class="p" style="left:24%"></i><i class="p on" style="left:44%"></i><i class="p" style="left:54%"></i><i class="p" style="left:74%"></i><i class="p" style="left:84%"></i><em></em></div>
       <p>같은 165묶음을 3D 현장 순찰 경로 위 정거장으로 세웠습니다. 구역 여섯을 걸으며 안전관리자가 훅을 말하고, 표지판에 사실이 붙습니다. 어디서 들었는지와 함께 외우는 기억의 궁전입니다.</p>
       <div class="nums"><div><b>165</b>정거장</div><div><b>6</b>구역</div><div><b>28</b>종 소품</div></div>
-      <span class="go">들어가기 →</span>
-    </a>
-    <a class="tile game" href="game.html?v=09081119" aria-label="순찰 게임 들어가기">
+      <span class="go">점검 중 · 잠시 후 다시 열립니다</span>
+    </div>
+    <a class="tile game" href="game.html?v=09081239" aria-label="순찰 게임 들어가기">
       <div class="k">04 · 게임</div>
       <h2>순찰 게임</h2>
       <div class="viz game" aria-hidden="true"><i class="road"></i><i class="sign"></i><i class="lamp"></i></div>
