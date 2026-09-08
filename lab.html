@@ -1943,7 +1943,6 @@ html,body{overscroll-behavior:none}
 
   /* ---------- 시작 · 루프 ---------- */
   let viaHash = false;
-  { const m = (location.hash || '').match(/topic=([a-z]+)/); if(m && T[m[1]]){ S.topic = m[1]; S.subj = SUBJECTS.find(s=>s.topics.includes(S.topic)).id; viaHash = true; } }
 /* 규칙마다 붙는 짧은 항목명(10자 이내). 순서는 각 주제 rules 배열과 같다.
    판정 카드의 윗줄이 된다. 규칙 전문은 그 아래 「기준」 줄에 그대로 나온다. */
 const RULE_TAG = {
@@ -1989,31 +1988,6 @@ const RULE_TAG = {
   carry:      ['운반 중량', '드는 자세', '물건 위치'],
 };
 window.RULE_TAG = RULE_TAG;
-
-  buildHome(); buildTabs(); buildTopicUI(); refresh();
-  window.__dbg = {get labels(){ return labels; }, get AMB(){ return AMB; }, camera, THREE, T, LIM, S, DEFAULTS, judge, allOk, get test(){ return test; }, selectTopic};
-  home.hidden = viaHash;   // 해시로 바로 들어온 경우가 아니면 과목 창부터
-  { const v = viewOf('wide'); Object.assign(orbit, v, {target: v.target.clone()}); }
-  const easeIO = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
-  let last = performance.now();
-  function frame(now){
-    const dt = Math.min(0.05, (now-last)/1000); last = now;
-    if(tween){ const k = clamp((now - tween.t0)/tween.dur, 0, 1), e = easeIO(k);
-      orbit.theta = tween.from.theta + (tween.to.theta-tween.from.theta)*e; orbit.phi = tween.from.phi + (tween.to.phi-tween.from.phi)*e;
-      orbit.radius = tween.from.radius + (tween.to.radius-tween.from.radius)*e; orbit.target.copy(tween.from.target).lerp(tween.to.target, e);
-      if(k>=1) tween = null; }
-    applyCamera(); syncZoom();
-    if(!reduced) stepAmbient(dt); if(!reduced && home.hidden && list.hidden) stepIdle(dt);
-    { const in3d = home.hidden && list.hidden; el('panelHandle').classList.toggle('off', !in3d); if(!in3d) document.body.classList.remove('panelOpen'); }
-    stepHazards(dt, now); stepFx(dt); if(!reduced && home.hidden && list.hidden) stepChatter(dt);
-    labels.filter(d=> d.expire && now > d.expire).forEach(removeLabel);
-    if(auto && !BLIND && !test && home.hidden && list.hidden){ autoT += dt; if(autoT > 4){ autoT = -6; startTest(); } }   // 자동 시연: 4초 뒤 시작, 끝나고 6초 뒤 반복
-    stepTest(dt);
-    renderer.render(scene, camera);
-    placeLabels(W, H);
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
 
 /* ===== 2차 확장 주제 (ext_topics.js) =====
    본 스크립트(IIFE) 끝에 끼워 넣어져 같은 스코프를 쓴다. 주제 하나 = S·T·LIM·LAW·SUM·YELL·MANAGER_POS·BUILD·ANNOT·EXT_STEP·EXT_IDLE 등록.
@@ -3052,6 +3026,31 @@ SUBJECTS.find(s=> s.id==='const').desc = '추락·낙하 방호 가시설, 강�
   g('elchem').topics = g('elec').topics.concat(g('chem').topics); }
 buildHome();
 
+  { const m = (location.hash || '').match(/topic=([a-z]+)/); if(m && T[m[1]]){ S.topic = m[1]; S.subj = SUBJECTS.find(s=>s.topics.includes(S.topic)).id; viaHash = true; } }
+  buildHome(); buildTabs(); buildTopicUI(); refresh();
+  window.__dbg = {get labels(){ return labels; }, get AMB(){ return AMB; }, camera, THREE, T, LIM, S, DEFAULTS, judge, allOk, get test(){ return test; }, selectTopic};
+  home.hidden = viaHash;   // 해시로 바로 들어온 경우가 아니면 과목 창부터
+  { const v = viewOf('wide'); Object.assign(orbit, v, {target: v.target.clone()}); }
+  const easeIO = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+  let last = performance.now();
+  function frame(now){
+    const dt = Math.min(0.05, (now-last)/1000); last = now;
+    if(tween){ const k = clamp((now - tween.t0)/tween.dur, 0, 1), e = easeIO(k);
+      orbit.theta = tween.from.theta + (tween.to.theta-tween.from.theta)*e; orbit.phi = tween.from.phi + (tween.to.phi-tween.from.phi)*e;
+      orbit.radius = tween.from.radius + (tween.to.radius-tween.from.radius)*e; orbit.target.copy(tween.from.target).lerp(tween.to.target, e);
+      if(k>=1) tween = null; }
+    applyCamera(); syncZoom();
+    if(!reduced) stepAmbient(dt); if(!reduced && home.hidden && list.hidden) stepIdle(dt);
+    { const in3d = home.hidden && list.hidden; el('panelHandle').classList.toggle('off', !in3d); if(!in3d) document.body.classList.remove('panelOpen'); }
+    stepHazards(dt, now); stepFx(dt); if(!reduced && home.hidden && list.hidden) stepChatter(dt);
+    labels.filter(d=> d.expire && now > d.expire).forEach(removeLabel);
+    if(auto && !BLIND && !test && home.hidden && list.hidden){ autoT += dt; if(autoT > 4){ autoT = -6; startTest(); } }   // 자동 시연: 4초 뒤 시작, 끝나고 6초 뒤 반복
+    stepTest(dt);
+    renderer.render(scene, camera);
+    placeLabels(W, H);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 })();
 </script>
 <script>(function(){ function cur(){ var a = document.documentElement.getAttribute('data-theme'); return a || 'dark'; } function sync(){ document.querySelectorAll('.bTheme').forEach(function(b){ var d = cur() === 'dark'; b.textContent = d ? '밝은 모드' : '어두운 모드'; b.setAttribute('aria-pressed', d); }); } document.querySelectorAll('.bTheme').forEach(function(b){ b.addEventListener('click', function(){ var t = cur() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try{ localStorage.setItem('safety_theme', t); }catch(e){} sync(); if(window.__onTheme) window.__onTheme(t); }); }); sync(); }());</script>
