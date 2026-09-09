@@ -18,7 +18,7 @@
 button,a,select,input,[role=button]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .mono{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.55;min-height:100vh}
 .wrap{max-width:960px;margin:0 auto;padding:48px 20px 80px}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
 h1{font-family:var(--display);font-weight:700;font-size:36px;letter-spacing:-.02em;margin:0 0 14px;text-wrap:balance}
@@ -52,7 +52,7 @@ h1{font-family:var(--display);font-weight:700;font-size:36px;letter-spacing:-.02
 .viz.memo span{flex:none;font-size:12px;padding:4px 9px;border-radius:5px;background:var(--panel);border:1px solid var(--line);color:var(--muted);white-space:nowrap} .viz.memo span.h{background:rgba(227,181,77,.12);border-color:rgba(227,181,77,.5);color:var(--text)} .viz.memo span.h b{font-family:var(--mono);font-size:10px;color:var(--warn);margin-right:5px;font-weight:500}
 
 .viz.palace{background:linear-gradient(180deg,#131C2C 0%,#0E1522 55%,#1B2436 55%)} .viz.palace .z{position:absolute;top:10px;width:28%;height:62px;border-radius:4px} .viz.palace .p{position:absolute;bottom:22px;width:8px;height:8px;border-radius:50%;background:#3B4658} .viz.palace .p.on{background:#E3B54D;box-shadow:0 0 10px #E3B54D;width:11px;height:11px;bottom:20px} .viz.palace em{position:absolute;bottom:26px;left:47%;width:10px;height:18px;border-radius:5px 5px 2px 2px;background:#2E8B57} .viz.palace em::before{content:'';position:absolute;top:-8px;left:1px;width:8px;height:8px;border-radius:50%;background:#F2F5F8}
-.topRow{display:flex;justify-content:flex-end;margin-bottom:8px} .b{font:inherit;font-size:13.5px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer} .b:hover{border-color:var(--muted)}
+.topRow{display:flex;justify-content:flex-end;margin-bottom:8px} .b{font:inherit;font-size:14px;min-height:44px;padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center} .b:hover{border-color:var(--muted)}
 /* 반투명 3D 현장 배경 */
 .bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden} .bg img{width:100%;height:100%;object-fit:cover;opacity:.22;filter:saturate(.85);transform:scale(1.04);animation:bgdrift 60s ease-in-out infinite alternate} .bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,var(--bg) 0%,transparent 35%,transparent 70%,var(--bg) 100%)}
 :root[data-theme="light"] .bg img{opacity:.16}
@@ -66,6 +66,15 @@ footer{margin-top:40px;color:var(--dim);font-family:var(--mono);font-size:12px}
 .viz.reigns .bar{position:absolute;top:12px;height:4px;border-radius:2px;opacity:.9} .viz.reigns .b0{left:8%;width:16%;background:#5CC08A} .viz.reigns .b1{left:28%;width:14%;background:#7FA6E0} .viz.reigns .b2{left:48%;width:16%;background:#E3B54D} .viz.reigns .b3{left:70%;width:9%;background:#B58FE0}
 .viz.reigns .cd{position:absolute;left:50%;top:28px;width:34%;height:44px;margin-left:-17%;border-radius:6px;background:var(--panel);border:1px solid var(--line);transform:rotate(-4deg);box-shadow:0 6px 14px rgba(0,0,0,.35)}
 .viz.reigns .ar{position:absolute;top:46px;width:9px;height:9px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;opacity:.8} .viz.reigns .ar.l{left:20%;color:#7FA6E0;transform:rotate(45deg)} .viz.reigns .ar.r{right:20%;color:#E3B54D;transform:rotate(-135deg)}
+.viz.defense{background:linear-gradient(180deg,#131C2C 0%,#0E1522 62%,#1B2436 62%,#1B2436 100%)}
+.viz.defense .w{position:absolute;width:9px;height:16px;border-radius:4px 4px 2px 2px;background:#3B4658}
+.viz.defense .w::before{content:'';position:absolute;top:-7px;left:1px;width:7px;height:7px;border-radius:50%;background:#3B4658}
+.viz.defense .w.on{background:#E3B54D} .viz.defense .w.on::before{background:#E3B54D}
+.viz.defense em{position:absolute;width:16px;height:16px;margin-left:-8px;border:1.5px solid #E3B54D;border-radius:50%}
+.viz.defense em::before,.viz.defense em::after{content:'';position:absolute;background:#E3B54D}
+.viz.defense em::before{left:50%;top:-6px;width:1.5px;height:6px;margin-left:-.75px}
+.viz.defense em::after{top:50%;left:-6px;width:6px;height:1.5px;margin-top:-.75px}
+.viz.defense s{position:absolute;left:0;right:0;bottom:6px;height:6px;background:repeating-linear-gradient(135deg,#E3B54D 0 8px,rgba(0,0,0,.5) 8px 16px);opacity:.5}
 @media (max-width:600px){h1{font-size:30px} .wrap{padding:30px 16px 60px} .tile{padding:20px 18px 18px} .tile h2{font-size:22px}}
 
 /* ---------- 다크/라이트 ---------- */
@@ -89,9 +98,9 @@ html{overscroll-behavior-y:contain}
 <div class="wrap">
   <div class="topRow"><button class="b sm bTheme" type="button">어두운 모드</button></div>
   <h1>산업안전기사 학습실</h1>
-  <p class="lede">역대 2,880문항을 분석하여 만든 여섯 가지 공부 도구입니다.</p>
+  <p class="lede">역대 2,880문항을 분석하여 만든 일곱 가지 공부 도구입니다.</p>
   <div class="grid">
-    <a class="tile lab" href="lab.html?v=09081239" aria-label="3D 규격 실습장 들어가기">
+    <a class="tile lab" href="lab.html?v=09091036" aria-label="3D 규격 실습장 들어가기">
       <div class="k">01 · 규정 수치</div>
       <h2>3D 규격 실습장</h2>
       <div class="viz lab" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><em></em><s></s></div>
@@ -99,7 +108,7 @@ html{overscroll-behavior-y:contain}
       <div class="nums"><div><b>40</b>주제</div><div><b>6</b>과목</div><div><b>5</b>문항씩 기출</div></div>
       <span class="go">들어가기 →</span>
     </a>
-    <a class="tile memo" href="memo.html?v=09081239" aria-label="암기 은행 들어가기">
+    <a class="tile memo" href="memo.html?v=09091036" aria-label="암기 은행 들어가기">
       <div class="k">02 · 암기</div>
       <h2>암기 은행</h2>
       <div class="viz memo" aria-hidden="true"><span>모래 1:1.8</span><span>경암 1:0.5</span><span class="h"><b>훅</b>모일팔·흙일이·연일영·경영오</span><span>30 mA</span><span>0.03초</span></div>
@@ -116,7 +125,7 @@ html{overscroll-behavior-y:contain}
       <div class="nums"><div><b>165</b>정거장</div><div><b>6</b>구역</div><div><b>28</b>종 소품</div></div>
       <span class="go">점검 중 · 잠시 후 다시 열립니다</span>
     </div>
-    <a class="tile game" href="game.html?v=09081239" aria-label="순찰 게임 들어가기">
+    <a class="tile game" href="game.html?v=09091036" aria-label="순찰 게임 들어가기">
       <div class="k">04 · 게임</div>
       <h2>순찰 게임</h2>
       <div class="viz game" aria-hidden="true"><i class="road"></i><i class="sign"></i><i class="lamp"></i></div>
@@ -138,6 +147,14 @@ html{overscroll-behavior-y:contain}
       <div class="viz focus" aria-hidden="true"><i style="height:74%"></i><i style="height:62%"></i><i style="height:58%"></i><i style="height:48%"></i><i style="height:44%"></i><i style="height:36%"></i><i style="height:31%"></i><i style="height:27%"></i><i style="height:22%"></i><i style="height:18%"></i><i style="height:15%"></i><i style="height:12%"></i><i style="height:9%"></i><i style="height:7%"></i><s></s></div>
       <p>기출 24회차를 헤아려 주제를 출제빈도 순으로 세웠습니다. 외운 것을 체크하면 그것이 기출의 몇 %를 덮는지 계산합니다. 진도를 개수가 아니라 <b>덮은 출제비중</b>으로 재는 곳입니다.</p>
       <div class="nums"><div><b>1,966</b>주제</div><div><b>2,880</b>문항 집계</div><div><b>200</b>개면 37%</div></div>
+      <span class="go">들어가기 →</span>
+    </a>
+    <a class="tile defense" href="defense.html?v=09091036" aria-label="불안전 행동 디펜스 들어가기">
+      <div class="k">07 · 판정 게임</div>
+      <h2>불안전 행동 디펜스</h2>
+      <div class="viz defense" aria-hidden="true"><i class="w" style="left:18%;bottom:14px"></i><i class="w on" style="left:46%;bottom:30px"></i><i class="w" style="left:70%;bottom:18px"></i><em style="left:46%;bottom:48px"></em><s></s></div>
+      <p>안전관리자가 되어 현장에 서면 작업자들이 각자 다른 자세로 걸어옵니다. 불안전 행동을 하는 사람만 호루라기로 짚어 내고, 정상 행동은 그냥 보내야 합니다. 오지적하면 감점과 함께 잠깐 굳고, 근거 조문은 한 줄로 바로 뜹니다. 5웨이브 사이 정비 시간엔 문제를 풀고, 일제 점검은 3회까지 쓸 수 있습니다.</p>
+      <div class="nums"><div><b>12</b>종 행동</div><div><b>5</b>웨이브</div><div><b>3</b>회 점검</div></div>
       <span class="go">들어가기 →</span>
     </a>
   </div>

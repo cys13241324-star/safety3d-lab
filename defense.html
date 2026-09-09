@@ -1,0 +1,1512 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A1018">
+<title>불안전 행동 디펜스</title>
+<script>(function(){try{var t=localStorage.getItem('safety_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Gothic+A1:wght@700;800&display=swap">
+<style>
+:root{--bg:#0A1018;--panel:#0F1622;--panel2:#182234;--line:#33425C;--line-soft:#1E2938;--text:#E8EEF8;--muted:#8C99B0;--dim:#8290AC;--accent:#7FA6E0;--accent-ink:#0B111C;--ok:#5CC08A;--ok-soft:rgba(92,192,138,.16);--bad:#F07056;--bad-soft:rgba(240,112,86,.16);--warn:#E3B54D;--warn-soft:rgba(227,181,77,.10);--warn-line:rgba(227,181,77,.45);--on-accent:#1A1200;--glass:rgba(15,22,34,.9);--tint:rgba(255,255,255,.05);--scrim:rgba(6,10,17,.78);--sans:"IBM Plex Sans KR","Pretendard","Malgun Gothic",sans-serif;--mono:"IBM Plex Mono",Consolas,monospace;--display:"Gothic A1","IBM Plex Sans KR",sans-serif;}
+/* safety3d_tpl.html:302 근처 밝은 테마 오버라이드를 그대로 가져옴 — safety_theme 값을 여러 페이지가 공유한다 */
+:root[data-theme="light"]{color-scheme:light;--bg:#F4F6FA;--panel:#FFFFFF;--panel2:#EAEEF5;--line:#C6D0DE;--line-soft:#E0E6EF;--text:#14202E;--muted:#4A5568;--dim:#66738A;--accent:#2F5FA8;--accent-ink:#FFFFFF;--ok:#1F6B45;--ok-soft:rgba(31,107,69,.12);--bad:#A8391F;--bad-soft:rgba(168,57,31,.10);--warn:#8F6512;--warn-soft:rgba(143,101,18,.10);--warn-line:rgba(143,101,18,.35);--on-accent:#FFFFFF;--glass:rgba(255,255,255,.93);--tint:rgba(0,0,0,.04);--scrim:rgba(244,246,250,.88);}
+/* fix round 1 — 자매 템플릿(hub_tpl.html:13·palace_tpl.html:13·memo_tpl.html:13)에는 다 있는
+   전역 .mono 규칙이 이 파일에만 없었다. class="mono" 가 붙은 자리(#eScore·#eAcc·#eWave·
+   .eGroupCount — 전부 숫자·기호만 담는다, 한글 없음)가 실제로 고정폭 숫자로 보이도록
+   font-family 까지 준다(자매 템플릿의 tabular-nums 만으론 폰트가 안 바뀐다 — 검증 시 이 차이가
+   드러났다). #hud 안의 b.mono 는 이미 스코프 규칙이 있어 그대로 둔다. */
+.mono{font-variant-numeric:tabular-nums}
+#dEnd .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+html,body{height:100%}
+/* Task 6: 390px 재검증 — #c(캔버스)는 touch-action:none 인데 HUD·버튼·모달은 캔버스의 형제
+   요소라 그 규칙을 안 물려받는다(터치 액션은 대상 요소와 그 조상만 본다 — 형제는 무관하다).
+   그래서 버튼을 두 번 빠르게 두드리면 캔버스 밖에서는 확대가 안 막혀 있었다 — body 에 기본값을
+   깔아 모든 형제 요소가 같이 막히게 한다. manipulation 은 두 번 탭 확대·더블탭 확대만 막고
+   스크롤은 남기지만, 이 페이지는 overflow:hidden 이라 스크롤 자체가 없다.*/
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;overflow:hidden;touch-action:manipulation}
+#stage{position:fixed;inset:0}
+#c{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
+/* Task 5: HUD 다시 만들기 — 목숨은 하트가 아니라 무재해 기록 3칸(안전모 아이콘), 일제 점검
+   남은 횟수는 버튼 글자가 아니라 여기(HUD)에 낸다. 사양에 없던 마크업은 늘리지 않는다. */
+#hud{position:fixed;left:14px;top:12px;width:max-content;max-width:calc(100vw - 172px);display:flex;flex-wrap:wrap;row-gap:4px;column-gap:9px;align-items:center;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px);font-size:15px;color:var(--text);z-index:3}
+#hud .sep{color:var(--dim)}
+#hud b.mono{font-family:var(--mono);font-weight:500;color:var(--warn);font-variant-numeric:tabular-nums}
+#hud .hudLifeWrap{display:inline-flex;align-items:center;gap:6px}
+#hud .hudLifeLabel{font-size:14px;color:var(--muted)}
+#hud .hudLives{display:inline-flex;gap:4px}
+#hud .life{width:20px;height:16px;color:var(--dim);opacity:.4}
+#hud .life svg{display:block;width:100%;height:100%;fill:currentColor}
+#hud .life.on{color:var(--warn);opacity:1}
+#hud .hudSweep b.mono{color:var(--accent)}
+/* fix round 3(C1) — 오지적 누적. 「잘못 분 것도 놓친 것만큼 나쁘다」가 규칙이라면 그 누적이
+   HUD 에 보여야 학습자가 규칙으로 이해한다(감점만 뜨고 사라지면 규칙이 아니라 잔소리다).
+   자리는 390px 실측으로 정했다 — #hud 는 flex-wrap 이라 좁은 화면에서 이 항목이 한 줄을
+   더 차지할 뿐 넘치지 않는다(검사6). 2/3 부터 색을 바꿔 「다음이 마지막」을 미리 알린다. */
+#hud .hudWrong b.mono{color:var(--muted)}
+#hud .hudWrong.near b.mono{color:var(--bad)}
+#hud .hudWrong .hudWrongMax{color:var(--dim);font-family:var(--mono);font-size:14px}
+#hint{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);font-size:14px;color:var(--dim);background:var(--glass);border:1px solid var(--line-soft);border-radius:999px;padding:6px 14px;backdrop-filter:blur(8px);z-index:3;white-space:nowrap}
+/* 화면 중앙 고정 조준 십자선 + palace_tpl.html:77~80 의 hm(적중 표시)·pops(점수 팝업)를 그대로 가져옴.
+   원본은 마우스를 따라다니는 조준점(.fx)이지만 여긴 카메라가 고정이라 항상 화면 중앙이다. */
+#fx{position:fixed;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:3}
+#fx .cross i{position:absolute;background:rgba(232,238,248,.85);border-radius:1px}
+#fx .cross i:nth-child(1){width:2px;height:12px;left:-1px;top:-18px}
+#fx .cross i:nth-child(2){width:2px;height:12px;left:-1px;top:6px}
+#fx .cross i:nth-child(3){width:12px;height:2px;left:-18px;top:-1px}
+#fx .cross i:nth-child(4){width:12px;height:2px;left:6px;top:-1px}
+#fx .dot{position:absolute;left:-2px;top:-2px;width:4px;height:4px;border-radius:50%;background:var(--warn)}
+/* palace_tpl.html:77 에서 가져옴 — 그대로 */
+#fx .hm{position:absolute;left:0;top:0;width:0;height:0;opacity:0;transition:opacity .1s}
+#fx .hm.on{opacity:1}
+#fx .hm i{position:absolute;left:-7px;top:-1px;width:14px;height:2px;background:#fff;border-radius:1px}
+#fx .hm i:nth-child(1){transform:translate(-11px,-11px) rotate(45deg)}
+#fx .hm i:nth-child(2){transform:translate(11px,-11px) rotate(-45deg)}
+#fx .hm i:nth-child(3){transform:translate(-11px,11px) rotate(-45deg)}
+#fx .hm i:nth-child(4){transform:translate(11px,11px) rotate(45deg)}
+#fx .hm.ok i{background:#3FD37F}
+#fx .hm.bad i{background:#FF5C5C}
+/* palace_tpl.html:78 에서 가져옴 — 그대로 */
+#fx .pops{position:absolute;left:0;top:0}
+#fx .pops span{position:absolute;left:14px;top:-10px;font-family:var(--display);font-weight:800;font-size:20px;color:var(--warn);white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.6);animation:fpop .9s ease-out forwards}
+#fx .pops span.bad{color:#FF7A7A}
+@keyframes fpop{0%{opacity:0;transform:translateY(6px) scale(.8)}15%{opacity:1;transform:translateY(0) scale(1.1)}100%{opacity:0;transform:translateY(-38px) scale(1)}}
+@media (prefers-reduced-motion:reduce){#fx .pops span{animation-duration:.01s}}
+/* Task 3: 근거 한 줄 · 호루라기 잠김 · 사고 섬광. #hud 는 손대지 않는다 — Task 5 가 사양대로 다시 만든다. */
+#dBasis{position:fixed;left:50%;bottom:56px;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:min(94vw,680px);display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:10px 18px;border-radius:12px;border:1px solid var(--warn-line);background:var(--glass);backdrop-filter:blur(8px);box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:4}
+#dBasis[hidden]{display:none}
+#dBasis b{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.35;color:var(--warn)}
+#dBasis span{font-size:16px;line-height:1.55;color:var(--text);word-break:keep-all;overflow-wrap:anywhere}   /* 조문 하나가 화면보다 길 수 있다(confined 는 조문 셋) */
+/* fix round 3(C1) — 오지적 3회로 무재해 1칸을 잃는 순간의 화면. 사고(놓침)와 반드시 구분돼야
+   한다: 사고는 붉은 섬광(#dFlash) + 발밑 고리 + 「사고 발생」 팝업이고, 이쪽은 섬광 없이 이
+   띠 하나만 뜬다. 왜 안전모를 잃었는지 학습자가 알아야 한다. 자리는 십자선 위(50% − 76px) —
+   아래쪽 50% + 30px 은 「호루라기 잠김」(#dStun)이 같은 순간에 뜨는 자리라 겹치면 안 된다. */
+#dWarn{position:fixed;left:50%;top:calc(50% - 76px);transform:translateX(-50%);font-size:15px;font-weight:600;color:var(--text);background:var(--glass);border:1px solid var(--bad);border-radius:999px;padding:6px 14px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(8px);z-index:4}
+#dWarn[hidden]{display:none}
+#dStun{position:fixed;left:50%;top:calc(50% + 30px);transform:translateX(-50%);font-size:14px;font-weight:600;color:#FFC0B2;background:var(--bad-soft);border:1px solid var(--bad);border-radius:999px;padding:4px 12px;white-space:nowrap;pointer-events:none;z-index:4}
+:root[data-theme="light"] #dStun{color:var(--bad)}
+#fx.lock .cross i{background:rgba(240,112,86,.9)}
+#fx.lock .dot{background:var(--bad)}
+#dFlash{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;transition:opacity .35s ease-out;background:radial-gradient(ellipse at 50% 55%,rgba(240,80,60,0) 30%,rgba(190,40,25,.6) 100%)}
+#dFlash.on{opacity:1;transition:opacity .05s}
+/* Task 4: 웨이브 다섯 · 정비 시간 · 일제 점검. #hud 는 손대지 않는다 — 일제 점검 남은 횟수는
+   버튼 글자로 낸다(HUD 내용을 바꾸지 말라는 지시 때문에 #hud 안에는 안 넣는다). */
+#btnSweep{position:fixed;right:14px;top:12px;z-index:3;min-height:44px;padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer}
+#btnSweep:disabled{opacity:.4;cursor:default}
+/* Task 8: 홈 링크. 위쪽 두 모서리(#hud·#btnSweep)는 이미 찼고, 아래 중앙은 #hint 가 문구
+   길이만큼 늘었다 줄었다 한다("화면을 클릭해 호루라기를 붑니다"가 가장 길어 390px 에서도
+   좌우 87px씩은 항상 빈다 — 실측 확인) — 그래서 아래 왼쪽 구석에 아이콘 전용 44px 버튼 하나만
+   둔다. 텍스트를 넣지 않은 건 이 구석의 여유가 안정적으로 크지 않아서다("← 홈" 같은 글자
+   버튼은 #hint 와 부딪힐 여지가 있다). #hud 처럼 aria-hidden 을 주지 않는다 — 이건 진짜
+   내비게이션 링크라 스크린리더가 봐야 한다. */
+#btnHome{position:fixed;left:14px;bottom:12px;z-index:3;width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px);color:var(--text);text-decoration:none}
+#btnHome svg{width:20px;height:20px;fill:currentColor}
+#btnHome:hover{border-color:var(--warn)}
+#dMaint{position:fixed;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--scrim)}
+#dMaint[hidden]{display:none}
+#dMaint .mCard{box-sizing:border-box;width:min(94vw,520px);max-height:88vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 20px 16px}
+#dMaint .mHead{margin:0 0 4px;font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.02em;color:var(--warn);text-transform:uppercase}
+#dMaint .mSrc{margin:0 0 10px;font-size:14px;color:var(--muted)}
+#dMaint .mStem{margin:0 0 14px;font-size:17px;line-height:1.55;color:var(--text);word-break:keep-all}
+#dMaint .mChoices{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+#dMaint .mChoices li{box-sizing:border-box;min-height:44px;display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;border:1px solid var(--line-soft);background:var(--panel2);font-size:16px;line-height:1.5;color:var(--text);cursor:pointer}
+#dMaint .mChoices li b{color:var(--muted);font-family:var(--mono);font-weight:500;flex:none}
+#dMaint .mChoices.answered li{cursor:default}
+#dMaint .mChoices li.ok{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+#dMaint .mChoices li.bad{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+#dMaint .mPoint{margin:0 0 14px;padding:10px 12px;border-left:2px solid var(--warn);font-size:14px;line-height:1.55;color:var(--muted)}
+#dMaint .mPoint strong{color:var(--text)}
+#dMaint .mPoint u{color:var(--text)}
+#dMaint #btnNextWave{display:block;width:100%;min-height:44px;border:none;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-family:var(--sans);font-weight:700;font-size:16px;cursor:pointer}
+/* Task 5: 종료 화면. dMaint 와 같은 모달 뼈대(고정 전체 화면 + 스크림)를 그대로 써서
+   잔여 작업자(5웨이브가 끝나도 걷고 있는 사람들)를 가린다. */
+#dEnd{position:fixed;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--scrim)}
+#dEnd[hidden]{display:none}
+#dEnd .eCard{box-sizing:border-box;width:min(94vw,560px);max-height:88vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 20px 20px}
+#dEnd .eHead{margin:0 0 14px;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:.01em;color:var(--warn);text-align:center}
+#dEnd .eStats{display:flex;gap:10px;margin:0}
+#dEnd .eStat{flex:1;box-sizing:border-box;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:10px;background:var(--panel2);border:1px solid var(--line-soft)}
+#dEnd .eStatN{font-size:20px;font-weight:600;color:var(--text)}
+#dEnd .eStatL{font-size:14px;color:var(--muted);text-align:center}
+#dEnd .eAccSub{margin:8px 0 0;font-size:14px;color:var(--muted);text-align:center}
+#dEnd .eMissedHead{margin:18px 0 8px;font-size:16px;font-weight:600;color:var(--text)}
+#dEnd .eMissed{display:flex;flex-direction:column;gap:10px;margin:0 0 18px}
+#dEnd .eMissedEmpty{margin:0 0 18px;font-size:16px;color:var(--muted)}
+#dEnd .eGroup{box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1px solid var(--line-soft);background:var(--panel2)}
+#dEnd .eGroupHead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 0 6px}
+#dEnd .eGroupName{font-size:16px;font-weight:600;color:var(--text);word-break:keep-all}
+#dEnd .eGroupCount{font-size:14px;color:var(--bad);flex:none}
+#dEnd .eGroupTell{margin:0 0 4px;font-size:14px;line-height:1.5;color:var(--warn);word-break:keep-all}
+#dEnd .eGroupFix{margin:0 0 8px;font-size:14px;line-height:1.5;color:var(--muted);word-break:keep-all}
+#dEnd .eGroupLaw{margin:0 0 10px;font-size:14px;color:var(--muted)}
+#dEnd .eGroupLaw summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:4px;font-size:14px;color:var(--accent);list-style:none}
+#dEnd .eGroupLaw summary::-webkit-details-marker{display:none}
+#dEnd .eGroupLaw summary::before{content:'▸';font-family:var(--mono)}
+#dEnd .eGroupLaw[open] summary::before{content:'▾'}
+#dEnd .eGroupLaw p{margin:6px 0 0;font-size:16px;line-height:1.55;color:var(--text);word-break:keep-all;overflow-wrap:anywhere}   /* 조문 원문 — 자르지 않는다(confined 는 조문 셋) */
+#dEnd .eGroupLink{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--accent);color:var(--accent);text-decoration:none;font-size:14px;font-weight:600}
+#dEnd #btnAgain{display:block;width:100%;min-height:44px;margin-top:4px;border:none;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-family:var(--sans);font-weight:700;font-size:16px;cursor:pointer}
+/* Task 8: 종료 화면에도 홈 — 여기까지 온 사람(사고로 끝났든 완주했든)은 "다시" 말고는
+   나갈 길이 없었다(실습장 링크는 target=_blank 라 이 탭은 그대로 남는다). */
+#dEnd #eHome{display:flex;align-items:center;justify-content:center;min-height:44px;margin-top:8px;font-size:14px;color:var(--muted);text-decoration:none}
+#dEnd #eHome:hover{color:var(--text)}
+</style>
+</head>
+<body>
+
+<div id="stage"><canvas id="c"></canvas></div>
+<div id="hud" aria-hidden="true">
+  <span class="hudLifeWrap"><span class="hudLifeLabel">무재해</span><span class="hudLives" id="hudLives"></span></span>
+  <span class="sep">·</span>
+  <span>WAVE <b class="mono" id="hudWaveN">0</b></span>
+  <span class="sep">·</span>
+  <span><b class="mono" id="hudScoreN">0</b>점</span>
+  <span class="sep">·</span>
+  <span class="hudWrong" id="hudWrong">오지적 <b class="mono" id="hudWrongN">0</b><span class="hudWrongMax" id="hudWrongMax">/3</span></span>
+  <span class="sep">·</span>
+  <span class="hudSweep">점검 <b class="mono" id="hudSweepN">3</b></span>
+</div>
+<a id="btnHome" href="./" aria-label="산업안전기사 학습실 홈으로"><svg viewBox="0 0 22 20" aria-hidden="true"><path d="M11 1 1 9.5V19h6.5v-6.5h7V19H21V9.5L11 1Z"/></svg></a>
+<div id="fx" aria-hidden="true">
+  <div class="cross"><i></i><i></i><i></i><i></i><span class="dot"></span></div>
+  <div class="hm" id="fHm"><i></i><i></i><i></i><i></i></div>
+  <div class="pops" id="fPop"></div>
+</div>
+<div id="hint">화면을 클릭해 호루라기를 붑니다</div>
+<div id="dFlash" aria-hidden="true"></div>
+<div id="dWarn" role="status" aria-live="polite" hidden></div>
+<div id="dStun" hidden>호루라기 잠김</div>
+<div id="dBasis" role="status" aria-live="polite" hidden></div>
+<button id="btnSweep" type="button">일제 점검</button>
+<div id="dMaint" hidden>
+  <div class="mCard" role="dialog" aria-modal="true" aria-label="정비 시간">
+    <p class="mHead">정비 시간</p>
+    <p class="mSrc" id="mSrc"></p>
+    <p class="mStem" id="mStem"></p>
+    <ol class="mChoices" id="mChoices"></ol>
+    <div class="mPoint" id="mPoint" hidden></div>
+    <button id="btnNextWave" type="button">다음 웨이브</button>
+  </div>
+</div>
+<div id="dEnd" hidden>
+  <div class="eCard" role="dialog" aria-modal="true" aria-label="게임 결과">
+    <p class="eHead" id="eHead">게임 오버</p>
+    <div class="eStats">
+      <div class="eStat"><span class="eStatN mono" id="eScore">0</span><span class="eStatL">점수</span></div>
+      <div class="eStat"><span class="eStatN mono" id="eAcc">0%</span><span class="eStatL">지적 정확도</span></div>
+      <div class="eStat"><span class="eStatN mono" id="eWave">0 / 5</span><span class="eStatL">도달 웨이브</span></div>
+    </div>
+    <p class="eAccSub" id="eAccSub"></p>
+    <p class="eAccSub" id="eWrongSub"></p>
+    <p class="eMissedHead">놓친 행동</p>
+    <div class="eMissed" id="eMissed"></div>
+    <button id="btnAgain" type="button">다시</button>
+    <a id="eHome" href="./">산업안전기사 학습실 홈으로</a>
+  </div>
+</div>
+
+<script id="hazardActs">/* 불안전 행동 12종. 데이터만 둔다 — 스폰·웨이브 로직은 이 파일을 모른다.
+
+   law  : 화면에 그대로 뜨는 근거 조문(지적 성공 시 한 줄 · 종료 화면 「근거 조문」).
+          예전엔 「LAW[topic].art 와 글자 그대로 같아야 한다」였는데, 그게 이 파일을 실습장
+          문자열의 사본으로 만들었다 — 조문을 행동에 맞추는 대신 행동을 조문에 맞추게 됐고,
+          실제로 forklift 가 「보행자가 지게차 작업구역에 들어갔다」인데 근거는 「제180조
+          (헤드가드) — 지게차에 씌우는 덮개 규격」이었다(fix round 2 에서 제172조(접촉의 방지)
+          제1항으로 바로잡음). 이제 law 는 topic 과 무관하게 **법령 원문**과 대조한다
+          (lawcheck.py ↔ law_text.json). 실습장 문자열과 같을 필요가 없다.
+   basis: 그 조문이 이 행동의 근거인 이유 — 조문 원문에서 **글자 그대로** 따온 문장.
+          {조번호: 인용}. lawcheck.py 가 law_text.json 에서 그 문장을 실제로 찾는다.
+          조문을 베끼지 말고 읽고 고르라는 강제 장치다. law 에 적은 규칙 조문은 전부
+          여기에 인용이 하나씩 있어야 한다(빠지면 검사 실패).
+   duty : 이 행동을 바로잡는 의무의 갈래(lawcheck.py 의 고정 목록 중 하나).
+          entry 출입·접근 제한 / ppe 보호구 지급·착용 / struct 통로·발판 구조 기준 /
+          load 적재·중량물 취급 제한 / guard 방호장치·덮개 설치 / vent 환기·적정공기 유지.
+          인용한 조문 중 적어도 하나가 그 갈래의 문장을 담고 있어야 한다 — 조문 번호는
+          맞는데 엉뚱한 조문인 경우를 잡는 두 번째 축이다(제180조는 entry 문장이 없다).
+   topic: 3D 실습장 주제 키 — 종료 화면 「실습장에서 보기」 링크가 쓴다(주소 뒤 #topic= 에 붙는다).
+          조문과 같을 필요는 없다(관련 학습 주제로 보내는 링크다). 실재하는 키여야 한다.
+   tell   : 멀리서 눈에 띄는 표 — 이게 안 보이면 오지적 벌칙이 불공정해진다
+   safeLook: 같은 자리의 정상 작업자가 어떻게 보이는지 (미끼를 만들 때 쓴다) */
+const HAZARD_ACTS = [
+  {id:'fall',     name:'안전대 고리 미체결', tell:'고리가 바닥에 끌린다',
+   topic:'fall',     law:'제42조(추락의 방지) 제2항', fix:'고리를 걸이설비에 체결', wave:1,
+   duty:'ppe',
+   basis:{'42':'근로자에게 안전대를 착용하도록 하는 등 추락위험을 방지하기 위해 필요한 조치를 해야 한다'},
+   safeLook:'고리가 위쪽 수평구명줄에 걸려 있다'},
+  {id:'rail',     name:'안전난간 넘기', tell:'난간을 타 넘는 자세',
+   topic:'rail',     law:'제13조(안전난간의 구조 및 설치요건)', fix:'통로로 우회', wave:1,
+   duty:'struct',
+   basis:{'13':'근로자의 추락 등의 위험을 방지하기 위하여 안전난간을 설치하는 경우 다음 각 호의 기준에 맞는 구조로 설치해야 한다'},
+   safeLook:'난간 안쪽으로 걷는다'},
+  {id:'ladder',   name:'사다리에서 상체 내밀기', tell:'사다리 옆으로 몸이 기울었다',
+   topic:'ladder',   law:'제24조(사다리식 통로 등의 구조)', fix:'사다리를 옮겨 다시 오름', wave:2,
+   duty:'struct',
+   basis:{'24':'사다리가 넘어지거나 미끄러지는 것을 방지하기 위한 조치를 할 것'},
+   safeLook:'몸이 사다리 가운데에 있다'},
+  {id:'ramp',     name:'경사로 뛰어 내려오기', tell:'경사로에서 뛰는 자세',
+   topic:'ramp',     law:'제23조(가설통로의 구조)', fix:'걸어서 내려옴', wave:2,
+   duty:'struct',
+   basis:{'23':'경사가 15도를 초과하는 경우에는 미끄러지지 아니하는 구조로 할 것'},
+   safeLook:'난간을 잡고 걷는다'},
+  {id:'plank',    name:'작업발판 틈으로 딛기', tell:'발이 발판 틈에 빠진다',
+   topic:'plank',    law:'제56조(작업발판의 구조)', fix:'틈을 메우고 통행', wave:2,
+   duty:'struct',
+   basis:{'56':'작업발판의 폭은 40센티미터 이상으로 하고, 발판재료 간의 틈은 3센티미터 이하로 할 것'},
+   safeLook:'발판 가운데를 딛는다'},
+  {id:'scaffold', name:'비계에 과다 적재', tell:'자재를 한 칸에 높이 쌓는다',
+   topic:'scaffold', law:'제60조(강관비계의 구조)', fix:'적재하중 이내로 분산', wave:3,
+   duty:'load',
+   basis:{'60':'비계기둥 간의 적재하중은 400킬로그램을 초과하지 않도록 할 것'},
+   safeLook:'자재를 나눠 나른다'},
+  // fix round 3(C4) — 예전 값은 '제385조(중량물 취급) ▸ 인력 운반 권장 한계' 였다.
+  // 제385조 원문은 「중량물을 운반하거나 취급하는 경우에 하역운반기계ㆍ운반용구…를 사용하여야
+  // 한다」 — 사람이 아니라 **기계를 쓰라**는 조문이라, 화면에 함께 뜨는 시정 동작(「무릎을 굽혀
+  // 다리 힘으로」)의 근거가 아니다. 이 행동은 사람이 손으로 드는 것을 전제한 자세 문제다.
+  // 제666조(작업자세 등)는 「중량물을 인력으로 들어올리는 작업을 하는 경우에 무게중심을 낮추거나
+  // 대상물에 몸을 밀착하도록 하는 등 … 자세에 대하여 알려야 한다」 — 무게중심을 낮추는 것이
+  // 곧 무릎을 굽히는 자세다. 조문을 바꾸면서 「인력 운반 권장 한계」(KOSHA 지침, 규칙 조문
+  // 아님)도 뗀다 — 제666조는 무게 한계를 정하는 조문이 아니라 자세를 알리게 하는 조문이다.
+  // 3D 실습장(ext_topics.js 의 carry)은 아직 제385조를 띄운다 — 이번 배포 대상이 아니라 남겨 뒀다.
+  {id:'carry',    name:'허리 굽혀 중량물 들기', tell:'무릎을 편 채 상체만 숙인다',
+   topic:'carry',    law:'제666조(작업자세 등)', fix:'무릎을 굽혀 다리 힘으로', wave:3,
+   duty:'load',
+   basis:{'666':'중량물을 인력으로 들어올리는 작업을 하는 경우에 무게중심을 낮추거나 대상물에 몸을 밀착하도록 하는 등 근로자에게 신체의 부담을 줄일 수 있는 자세에 대하여 알려야 한다'},
+   safeLook:'무릎을 굽히고 든다'},
+  {id:'noise',    name:'청력보호구 미착용', tell:'소음 구역인데 귀가 맨귀',
+   topic:'noise',    law:'제512조(정의: 소음작업·강렬한 소음작업·충격소음작업) · 제516조(청력보호구의 지급 등)', fix:'귀마개 착용', wave:3,
+   duty:'ppe',
+   basis:{'512':'"소음작업"이란 1일 8시간 작업을 기준으로 85데시벨 이상의 소음이 발생하는 작업을 말한다',
+          '516':'근로자가 소음작업, 강렬한 소음작업 또는 충격소음작업에 종사하는 경우에 근로자에게 청력보호구를 지급하고 착용하도록 하여야 한다'},
+   safeLook:'귀덮개를 쓰고 있다'},
+  {id:'approach', name:'충전전로 접근한계 침범', tell:'전선 쪽으로 손을 뻗는다',
+   topic:'approach', law:'제321조(충전전로에서의 전기작업) ▸ 충전전로 접근한계거리 표', fix:'접근한계거리 밖으로', wave:4,
+   duty:'entry',
+   basis:{'321':'노출 충전부에 다음 표에 제시된 접근한계거리 이내로 접근하거나 절연 손잡이가 없는 도전체에 접근할 수 없도록 할 것'},
+   safeLook:'절연용 방호구를 쓰고 거리를 둔다'},
+  // fix round 2(C2) — 예전 값은 '제180조(헤드가드) · 한국산업표준 KS B ISO 6055' 였다.
+  // 제180조는 지게차에 씌우는 헤드가드의 강도·개구 규격이고, 보행자가 지게차 작업구역에
+  // 걸어 들어간 것의 근거가 아니다. 설계문서 표 9행이 지정한 계열(제172조)로 바로잡는다.
+  {id:'forklift', name:'지게차 작업구역 침범', tell:'움직이는 지게차 앞을 가로지른다',
+   topic:'forklift', law:'제172조(접촉의 방지) 제1항', fix:'지게차가 지난 뒤 통행', wave:4,
+   duty:'entry',
+   basis:{'172':'차량계 하역운반기계등에 접촉되어 근로자가 위험해질 우려가 있는 장소에는 근로자를 출입시켜서는 아니 된다'},
+   safeLook:'지게차를 보내고 지나간다'},
+  {id:'grinder',  name:'덮개 없이 연삭', tell:'연삭기에 덮개가 없다',
+   topic:'grinder',  law:'규칙 제122조(연삭숫돌의 덮개 등) · 고시 연삭기 덮개 노출각도',
+   fix:'덮개를 씌우고 작업', wave:5,
+   duty:'guard',
+   basis:{'122':'회전 중인 연삭숫돌(지름이 5센티미터 이상인 것으로 한정한다)이 근로자에게 위험을 미칠 우려가 있는 경우에 그 부위에 덮개를 설치하여야 한다'},
+   safeLook:'덮개가 씌워져 있다'},
+  // 제619조의 제목은 원문이 「밀폐공간 작업 프로그램의 수립·시행」이다(예전엔 「밀폐공간 작업
+  // 프로그램」으로 줄여 적었다 — 화면에 뜨는 값이므로 원문 제목 그대로 쓴다).
+  {id:'confined', name:'환기 없이 밀폐공간 진입', tell:'맨몸으로 맨홀에 들어간다',
+   topic:'confined', law:'제618조(정의: 적정공기) · 제619조(밀폐공간 작업 프로그램의 수립·시행) · 제620조(환기 등)', fix:'환기 후 측정하고 진입', wave:5,
+   duty:'vent',
+   basis:{'618':'"적정공기"란 산소농도의 범위가 18퍼센트 이상 23.5퍼센트 미만, 이산화탄소의 농도가 1.5퍼센트 미만, 일산화탄소의 농도가 30피피엠 미만, 황화수소의 농도가 10피피엠 미만인 수준의 공기를 말한다',
+          '619':'밀폐공간에서 근로자에게 작업을 하도록 하는 경우 다음 각 호의 내용이 포함된 밀폐공간 작업 프로그램을 수립하여 시행하여야 한다',
+          '620':'근로자가 밀폐공간에서 작업을 하는 경우에 작업을 시작하기 전과 작업 중에 해당 작업장을 적정공기 상태가 유지되도록 환기하여야 한다'},
+   safeLook:'송풍기를 돌리고 들어간다'},
+];
+window.HAZARD_ACTS = HAZARD_ACTS;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const el = id => document.getElementById(id);
+
+  /* ---------- three 기본 ---------- */
+  // safety3d_tpl.html:578 에서 가져옴 — 이 리포는 페이지마다 자립형이다
+  const col = hex => new THREE.Color(hex).convertSRGBToLinear();
+  // safety3d_tpl.html:408 에서 가져옴
+  const clamp = (v,a,b)=>Math.min(b,Math.max(a,v));
+  // safety3d_tpl.html:592 근처에서 가져옴 — 위치 벡터 축약 생성자. 인자 없이 부르면 (0,0,0) 스크래치 벡터
+  const P3 = (x,y,z)=>new THREE.Vector3(x,y,z);
+
+  const canvas = el('c');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+
+  const scene = new THREE.Scene();
+  scene.background = col(0x0A1018);
+  scene.fog = new THREE.Fog(col(0x2C394D), 16, 40);
+
+  // 무대 Step 2: 카메라 고정 — 위치 P3(0, 1.6, 6), 원점을 본다
+  const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 100);
+  camera.position.copy(P3(0, 1.6, 6));
+  camera.lookAt(0, 0, 0);
+
+  const hemi = new THREE.HemisphereLight(col(0xC9DBFF), col(0x1A2230), 0.9); scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+  sun.position.set(8, 14, 9); sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.left = -14; sun.shadow.camera.right = 14; sun.shadow.camera.top = 12; sun.shadow.camera.bottom = -6;
+  sun.shadow.camera.near = 2; sun.shadow.camera.far = 40; sun.shadow.bias = -0.001;
+  scene.add(sun);
+  const fillL = new THREE.DirectionalLight(col(0x7FA6E0), 0.25); fillL.position.set(-8, 6, -4); scene.add(fillL);
+
+  // safety3d_tpl.html:618 에서 가져옴
+  function box(w, h, d, mat, parent, x=0, y=0, z=0){ const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; }
+
+  /* ---------- 작업자 인형: safety3d_tpl.html 에서 가져옴 (재질 596행 근처 · worker() 659행 · walkPose() 687행) ---------- */
+  const RAIL_Y = 0xE3B54D;
+  const skinMat = new THREE.MeshStandardMaterial({color: col(0xE8C9A8), roughness: .7}), pantsMat = new THREE.MeshStandardMaterial({color: col(0x2E3949), roughness: .8}), helmetMat = new THREE.MeshStandardMaterial({color: col(RAIL_Y), roughness: .5});
+  const stripeMat = new THREE.MeshStandardMaterial({color: col(0xE6E9EC), roughness: .45}), beltMat = new THREE.MeshStandardMaterial({color: col(0x2A2A2A), roughness: .8}), bootMat = new THREE.MeshStandardMaterial({color: col(0x4A3728), roughness: .9}), gloveMat = new THREE.MeshStandardMaterial({color: col(0xD9B26A), roughness: .8}), eyeMat = new THREE.MeshStandardMaterial({color: col(0x222222), roughness: .6});
+  // safety3d_tpl.html:659 에서 가져옴 — 이 리포는 페이지마다 자립형이다
+  function worker(vestHex=0xF07056, parent=scene, helmetHex=null){
+    const g = new THREE.Group(), vest = new THREE.MeshStandardMaterial({color: col(vestHex), roughness: .8}), helmetM = helmetHex ? new THREE.MeshStandardMaterial({color: col(helmetHex), roughness: .5}) : helmetMat;
+    // 몸통: 어깨가 넓고 허리가 잘록한 조끼 + 반사띠 2줄 + 벨트
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.2, 0.6, 16), vest); torso.position.y = 0.96; torso.castShadow = true; g.add(torso);
+    [[0.83, 0.216, 0.21], [1.1, 0.246, 0.24]].forEach(([y, r0, r1])=>{ const band = new THREE.Mesh(new THREE.CylinderGeometry(r0, r1, 0.05, 16), stripeMat); band.position.y = y; g.add(band); });
+    const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.205, 0.205, 0.06, 12), beltMat); belt.position.y = 0.67; g.add(belt);
+    const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.19, 0.1, 12), pantsMat); hips.position.y = 0.6; g.add(hips);
+    [-0.25, 0.25].forEach(x=>{ const sh = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), vest); sh.position.set(x, 1.2, 0); g.add(sh); });
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.1, 10), skinMat); neck.position.y = 1.28; g.add(neck);
+    // 다리: 바지 + 안전화(앞으로 나온 발)
+    const legs = [-0.1, 0.1].map(x=>{ const p = new THREE.Group(); p.position.set(x, 0.62, 0); const m = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.07, 0.55, 10), pantsMat); m.position.y = -0.28; m.castShadow = true; p.add(m);
+      const boot = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.27), bootMat); boot.position.set(0, -0.57, 0.05); p.add(boot); g.add(p); return p; });
+    // 팔: 소매(조끼색) + 팔꿈치 + 팔뚝(살색) + 장갑
+    const arms = [-0.3, 0.3].map(x=>{ const p = new THREE.Group(); p.position.set(x, 1.2, 0);
+      const up = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.06, 0.27, 10), vest); up.position.y = -0.13; up.castShadow = true; p.add(up);
+      const el = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), skinMat); el.position.y = -0.27; p.add(el);
+      const fo = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.05, 0.27, 10), skinMat); fo.position.y = -0.41; fo.castShadow = true; p.add(fo);
+      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), gloveMat); hand.position.y = -0.56; p.add(hand); g.add(p); return p; });
+    // 머리: 얼굴(눈·입)과 챙 달린 안전모는 머리 메시에 붙여서 고개를 돌리면 같이 돈다
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.17, 16, 12), skinMat); head.position.y = 1.42; g.add(head);
+    [-0.06, 0.06].forEach(x=>{ const eye = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 6), eyeMat); eye.position.set(x, 0.02, 0.155); head.add(eye); });
+    const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.012, 0.01), eyeMat); mouth.position.set(0, -0.06, 0.165); head.add(mouth);
+    const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.205, 16, 10, 0, Math.PI*2, 0, Math.PI/2), helmetM); helmet.position.y = 0.02; head.add(helmet);
+    const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.23, 0.02, 16), helmetM); brim.position.y = 0.02; head.add(brim);
+    const peak = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.02, 0.1), helmetM); peak.position.set(0, 0.02, 0.26); head.add(peak);
+    g.userData.limbs = {legs, arms}; g.userData.head = head;
+    parent.add(g); return g;
+  }
+  // safety3d_tpl.html:687 에서 가져옴 — 이 리포는 페이지마다 자립형이다
+  function walkPose(g, phase, amp=0.5, armsFree=true){ const L = g.userData.limbs; if(!L) return; const s = Math.sin(phase); L.legs[0].rotation.x = s*amp; L.legs[1].rotation.x = -s*amp; if(armsFree){ L.arms[0].rotation.x = -s*amp*0.8; L.arms[1].rotation.x = s*amp*0.8; } }
+
+  /* ---------- 무대 Step 2: 바닥(콘크리트) · 뒤쪽 건물 벽 · 좌우 자재 더미 · 작업 구역 선 ---------- */
+  const groundMat = new THREE.MeshStandardMaterial({color: col(0x3F4956), roughness: .92});
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), groundMat);
+  ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+
+  const wallMat = new THREE.MeshStandardMaterial({color: col(0x243144), roughness: .85});
+  box(30, 9, 1, wallMat, scene, 0, 4.5, -18);
+  // 벽에 창문 몇 개(현장 건물 느낌)
+  const winMat = new THREE.MeshStandardMaterial({color: col(0x121A26), roughness: .4, metalness: .2});
+  for(let i=-2;i<=2;i++) box(1.3, 1.6, 0.1, winMat, scene, i*3.6, 5.4, -17.4);
+
+  const woodMat = new THREE.MeshStandardMaterial({color: col(0xA97F4C), roughness: .8});
+  const brickMat = new THREE.MeshStandardMaterial({color: col(0xB5563A), roughness: .85});
+  const steelMat = new THREE.MeshStandardMaterial({color: col(0xB8C2D2), roughness: .5, metalness: .35});
+  function pile(x){
+    for(let i=0;i<4;i++) box(0.5, 0.3, 1.6, i%2 ? woodMat : brickMat, scene, x, 0.15 + i*0.32, -9 + (i%2 ? 0.3 : -0.3));
+    const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.9, 16), steelMat); drum.position.set(x + (x > 0 ? 0.9 : -0.9), 0.45, -8.6); drum.castShadow = true; drum.receiveShadow = true; scene.add(drum);
+  }
+  pile(-7); pile(7);
+
+  // 작업 구역 선(경고 줄무늬): 작업자가 여기(z>3) 닿으면 사고 — stepWorkers 의 reachedZone 기준선과 같은 z
+  function hazardStripeTex(repeat){
+    const c = document.createElement('canvas'); c.width = 256; c.height = 32; const g = c.getContext('2d');
+    g.fillStyle = '#E3B54D'; g.fillRect(0, 0, 256, 32);
+    g.fillStyle = '#1A1A1A';
+    for(let x=-32;x<256;x+=32){ g.save(); g.translate(x, 0); g.beginPath(); g.moveTo(0, 32); g.lineTo(16, 0); g.lineTo(32, 0); g.lineTo(16, 32); g.closePath(); g.fill(); g.restore(); }
+    const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping; t.repeat.set(repeat, 1); return t;
+  }
+  const zoneLine = new THREE.Mesh(new THREE.PlaneGeometry(16, 0.5), new THREE.MeshBasicMaterial({map: hazardStripeTex(12)}));
+  zoneLine.rotation.x = -Math.PI/2; zoneLine.position.set(0, 0.015, 3); scene.add(zoneLine);
+
+  /* ---------- 호루라기: palace_tpl.html 의 총(ensureGun·gunTip·tracer)을 호루라기+지적봉으로 바꿈 ---------- */
+  const W = { grp: null, wave: null, waveT: 0 };
+  // palace_tpl.html:621 에서 가져옴 — ensureGun() → ensureWhistle(): 총열 대신 호루라기(작은 원통 + 링)와 지적봉을 카메라에 붙인다
+  function ensureWhistle(){
+    if(W.grp) return;
+    scene.add(camera);
+    const g = new THREE.Group();
+    const mBody = new THREE.MeshStandardMaterial({color: col(RAIL_Y), roughness: .4, metalness: .5});
+    const mRing = new THREE.MeshStandardMaterial({color: col(0xB8C2D2), roughness: .35, metalness: .6});
+    const mStick = new THREE.MeshStandardMaterial({color: col(0xF07056), roughness: .55});
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.028, 0.09, 12), mBody); body.rotation.z = Math.PI/2; g.add(body);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.006, 8, 16), mRing); ring.position.set(-0.05, 0.014, 0); ring.rotation.y = Math.PI/2; g.add(ring);
+    // 지적봉: 가늘고 긴 막대(팔로 잡은 것처럼 앞으로 뻗음)
+    const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.4, 8), mStick); stick.position.set(0.05, -0.05, -0.35); stick.rotation.x = Math.PI/2; g.add(stick);
+    // 총구 화염 스프라이트 대신 호루라기 소리 파형 링 — whistle() 이 부르면 커지며 사라진다
+    const wave = new THREE.Mesh(new THREE.RingGeometry(0.03, 0.05, 24), new THREE.MeshBasicMaterial({color: col(0xE8EEF8), transparent: true, opacity: 0, side: THREE.DoubleSide, depthTest: false}));
+    wave.position.set(0.02, 0.02, -0.08); g.add(wave); W.wave = wave;
+    g.scale.setScalar(0.95); g.rotation.set(0.02, -0.12, 0.02);
+    camera.add(g); W.grp = g;
+    layoutWhistle();
+  }
+  // 세로 화면(좁은 aspect)에서는 수평 시야가 크게 줄어(수직 fov 고정) 카메라 구석에 고정한
+  // 소품이 화면 밖으로 밀려난다. 화면비에 맞춰 매 리사이즈마다 시야 안쪽 구석으로 되돌린다.
+  function layoutWhistle(){
+    if(!W.grp) return;
+    const halfV = THREE.MathUtils.degToRad(camera.fov/2);
+    const halfH = Math.atan(Math.tan(halfV)*camera.aspect);
+    const depth = 0.55, marginH = 0.72, marginV = 0.6;
+    W.grp.position.set(depth*Math.tan(halfH)*marginH, -depth*Math.tan(halfV)*marginV, -depth);
+  }
+  // palace_tpl.html:642 에서 가져옴 — gunTip() → whistleTip()
+  function whistleTip(){ const v = P3(0.05, -0.05, -0.55); return W.grp ? W.grp.localToWorld(v) : camera.position.clone(); }
+  let FX = [];
+  // palace_tpl.html:643 에서 가져옴 — tracer(to) → pointLine(to): 예광탄 노란선 대신 빨간 지적선.
+  // shell() (탄피 배출)은 가져오지 않았다 — 호루라기에 탄피는 없다.
+  function pointLine(to){
+    const from = whistleTip();
+    const geo = new THREE.BufferGeometry().setFromPoints([from, to]);
+    const ln = new THREE.Line(geo, new THREE.LineBasicMaterial({color: col(0xF07056), transparent: true, opacity: .85}));
+    scene.add(ln);
+    FX.push({o: ln, life: 0.22, t: 0.22});
+  }
+  // palace_tpl.html:638 에서 가져옴 — 그대로
+  function hitMark(cls){ const h = el('fHm'); if(!h) return; h.className = 'hm on ' + cls; setTimeout(()=>{ h.classList.remove('on'); }, 150); }
+  // palace_tpl.html:639 에서 가져옴 — 그대로
+  function popText(txt, bad){ const box = el('fPop'); if(!box) return; const s = document.createElement('span'); s.textContent = txt; if(bad) s.className = 'bad'; box.appendChild(s); setTimeout(()=> s.remove(), 950); }
+  // palace_tpl.html:606 snd() 패턴을 따름 — 총소리 대신 호루라기 소리(짧은 사각파 스윕)
+  const AC = window.AudioContext || window.webkitAudioContext; let ac = null;
+  function sndWhistle(){
+    if(!AC) return;
+    try{
+      if(!ac) ac = new AC(); if(ac.state === 'suspended') ac.resume();
+      const t0 = ac.currentTime, g = ac.createGain(); g.connect(ac.destination);
+      const o = ac.createOscillator(); o.type = 'square';
+      o.frequency.setValueAtTime(2300, t0); o.frequency.exponentialRampToValueAtTime(3000, t0 + 0.05); o.frequency.exponentialRampToValueAtTime(2100, t0 + 0.2);
+      o.connect(g); g.gain.setValueAtTime(0.001, t0); g.gain.exponentialRampToValueAtTime(0.26, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.22);
+      o.start(t0); o.stop(t0 + 0.24);
+    }catch(e){}
+  }
+  function whistle(){ ensureWhistle(); sndWhistle(); if(W.wave){ W.wave.material.opacity = .9; W.wave.scale.set(1, 1, 1); W.waveT = 0; } }
+  function stepWhistleFx(dt){
+    if(W.wave && W.wave.material.opacity > 0){
+      W.waveT += dt; const k = Math.min(1, W.waveT / 0.3);
+      W.wave.scale.setScalar(1 + k*4);
+      W.wave.material.opacity = Math.max(0, .9*(1 - k));
+    }
+    FX = FX.filter(f=>{
+      f.t -= dt; const k = Math.max(0, f.t/f.life);
+      f.o.material.opacity = k*0.85;
+      if(f.grow) f.o.scale.setScalar(1 + (1 - k)*f.grow);   // 사고 링은 퍼지면서 사라진다
+      if(f.t <= 0){ scene.remove(f.o); f.o.geometry.dispose(); f.o.material.dispose(); return false; }
+      return true;
+    });
+  }
+
+  /* ---------- Task 3: 12종의 표 ----------
+     worker() 는 helmet 을 userData 로 내주지 않고 머리는 limbs 밖(userData.head)에 있다. 기존 부품을 찾아
+     지우는 방식은 참조가 없어 못 쓴다 — 표는 전부 「붙이는」 쪽으로만 만들었다.
+     RIG[id](w, safe) 하나가 위험한 사람과 규정을 지킨 사람 두 벌을 같이 만든다. 이렇게 묶지 않으면
+     사다리·비계·지게차 같은 소품이 위험한 사람에게만 붙어서, 게임이 「위험 인지」가 아니라
+     「소품 찾기」가 된다. 소품은 두 쪽이 똑같고 다른 것은 자세·착용 상태뿐이다. */
+  const lanyMat  = new THREE.MeshStandardMaterial({color: col(0xF2D24A), roughness: .7});   // 안전대 로프
+  const railMat2 = new THREE.MeshStandardMaterial({color: col(RAIL_Y), roughness: .5, metalness: .2});
+  const darkMat  = new THREE.MeshStandardMaterial({color: col(0x161C26), roughness: .95});
+  const muffMat  = new THREE.MeshStandardMaterial({color: col(0x35D6E8), roughness: .4});   // 청력보호구
+  const orangeMat= new THREE.MeshStandardMaterial({color: col(0xFF7A2F), roughness: .6});   // 절연용 방호구
+  const ductMat  = new THREE.MeshStandardMaterial({color: col(0xFF8A3D), roughness: .8});   // 송풍 덕트
+  const drumMat  = new THREE.MeshStandardMaterial({color: col(0xE3B54D), roughness: .6});   // 송풍기
+  const forkMat  = new THREE.MeshStandardMaterial({color: col(0xE07B1F), roughness: .6});   // 지게차
+  const wheelMat = new THREE.MeshStandardMaterial({color: col(0xF2F5FA), roughness: .35, emissive: col(0x94A6BF), emissiveIntensity: .5});
+  const guardMat = new THREE.MeshStandardMaterial({color: col(0xE0782A), roughness: .55, metalness: .2});   // 연삭기 덮개 — 어두운 색은 배경에 묻혀 12m 에서 안 보였다
+  const arcMat   = new THREE.MeshBasicMaterial({color: col(0xFFE9A0)});
+  const noiseMat = new THREE.MeshBasicMaterial({color: col(0xFF6A3D), transparent: true, opacity: .75, side: THREE.DoubleSide});
+  const forkPathTex = hazardStripeTex(8);   // 지게차 통행로 — 작업 구역 선과 같은 줄무늬를 쓴다
+  // Task 6: ramp 전용 — 다리·발 표(경사판에 가려 390px 에서 안 보임, task-3 신고)가 안 보여도
+  // 어깨 위(가려지지 않는 자리)에서 「뛰고 있다」가 읽히도록 쓰는 속도선. 다른 표에 없는 색(마젠타)이라
+  // 다른 열의 표와 안 섞인다.
+  // ramp 의 속도선(rads 로 세기를 가른다)과 forklift 의 위험구역 테두리(양쪽 다 그린다) 둘 다
+  // 쓰는 기본 재질. safe/unsafe 로 안 가르고 둘 다 만든다 — 유무 자체가 정답이 되면 안 된다는
+  // fix round 1 리뷰 지적(noise 의 실제 패턴: 소음 파형은 양쪽, 표는 귀덮개뿐)을 따른다.
+  const speedMat = new THREE.MeshBasicMaterial({color: col(0xFF2E8C), transparent: true, opacity: .85});
+  // forklift 의 위험구역 테두리 — 통행로(path)가 이미 양쪽에 있는 것처럼, 이 테두리도 두 쪽
+  // 모두에 두른다(위험구역은 누가 서 있든 존재한다). 표는 테두리 유무가 아니라 그 안/밖이다.
+  const dangerMat = new THREE.MeshBasicMaterial({color: col(0xFF3B30), transparent: true, opacity: .8, side: THREE.DoubleSide});
+
+  function tube(r, h, mat, parent, x, y, z, rx, rz){
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 10), mat);
+    m.position.set(x, y, z); if(rx) m.rotation.x = rx; if(rz) m.rotation.z = rz;
+    m.castShadow = true; parent.add(m); return m;
+  }
+  // 두 점을 잇는 막대(로프·구명줄·손잡이). 방향은 쿼터니언으로 맞춘다.
+  function link(a, b, r, mat, parent){
+    const d = b.clone().sub(a), L = d.length();
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L, 8), mat);
+    m.position.copy(a).add(d.clone().multiplyScalar(0.5));
+    m.quaternion.setFromUnitVectors(P3(0, 1, 0), d.clone().normalize());
+    m.castShadow = true; parent.add(m); return m;
+  }
+  // stepWorkers 가 매 프레임 g.lookAt() 으로 g.rotation 을 덮는다. 그래서 자세는 g 가 아니라
+  // 몸통 피벗(w.body)에서 준다. 소품은 g 에 직접 붙여 기울지 않게 한다.
+  //   pivotAll(w, y) : 온몸을 높이 y 를 축으로 기울인다
+  //   pivotUp (w, y) : 다리는 두고 상체만 굽힌다(허리 굽혀 들기·몸 돌리기)
+  // ⚠ 둘을 한 작업자에 같이 쓸 때: pivotAll 의 축 높이가 0 이 아니면 자식 좌표가 이미 그만큼 내려가
+  //   있어서 pivotUp 이 한 번 더 내린다 — 조용한 이중 이동이 된다. 축 높이 0 이면 겹쳐 써도 안전하다
+  //   (forklift 정상 쪽이 그렇게 쓴다). 어기면 조용히 어긋나지 말고 콘솔에 대고 소리치게 해 뒀다.
+  function pivotAll(w, y){
+    const pv = w.body, at = y || 0;
+    if(pv.userData.origin === undefined){
+      pv.userData.origin = at;
+      if(at){ pv.children.forEach(k=> k.position.y -= at); pv.position.y = at; }
+    }else if(pv.userData.origin !== at){
+      console.error('pivotAll: 축 높이를 바꿔 두 번 불렀다 ' + pv.userData.origin + ' → ' + at + ' (두 번째는 무시된다)');
+    }
+    return pv;
+  }
+  function pivotUp(w, y){
+    const ud = w.g.userData, pv = w.body; if(ud.up) return ud.up;
+    if(pv.userData.origin) console.error('pivotUp: pivotAll(w, ' + pv.userData.origin + ') 뒤에 부르면 상체가 두 번 내려간다');
+    const legs = ud.limbs.legs, b = new THREE.Group(); b.position.y = y;
+    pv.children.slice().forEach(k=>{ if(legs.indexOf(k) >= 0) return; k.position.y -= y; b.add(k); });
+    pv.add(b); ud.up = b; return b;
+  }
+
+  const RIG = {
+
+    /* fall — 「고리가 바닥에 끌린다」 / 정상 「고리가 위쪽 수평구명줄에 걸려 있다」
+       두 쪽 다 수평구명줄이 머리 위에 있다. 다른 것은 로프가 위로 가느냐 바닥으로 늘어지느냐뿐. */
+    fall(w, safe){
+      const g = w.g;
+      tube(0.05, 2.5, steelMat, g, -1.25, 1.25, -0.55);
+      tube(0.05, 2.5, steelMat, g,  1.25, 1.25, -0.55);
+      link(P3(-1.25, 2.42, -0.55), P3(1.25, 2.42, -0.55), 0.04, steelMat, g);
+      const belt = P3(0.17, 0.72, 0.02);
+      if(safe){
+        link(belt, P3(0.10, 2.30, -0.48), 0.03, lanyMat, g);
+        const hook = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.035, 8, 16), steelMat);
+        hook.position.set(0.10, 2.42, -0.52); hook.rotation.y = Math.PI/2; g.add(hook);
+      }else{
+        link(belt, P3(0.34, 0.08, -0.90), 0.03, lanyMat, g);
+        link(P3(0.34, 0.06, -0.90), P3(0.46, 0.05, -1.48), 0.03, lanyMat, g);
+        const hook = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.035, 8, 16), steelMat);
+        hook.position.set(0.48, 0.05, -1.55); hook.rotation.x = Math.PI/2; g.add(hook);
+      }
+    },
+
+    /* rail — 「난간을 타 넘는 자세」 / 정상 「난간 안쪽으로 걷는다」
+       난간은 두 쪽 다 옆에 있다. 위험한 쪽은 난간 위로 올라타 바깥 다리를 넘긴다. */
+    rail(w, safe){
+      const g = w.g;
+      [-1.1, 1.1].forEach(z=> tube(0.045, 1.05, railMat2, g, -0.8, 0.52, z));
+      [1.0, 0.55].forEach(y=> tube(0.04, 2.4, railMat2, g, -0.8, y, 0, Math.PI/2));
+      box(0.05, 0.14, 2.4, railMat2, g, -0.8, 0.07, 0);
+      if(safe) return;
+      const b = pivotAll(w, 0);
+      b.position.set(-0.5, 0.34, 0); b.rotation.z = -0.16;
+      const L = g.userData.limbs;
+      L.legs[0].rotation.z = -1.75;      // 바깥쪽 다리를 난간 너머로
+      L.arms[0].rotation.z = -0.95; L.arms[1].rotation.x = -0.45;
+      w.amp = 0; w.armsFree = false;
+    },
+
+    /* ladder — 「사다리 옆으로 몸이 기울었다」 / 정상 「몸이 사다리 가운데에 있다」 */
+    ladder(w, safe){
+      const g = w.g;
+      g.position.y = 0.55;                                  // 사다리에 올라서 있다
+      [-0.24, 0.24].forEach(x=> tube(0.045, 2.8, woodMat, g, x, 0.85, -0.34));
+      for(let i=0;i<7;i++) tube(0.035, 0.48, woodMat, g, 0, -0.5 + i*0.36, -0.34, 0, Math.PI/2);
+      const b = pivotAll(w, 0.35), L = g.userData.limbs;
+      w.amp = 0; w.armsFree = false;
+      if(safe){ L.arms.forEach(a=> a.rotation.x = -2.5); }
+      else { b.rotation.z = 0.62; L.arms[0].rotation.z = -1.35; L.arms[1].rotation.x = -2.3; }
+    },
+
+    /* ramp — 「경사로에서 뛰는 자세」 / 정상 「난간을 잡고 걷는다」
+       위험한 쪽은 보폭이 크고 몸이 앞으로 쏠리고 발이 뜬다(위아래로 튄다). 걸음도 빠르다. */
+    ramp(w, safe){
+      const g = w.g, L = g.userData.limbs;
+      // 경사로를 진행 방향과 나란히 두면 옆모습이 접혀서 그냥 판자 상자로 보인다(1차 촬영에서 확인).
+      // 비스듬히 돌려 놓아야 12m 에서도 「내려오는 비탈」로 읽힌다.
+      const r = new THREE.Group(); r.rotation.y = -0.55; g.add(r);
+      // Task 6: 390px 재검증에서 다리·발 표 둘 다 판에 먹혀 안 보인 원인 — 판의 카메라쪽 끝이
+      // 사람 앞(z=+0.9, 카메라에 더 가까움)까지 나와 있어 사람과 카메라 사이를 가로막았다.
+      // 폭 1.4→0.85 로 좁히고(그래도 「판자」로 읽힌다), 중심을 뒤로 밀어(z −0.9→−1.7) 카메라쪽
+      // 끝이 사람 발치(z=0)보다 뒤(−0.25)에 오게 했다 — 사람과 카메라 사이에 판이 없다.
+      const slab = box(0.85, 0.14, 3.0, woodMat, r, 0, 0.272, -1.7); slab.rotation.x = -0.36;
+      tube(0.045, 1.05, railMat2, r, -0.68, 1.28, -2.0);
+      tube(0.045, 1.05, railMat2, r, -0.68, 0.56, -0.1);
+      link(P3(-0.68, 1.80, -2.0), P3(-0.68, 1.09, -0.1), 0.045, railMat2, r);
+      w.armsFree = false;
+      // fix round 1 (리뷰 Important): 다리·발 표는 판에 가려질 수 있는 자리라 판 폭을 줄이는
+      // 것만으론 100% 안심할 수 없어, 판에 가려질 일이 없는 자리(머리 뒤, y≈1.55)에 속도선(호)을
+      // 하나 더 두기로 했다. 처음엔 이 호를 unsafe 분기 안에서만 그렸는데, 리뷰어가 noise 를
+      // 다시 짚었다 — noise 의 소음 파형(:573-576)은 if(safe) **앞**에서 양쪽 다 그리고, 표는
+      // 그 안의 귀덮개뿐이다. 「호가 있으면 위험」은 noise 의 실제 패턴이 아니라 내가 잘못
+      // 따라 한 것이었다. 그래서 noise 처럼 양쪽 다 그리되, 정상은 걷는 만큼(작고 옅게) ·
+      // 위험은 뛰는 만큼(크고 진하게) 그려 표를 「호의 유무」가 아니라 「세기」로 바꿨다.
+      // 자세(앞으로 기울기·벌어진 보폭)가 이미 독립적으로 표라서 호는 어디까지나 보조다.
+      const spec = safe ? {rads: [0.13, 0.19], tube: 0.018, op: .35} : {rads: [0.24, 0.36], tube: 0.032, op: .85};
+      const am = speedMat.clone(); am.opacity = spec.op;
+      [-1, 1].forEach(side=> spec.rads.forEach(rad=>{
+        const a = new THREE.Mesh(new THREE.TorusGeometry(rad, spec.tube, 6, 16, Math.PI*0.7), am);
+        a.position.set(0, 1.55, -0.18); a.rotation.z = side > 0 ? -Math.PI*0.35 : Math.PI*0.55; g.add(a);
+      }));
+      if(safe){
+        L.arms[0].rotation.z = -0.75; L.arms[0].rotation.x = -0.5; L.arms[1].rotation.x = 0.2;
+      }else{
+        const b = pivotAll(w, 0.62); b.rotation.x = 0.55;   // 32도 앞으로 쏠린 몸 — 서 있는 사람과 실루엣이 갈린다
+        w.speed *= 1.8; w.rate = 12;
+        // 걸음을 sin 으로만 흔들면 다리가 모이는 순간이 있어 「뛴다」가 한 프레임씩 사라진다.
+        // 보폭에 바닥을 깔아 항상 크게 벌어져 있게 하고, 발이 뜨도록 몸을 띄운다.
+        w.tick = ww=>{
+          const s = Math.sin(ww.phase), Lb = ww.g.userData.limbs;
+          Lb.legs[0].rotation.x =  0.62 + s*0.55; Lb.legs[1].rotation.x = -0.62 + s*0.55;
+          Lb.arms[0].rotation.x = -1.15 - s*0.45; Lb.arms[1].rotation.x = 0.85 - s*0.45;
+          ww.body.position.y = 0.62 + Math.max(0, Math.sin(ww.phase*0.5))*0.32;
+        };
+      }
+    },
+
+    /* plank — 「발이 발판 틈에 빠진다」 / 정상 「발판 가운데를 딛는다」 */
+    plank(w, safe){
+      const g = w.g;
+      g.position.y = 0.46;
+      [-0.44, 0.44].forEach(z=> box(1.5, 0.09, 0.56, woodMat, g, 0, -0.045, z));   // 사이가 0.32m 벌어진 발판 두 장
+      [-0.62, 0.62].forEach(x=> [-0.55, 0.55].forEach(z=> tube(0.05, 0.37, steelMat, g, x, -0.275, z)));
+      box(1.5, 0.06, 0.06, steelMat, g, 0, -0.43, -0.55);
+      box(1.5, 0.06, 0.06, steelMat, g, 0, -0.43,  0.55);
+      const b = pivotAll(w, 0);
+      w.amp = 0; w.armsFree = false;
+      if(safe){ b.position.z = 0.44; }
+      else {
+        b.position.y = -0.34; b.rotation.z = 0.30;          // 틈으로 빠져 내려앉고 몸이 기운다
+        g.userData.limbs.arms.forEach(a=> a.rotation.x = -2.45);   // 두 팔이 위로
+      }
+    },
+
+    /* scaffold — 「자재를 한 칸에 높이 쌓는다」 / 정상 「자재를 나눠 나른다」 */
+    scaffold(w, safe){
+      const g = w.g;
+      [-0.8, 0.8].forEach(x=> tube(0.05, 2.7, steelMat, g, x, 1.35, -0.62));
+      [0.9, 1.85].forEach(y=> tube(0.045, 1.6, steelMat, g, 0, y, -0.62, 0, Math.PI/2));
+      box(1.7, 0.08, 0.62, woodMat, g, 0, 0.95, -0.62);
+      // 적재물은 두 쪽 다 몸 옆(x=0.45)에 둔다. 정상 쪽 자재가 몸에 가리면 「자재가 있으면 위험」이
+      // 돼 버려서, 표가 적재 높이가 아니라 자재 유무가 된다.
+      const n = safe ? 2 : 9;
+      for(let i=0;i<n;i++){
+        const b2 = box(0.62, 0.13, 0.44, i%2 ? brickMat : woodMat, g, 0.45 + (safe ? 0 : i*0.028), 1.06 + i*0.14, -0.62);
+        if(!safe) b2.rotation.y = i*0.05;                   // 위로 갈수록 어긋나며 기운다
+      }
+      if(safe){
+        box(0.42, 0.13, 0.3, brickMat, g, 0, 0.79, 0.36);   // 한 장씩 나눠 나른다
+        g.userData.limbs.arms.forEach(a=> a.rotation.x = -0.75); w.armsFree = false;
+      }
+    },
+
+    /* carry — 「무릎을 편 채 상체만 숙인다」 / 정상 「무릎을 굽히고 든다」 */
+    carry(w, safe){
+      const g = w.g, L = g.userData.limbs;
+      w.amp = 0; w.armsFree = false;
+      if(safe){
+        const b = pivotAll(w, 0); b.position.y = -0.24;     // 무릎을 굽혀 낮췄다(몸통은 세운 채)
+        L.legs[0].rotation.z = 0.3; L.legs[1].rotation.z = -0.3;
+        L.arms.forEach(a=> a.rotation.x = -0.95);
+        box(0.56, 0.4, 0.4, woodMat, b, 0, 0.98, 0.42);
+      }else{
+        const b = pivotUp(w, 0.62); b.rotation.x = 1.32;    // 다리는 편 채 허리만 굽혔다 — 등이 거의 수평
+        L.arms.forEach(a=> a.rotation.x = -0.4);
+        box(0.56, 0.4, 0.4, woodMat, b, 0, -0.03, 0.36);
+      }
+    },
+
+    /* noise — 「소음 구역인데 귀가 맨귀」 / 정상 「귀덮개를 쓰고 있다」
+       ★ 「없음」이 표인 행동. 두 쪽 다 같은 소음원(브레이커)과 같은 소음 파형을 갖는다.
+       다른 것은 청록색 귀덮개 하나뿐 — 그게 있어야 오지적이 운이 아니게 된다. */
+    noise(w, safe){
+      const g = w.g, L = g.userData.limbs;
+      box(0.18, 0.52, 0.2, darkMat, g, 0.06, 0.86, 0.44);
+      tube(0.045, 0.66, steelMat, g, 0.06, 0.28, 0.44);
+      box(0.3, 0.1, 0.13, forkMat, g, 0.06, 1.1, 0.44);
+      L.arms.forEach(a=> a.rotation.x = -0.9); w.armsFree = false;
+      const nm = noiseMat.clone();
+      [-1, 1].forEach(s=> [0.28, 0.44].forEach(r=>{
+        const a = new THREE.Mesh(new THREE.TorusGeometry(r, 0.03, 6, 18, Math.PI*0.8), nm);
+        a.position.set(0, 1.44, 0.03); a.rotation.z = s > 0 ? -Math.PI*0.4 : Math.PI*0.6; g.add(a);
+      }));
+      w.tick = ww=>{ nm.opacity = 0.4 + 0.45*Math.abs(Math.sin(ww.phase*0.9)); };
+      if(safe){
+        const head = g.userData.head;
+        [-1, 1].forEach(s=>{ const m = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.1, 14), muffMat); m.position.set(s*0.21, -0.01, 0); m.rotation.z = Math.PI/2; head.add(m); });
+        const band = new THREE.Mesh(new THREE.TorusGeometry(0.235, 0.035, 6, 16, Math.PI), muffMat);
+        head.add(band);
+      }
+    },
+
+    /* approach — 「전선 쪽으로 손을 뻗는다」 / 정상 「절연용 방호구를 쓰고 거리를 둔다」 */
+    approach(w, safe){
+      const g = w.g, L = g.userData.limbs;
+      [-1.4, 1.4].forEach(x=> tube(0.06, 2.5, darkMat, g, x, 1.25, -0.35));
+      tube(0.05, 2.8, darkMat, g, 0, 2.15, -0.35, 0, Math.PI/2);
+      [-1.4, 1.4].forEach(x=> tube(0.1, 0.2, stripeMat, g, x, 2.32, -0.35));
+      if(safe){
+        tube(0.14, 1.5, orangeMat, g, 0, 2.15, -0.35, 0, Math.PI/2);   // 절연용 방호관
+      }else{
+        L.arms[1].rotation.x = -3.0; w.armsFree = false;               // 전선 쪽으로 손을 뻗는다
+        link(P3(0.3, 1.80, -0.06), P3(0.30, 2.06, -0.24), 0.022, arcMat, g);
+        const sp = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), arcMat);
+        sp.position.set(0.30, 2.10, -0.28); g.add(sp);
+      }
+    },
+
+    /* forklift — 「움직이는 지게차 앞을 가로지른다」 / 정상 「지게차를 보내고 지나간다」
+       ★ 지게차는 두 쪽이 위치·크기까지 글자 그대로 같다. 정상 쪽만 멀리 두면 작업자가 다가올수록
+       화면 밖으로 밀려서(수평 반폭 = 거리×0.267 이라 6m 에선 1.60m 뿐) 「지게차가 보이면 위험,
+       안 보이면 정상」이 된다 — 표를 안 보고 이기는 길이 생긴다.
+       그래서 자리를 옮기는 것은 기계가 아니라 사람이다. 위험한 쪽은 통행로 줄무늬 위에서 포크
+       사이를 지나가고, 정상 쪽은 줄무늬 밖으로 비켜서서 지게차를 본다. 줄무늬도 두 쪽이 같다. */
+    forklift(w, safe){
+      const g = w.g;
+      const f = new THREE.Group(); f.position.set(-1.0, 0, -0.15); f.rotation.y = Math.PI/2; g.add(f);
+      box(1.0, 0.75, 1.5, forkMat, f, 0, 0.55, -0.1);
+      box(0.8, 0.5, 0.7, darkMat, f, 0, 1.1, -0.45);
+      [-0.45, 0.45].forEach(x=> [-0.75, 0.15].forEach(z=> tube(0.05, 1.0, forkMat, f, x, 1.4, z)));
+      box(1.15, 0.08, 1.15, forkMat, f, 0, 1.92, -0.3);                 // 헤드가드
+      [-0.3, 0.3].forEach(x=> tube(0.06, 1.9, steelMat, f, x, 0.95, 0.72));
+      [-0.3, 0.3].forEach(x=> box(0.1, 0.07, 0.6, steelMat, f, x, 0.11, 1.02));   // 포크(끝이 월드 x=+0.32)
+      [-0.5, 0.5].forEach(x=> [-0.55, 0.5].forEach(z=>{
+        const wl = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.16, 14), darkMat);
+        wl.position.set(x, 0.26, z); wl.rotation.z = Math.PI/2; f.add(wl);
+      }));
+      // 지게차 통행로. 발이 이 위에 있느냐 밖에 있느냐가 두 번째 표다(거리 하나에만 기대지 않는다).
+      const path = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 0.95), new THREE.MeshBasicMaterial({map: forkPathTex}));
+      path.rotation.x = -Math.PI/2; path.position.set(-0.70, 0.012, -0.15); g.add(path);
+      // fix round 1 (리뷰 Important): 처음엔 「발밑 붉은 원」을 unsafe 분기 안에서만 그려서
+      // 「원이 있으면 위험」이 됐었다 — 위험구역은 누가 서 있든 존재해야 한다는 원칙을 어겼다.
+      // 통행로(path)가 이미 양쪽에 있는 것처럼, 위험구역 테두리도 통행로 가장자리에 두르는
+      // 것으로 옮겼다(if/else 밖 — 두 쪽 다 그린다). 표는 이제 「테두리 유무」가 아니라 noise
+      // 의 귀덮개·approach 의 방호관처럼 「그 안에 있느냐 밖이냐」다. 리뷰어가 네이티브 390px
+      // 에서 이전 원이 잘 안 보인다고 지적한 것도 여기서 같이 고친다 — 판 전체를 두르는 굵은
+      // 테두리라 반경 0.3~0.46 짜리 원 하나보다 훨씬 크게 보인다.
+      const dzMat = dangerMat.clone(); dzMat.opacity = .8;
+      const dzW = 2.3, dzD = 0.95, dzX = -0.70, dzZ = -0.15, dzB = 0.07;
+      function dzEdge(w2, d2, x2, z2){
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w2, d2), dzMat);
+        m.rotation.x = -Math.PI/2; m.position.set(x2, 0.02, z2); g.add(m);
+      }
+      dzEdge(dzW, dzB, dzX, dzZ - dzD/2);   // 앞
+      dzEdge(dzW, dzB, dzX, dzZ + dzD/2);   // 뒤
+      dzEdge(dzB, dzD, dzX - dzW/2, dzZ);   // 좌
+      dzEdge(dzB, dzD, dzX + dzW/2, dzZ);   // 우
+      if(safe){
+        pivotAll(w, 0).position.x = 0.95;        // 통행로 밖으로 비켜선다(포크 끝까지 0.45m)
+        pivotUp(w, 0.62).rotation.y = -0.9;      // 지게차 쪽을 보고 선다
+      }else{
+        w.tick = ww=>{ f.position.x = -1.0 + Math.sin(ww.g.position.z*0.9)*0.10; };
+      }
+    },
+
+    /* grinder — 「연삭기에 덮개가 없다」 / 정상 「덮개가 씌워져 있다」 */
+    grinder(w, safe){
+      const g = w.g, L = g.userData.limbs;
+      L.arms.forEach(a=> a.rotation.x = -0.95); L.arms[1].rotation.z = -0.3; w.armsFree = false;
+      // 연삭기를 배 앞에 두면 흰 숫돌이 몸통에 겹쳐 덮개 유무가 안 보인다(1차 촬영에서 확인).
+      // 몸 옆으로 빼서 숫돌이 배경 위에 놓이게 한다.
+      const gr = new THREE.Group(); gr.position.set(0.42, 0.96, 0.5); g.add(gr);
+      box(0.36, 0.16, 0.17, darkMat, gr, -0.32, 0, 0);
+      const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.30, 0.035, 24), wheelMat);
+      disc.rotation.x = Math.PI/2; gr.add(disc);
+      if(safe){
+        const hood = new THREE.Mesh(new THREE.CylinderGeometry(0.37, 0.37, 0.22, 24, 1, true, Math.PI*0.02, Math.PI*1.24), guardMat);
+        hood.rotation.x = Math.PI/2; hood.material.side = THREE.DoubleSide; gr.add(hood);
+        const side = new THREE.Mesh(new THREE.CircleGeometry(0.36, 24, Math.PI*0.02, Math.PI*1.24), guardMat);
+        side.position.z = 0.12; side.material.side = THREE.DoubleSide; gr.add(side);   // 카메라 쪽에서 숫돌 윗부분을 가린다
+      }
+      const sm = arcMat.clone(); const sparks = [];
+      const n = safe ? 5 : 16, spread = safe ? 0.5 : 2.7;
+      const sz = safe ? 0.05 : 0.075;
+      for(let i=0;i<n;i++){ const s = new THREE.Mesh(new THREE.BoxGeometry(sz, sz, sz), sm); gr.add(s); sparks.push(s); }
+      w.tick = ww=>{ sparks.forEach((s, i)=>{
+        const a = -Math.PI*0.5 + (((i*0.37 + ww.phase*0.11) % 1) - 0.5)*spread;
+        const r = 0.34 + (((i*0.23 + ww.phase*0.31) % 1))*(safe ? 0.2 : 0.52);
+        s.position.set(Math.cos(a)*r, Math.sin(a)*r, 0.02);
+      }); };
+    },
+
+    /* confined — 「맨몸으로 맨홀에 들어간다」 / 정상 「송풍기를 돌리고 들어간다」
+       ★ 「없음」이 표인 행동. 두 쪽 다 맨홀에 반쯤 들어간 모습이고, 정상 쪽에만 송풍기와 덕트가 있다. */
+    confined(w, safe){
+      const g = w.g, L = g.userData.limbs;
+      const b = pivotAll(w, 0); b.position.y = -0.62;
+      w.amp = 0; w.armsFree = false; L.arms.forEach(a=> a.rotation.x = -0.25);
+      const hole = new THREE.Mesh(new THREE.CircleGeometry(0.44, 24), darkMat);
+      hole.rotation.x = -Math.PI/2; hole.position.y = 0.02; g.add(hole);
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(0.46, 0.07, 8, 24), steelMat);
+      rim.rotation.x = Math.PI/2; rim.position.y = 0.05; g.add(rim);
+      const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.44, 0.07, 20), steelMat);
+      lid.position.set(0.88, 0.44, 0.12); lid.rotation.z = Math.PI/2 - 0.22; g.add(lid);
+      if(safe){
+        const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.48, 16), drumMat);
+        drum.position.set(-1.2, 0.32, -0.3); drum.rotation.z = Math.PI/2; g.add(drum);
+        box(0.72, 0.1, 0.7, darkMat, g, -1.2, 0.05, -0.3);
+        const duct = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.1, 8, 20, Math.PI), ductMat);
+        duct.position.set(-0.6, 0.15, -0.2); g.add(duct);                // 맨홀로 들어가는 송풍 덕트
+      }
+    },
+  };
+
+  // ACT_BUILD: 불안전 행동을 하는 사람 · ACT_SAFE: 같은 상황에서 규정을 지킨 사람(미끼)
+  const ACT_BUILD = {}, ACT_SAFE = {};
+  Object.keys(RIG).forEach(id=>{ ACT_BUILD[id] = w=> RIG[id](w, false); ACT_SAFE[id] = w=> RIG[id](w, true); });
+  (window.HAZARD_ACTS || []).forEach(a=>{ if(!ACT_BUILD[a.id]) console.error('ACT_BUILD 누락: ' + a.id); });
+
+  /* ---------- 게임 상태 · 스폰 · 걸음 · 판정 ---------- */
+  // judgeN·judgeOk: Task 5 종료 화면의 지적 정확도(맞은 지적/전체 지적)가 읽는다. judge(w) 가 채운다.
+  // fix round 3(C1) — wrong: 다음 무재해 1칸까지 남은 오지적 누적(3에서 0으로 되돌아간다) ·
+  // wrongTotal: 한 판의 오지적 총 횟수(종료 화면) · wrongLives: 오지적으로 잃은 칸 수 ·
+  // overCause: 무엇으로 끝났는가('accident' 놓침 / 'wrong' 오지적) — 종료 화면 헤드라인이 읽는다.
+  const S = { workers: [], t: 0, lives: 3, score: 0, wave: 0, running: false,
+              streak: 0, stun: 0, basisT: 0, warnT: 0, missed: [], over: false, judgeN: 0, judgeOk: 0,
+              wrong: 0, wrongTotal: 0, wrongLives: 0, overCause: null };
+
+  // 조끼 색은 행동과 무관하게 뽑는다. 색으로 위험/정상이 갈리면 「보고 나서 쏘는」 일이 사라지고
+  // 게임이 색깔 맞추기가 된다 — 그러면 오지적 벌칙도 학습도 뜻이 없다.
+  const VEST = [0xF07056, 0x4F86C6, 0x5CC08A, 0xE0A33C, 0xB07FD8];
+
+  // act 가 null 이면 그냥 정상 작업자. act 를 주고 safe=true 면 「같은 상황에서 규정을 지킨」 미끼로,
+  // 판정은 정상 작업자다(지적하면 오지적). Task 4 의 웨이브가 이 세 가지를 섞어 낸다.
+  function spawnWorker(act, safe){
+    const g = worker(VEST[(Math.random()*VEST.length)|0]);
+    const side = Math.random() < .5 ? -1 : 1;
+    g.position.set(side * (2 + Math.random()*3), 0, -12 - Math.random()*4);
+    scene.add(g);
+    // 몸 부품을 피벗 하나로 묶는다. (1) 자세를 g.lookAt 에 덮이지 않게 주고 (2) 레이캐스트를
+    // 몸에만 걸어 소품(사다리·지게차)을 클릭해도 사람을 부른 것으로 치지 않는다.
+    const pv = new THREE.Group(); g.children.slice().forEach(k=> pv.add(k)); g.add(pv); g.userData.pv = pv;
+    // 일제 점검(sweepHighlight)이 나중에 이 몸 메시들을 traverse 하며 필요로 하는 boundingSphere 를
+    // 여기서 한 번만 미리 계산해 둔다(리뷰 Minor) — 몸 27개 메시는 전부 여기서 만들어지고 이후엔
+    // 안 늘어나니, 만들 때 한 번이면 충분하고 sweepHighlight 는 몇 번을 불려도 다시 안 잰다.
+    pv.traverse(o=>{ if(o.isMesh && o.geometry && !o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); });
+    // safe: Task 4 웨이브가 「웨이브마다 미끼가 최소 1명 나온다」를 셀 수 있게 남겨 두는 플래그.
+    // w.act===null 만으로는 미끼(spawn(act,true))와 행인(spawn(null))이 구분되지 않는다.
+    const w = { g, body: pv, act: safe ? null : (act || null), look: act ? act.id : null, safe: !!safe,
+                phase: Math.random()*6, speed: 0.9 + Math.random()*0.3,
+                stopped: false, done: false };
+    S.workers.push(w);
+    const build = act ? (safe ? ACT_SAFE : ACT_BUILD)[act.id] : null;
+    if(build) build(w);
+    return w;
+  }
+
+  function stepWorkers(dt){
+    for(const w of S.workers){
+      if(w.stopped || w.done) continue;
+      w.phase += dt * (w.rate || 6);
+      w.g.position.z += dt * w.speed;
+      w.g.position.x += (0 - w.g.position.x) * dt * 0.4;
+      w.g.lookAt(w.g.position.x, w.g.position.y, w.g.position.z + 1);
+      walkPose(w.g, w.phase, w.amp === undefined ? 0.5 : w.amp, w.armsFree !== false);
+      if(w.tick) w.tick(w, dt);          // 표 자체의 움직임(불꽃·소음 파형·지게차)은 walkPose 뒤에 덮는다
+      if(w.g.position.z > 3) reachedZone(w);
+    }
+  }
+
+  /* 근거 한 줄 — act.law 를 글자 그대로 쓴다. 자르거나 다듬지 않는다(접어 보이는 처리는 Task 5). */
+  // Task 4: double(4웨이브)이 표 둘을 한 사람에게 같이 건다 — acts 를 배열로도 받아 둘 다 보여준다.
+  function showBasis(acts){
+    const list = Array.isArray(acts) ? acts : [acts];
+    const b = el('dBasis'); if(!b) return;
+    b.textContent = '';
+    list.forEach(act=>{
+      const n = document.createElement('b'); n.textContent = act.name;
+      const l = document.createElement('span'); l.textContent = act.law;
+      b.appendChild(n); b.appendChild(l);
+    });
+    b.hidden = false; S.basisT = 2.6;
+  }
+
+  // 옳게 지적당한 작업자는 잠깐 바로잡는 시늉을 하고 물러난다
+  function fixAnim(w){
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.05, 8, 20),
+                                new THREE.MeshBasicMaterial({color: col(0x5CC08A), transparent: true, opacity: .95, depthTest: false}));
+    ring.position.copy(w.g.localToWorld(P3(w.body.position.x, 2.0, w.body.position.z))); ring.lookAt(camera.position); scene.add(ring);
+    FX.push({o: ring, life: 0.9, t: 0.9});
+    const L = w.g.userData.limbs; if(L) L.arms.forEach(a=> a.rotation.x = -1.9);
+    setTimeout(()=> fadeOut(w), 700);
+  }
+
+  // skinMat·pantsMat 같은 재질은 여러 작업자가 함께 쓴다 — 투명도를 건드리면 남의 몸까지 흐려진다.
+  // 그래서 퇴장은 오그라들며 사라지는 것으로 만들었다.
+  function fadeOut(w){
+    if(w.gone) return; w.gone = true; w.done = true; w.stopped = true;
+    const t0 = performance.now();
+    (function step(){
+      const k = Math.min(1, (performance.now() - t0)/450);
+      w.g.scale.setScalar(Math.max(0.001, 1 - k));
+      if(k < 1) requestAnimationFrame(step);
+      else { scene.remove(w.g); const i = S.workers.indexOf(w); if(i >= 0) S.workers.splice(i, 1); }
+    })();
+  }
+
+  function accidentFx(w){
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.22, 0.42, 28),
+                                new THREE.MeshBasicMaterial({color: col(0xF07056), transparent: true, opacity: .9, side: THREE.DoubleSide, depthTest: false}));
+    ring.position.copy(w.g.position).add(P3(0, 0.06, 0)); ring.rotation.x = -Math.PI/2; scene.add(ring);
+    FX.push({o: ring, life: 0.7, t: 0.7, grow: 5});
+    const f = el('dFlash'); if(f){ f.classList.add('on'); setTimeout(()=> f.classList.remove('on'), 90); }
+  }
+
+  // fix round 3(C1) — 끝나는 길이 둘이 됐다: 놓쳐서(사고) 0칸, 오지적 3회씩 쌓여 0칸.
+  // 둘 다 「무재해 기록 0 = 종료」라는 같은 규칙이고 끝나는 방식도 같다 — 다른 것은 왜 끝났는지뿐이다.
+  function gameOver(cause){
+    S.running = false; S.over = true; S.overCause = cause || 'accident';
+    S.stun = 0;                       // 경직 중에 끝났어도 잠김 표시를 남기지 않는다
+    lockUi(false);
+    el('hint').textContent = S.overCause === 'wrong'
+      ? '오지적 ' + S.wrongTotal + '회 — 게임 오버'
+      : '사고 ' + S.missed.length + '회 — 게임 오버';
+    showEndScreen();
+  }
+
+  function lockUi(on){
+    const f = el('fx'), s = el('dStun');
+    if(f) f.classList.toggle('lock', !!on);
+    if(s) s.hidden = !on;
+  }
+
+  // 작업 구역(z>3) 도달 = 놓쳤다. 불안전 행동을 하던 사람이면 사고.
+  // fix round 1: w.spawnWave·wstat 은 이 함수보다 뒤(Task 4 절)에서 정의되지만, 함수 선언은
+  // 끌어올려지고(hoist) reachedZone 은 게임 루프가 돈 뒤에야 불리므로 여기서 써도 안전하다.
+  function reachedZone(w){
+    if(w.done) return;
+    w.done = true;
+    if(w.spawnWave){ const st = wstat(w.spawnWave); st.arrived++; if(w.safe) st.baitArrived++; }
+    if(w.act){
+      S.lives--; S.missed.push(w.act); if(w.act2) S.missed.push(w.act2); S.streak = 0; accidentFx(w);
+      hitMark('bad'); popText('사고 발생', true);
+      hud();
+      if(S.lives <= 0) gameOver('accident');
+    }
+    fadeOut(w);                                   // 정상 작업자는 그냥 지나간다
+  }
+
+  function judgeAt(cx, cy){
+    if(!S.running || S.stun > 0) return;          // 경직 중에는 호루라기가 안 나간다
+    const r = new THREE.Raycaster();
+    r.setFromCamera(new THREE.Vector2((cx/innerWidth)*2 - 1, -(cy/innerHeight)*2 + 1), camera);
+    const live = S.workers.filter(w=> !w.stopped && !w.done);
+    const hits = r.intersectObjects(live.map(w=> w.body), true);   // 소품 말고 사람만
+    whistle();
+    if(!hits.length){ pointLine(r.ray.at(30, P3())); return; }
+    let o = hits[0].object; while(o.parent && !live.some(w=> w.body === o)) o = o.parent;
+    const w = live.find(x=> x.body === o);
+    if(w) judge(w);
+  }
+  // Task 4: 정비 시간 카드·일제 점검 버튼은 이 캔버스 위에 뜨는 진짜 DOM 이라, 그냥 두면 버튼을
+  // 눌러도 이 window 레벨 리스너가 같이 걸려 judgeAt() 이 불려 호루라기가 헛되게 나간다.
+  addEventListener('pointerdown', e=>{ if(e.target.closest && e.target.closest('#dMaint,#btnSweep,#dEnd,#btnHome')) return; judgeAt(e.clientX, e.clientY); });
+
+  /* 판정. 오지적 벌칙(감점 + 1.2초 경직)이 이 게임의 중심이다 — 이게 없으면 화면을 긁는 것이
+     최적 전략이 되고, 그러면 「보고 나서 쏘는」 일이 사라져 학습과 무관해진다. */
+  function judge(w){
+    if(w.stopped || w.done) return;
+    w.stopped = true;
+    S.judgeN++;                                   // 종료 화면의 "전체 지적" — double(표 둘)도 클릭 하나면 1회
+    pointLine(w.g.localToWorld(P3(w.body.position.x, 1.1, w.body.position.z)));   // 몸이 옆으로 비켜선 경우(forklift 정상)도 사람을 가리킨다
+    if(w.act){                                    // 옳은 지적
+      S.judgeOk++;                                // 종료 화면의 "맞은 지적"
+      const acts = w.act2 ? [w.act, w.act2] : [w.act];   // double(4웨이브) 은 표 둘을 같이 낸다
+      let gained = 0;
+      acts.forEach(()=>{ gained += 100 + Math.min(4, S.streak)*50; S.streak++; });
+      S.score += gained;
+      hitMark('ok'); popText('+' + gained + (acts.length > 1 ? ' (표 둘)' : ''));
+      showBasis(acts);                            // 근거 한 줄(표 둘이면 두 줄)
+      fixAnim(w);                                 // 시정 동작 후 퇴장
+    }else{                                        // 오지적
+      S.score = Math.max(0, S.score - 150); S.streak = 0;
+      hitMark('bad'); popText('오지적 −150', true);
+      S.stun = 1.2; lockUi(true);                 // 1.2초 호루라기 잠김
+      setTimeout(()=>{ if(!w.done) w.stopped = false; }, 900);
+      wrongCall();                                // fix round 3(C1) — 3회면 무재해 1칸
+      if(S.over) return;                          // 그 3회째가 마지막 칸이었으면 이미 끝났다
+    }
+    hud();
+  }
+
+  /* fix round 3(C1) — 오지적 3회 = 무재해 1칸 소진.
+     예전엔 오지적이 감점(−150)과 경직(1.2초)뿐이었다 — 승패를 가르는 것을 아무것도 소모하지
+     않는다. 점수는 0에서 바닥을 치고 무재해 기록은 「놓친 경우에만」 줄었으므로, 표(tell)를
+     하나도 안 보고 「경직이 풀릴 때마다 가장 앞선 사람을 한 번씩」 부는 것만으로 5웨이브를
+     완주할 수 있었다(리뷰 Critical 1 · 실측 4/4판 완주, 무재해 3/3 유지, 사고 0). 설계문서가
+     「오지적 벌칙이 중심이다」에서 막겠다고 한 바로 그 전략이다.
+     그래서 오지적도 놓침과 같은 자원(무재해 3칸)을 쓰게 한다 — 다만 3회에 1칸이라, 한 번쯤의
+     실수로는 안 죽고 「난사」는 곧바로 죽는다. 감점과 경직은 그대로 둔다(더하는 것이지
+     바꾸는 것이 아니다). */
+  const WRONG_PER_LIFE = 3;
+  function wrongCall(){
+    S.wrong++; S.wrongTotal++;
+    if(S.wrong < WRONG_PER_LIFE){ hud(); return; }
+    S.wrong = 0;                                  // 안전모 하나당 3회 — 소진하면 누적을 0으로 되돌린다
+    S.lives--; S.wrongLives++; S.streak = 0;
+    // 사고(놓침)와 화면에서 갈라 둔다 — 붉은 섬광(accidentFx)은 여기서 쓰지 않는다.
+    warnBanner('오지적 ' + WRONG_PER_LIFE + '회 — 무재해 1칸 소진');
+    hud();
+    if(S.lives <= 0) gameOver('wrong');
+  }
+  function warnBanner(txt){
+    const b = el('dWarn'); if(!b) return;
+    b.textContent = txt; b.hidden = false; S.warnT = 2.2;
+  }
+
+  /* ---------- Task 4: 웨이브 다섯 · 정비 시간 · 일제 점검 ----------
+     이 시점엔 S·spawnWorker·ACT_BUILD·ACT_SAFE·judge·reachedZone·showBasis·hud 가 전부 이미
+     있다(모두 위에서 정의됨). RIG 는 손대지 않는다 — trap 은 RIG.fall 을 감싸지 않고 밖에서
+     새로 짓고, double 은 ACT_BUILD 를 그대로(두 번) 불러 쓴다. */
+
+  const ACTS_ALL = window.HAZARD_ACTS || [];
+  const ACT_BY_ID = {}; ACTS_ALL.forEach(a=> ACT_BY_ID[a.id] = a);
+
+  const WAVES = [
+    {n:1, sec:45, every:2.6, safeRatio:0.00, acts:a=> a.wave<=1},
+    {n:2, sec:45, every:2.2, safeRatio:0.40, acts:a=> a.wave<=2},
+    {n:3, sec:45, every:1.9, safeRatio:0.40, acts:a=> a.wave<=3},
+    {n:4, sec:45, every:1.6, safeRatio:0.45, acts:a=> a.wave<=4, double:true},
+    {n:5, sec:45, every:1.3, safeRatio:0.45, acts:a=> a.wave<=5, trap:true},
+  ];
+
+  // 정비 시간 문항 — build_safety.py 의 KW 표(주제키→정규식)를 그대로 옮겨 law_bank.json 을
+  // 미리 걸러 둔 것이다. 12 주제 전부 1건 이상 걸렸다(fall·carry 가 가장 적어 2건). 이 페이지는
+  // law_bank.json 을 런타임에 안 읽는다 — 자립형 페이지라 fetch 가 없고, 869건 전체를 넣는
+  // 대신 KW 로 이미 골라 둔 것만(주제당 최대 3개, sol 의 큰 비교표는 뺐다) 박아 둔다.
+  const MAINT_QUIZ = {"fall":[{"t":"추락에 의한 위험 방지를 위하여 설치하는 안전방망의 경우 작업면으로부터 망의 설치지점까지의 수직거리가 최대 몇 미터를 초과하지 않도록 설치하는가?","c":["5m","7m","8m","10m"],"a":4,"pt":"<strong>추락방호망<\/strong><br><strong>10 [m]는 「이 정도 높이에서 떨어져도 방망이 받아 낼 수 있다」<\/strong>는 한계다 — <strong>더 높으면 방망 자체가 찢어지거나 바닥에 닿는다<\/strong>. <strong>「10 · 3 · 12% · 60」<\/strong> 네 숫자로 붙든다.<p><strong>◈ 암기<\/strong> <u>수직거리 10 [m] 이하<\/u>.<\/p>","src":"2022년 1회 104번 · 원본 2011.08.21","tm":1},{"t":"추락방호망(안전방망) 설치 시 작업면으로부터 망의 설치지점까지의 수직거리 기준은?","c":["5m를 초과하지 아니할 것","10m를 초과하지 아니할 것","15m를 초과하지 아니할 것","17m를 초과하지 아니할 것"],"a":2,"pt":"<strong>추락방호망<\/strong><br><strong>숫자가 「10 · 3 · 12% · 60」<\/strong>이다. <strong>10 [m]라는 값이 「이 정도 높이에서 떨어져도 방망이 받아 낼 수 있다」<\/strong>는 한계다.<p><strong>◈ 암기<\/strong> <u>수직거리 10 [m] 이하<\/u>.<\/p><p><strong>⚠ 주의사항<\/strong> 추락방호망 규정은 <u>2021.5.28 개정<\/u>으로 안전보건기준규칙 <u>제42조<\/u>로 옮겨 실렸다.<\/p>","src":"2023년 4회 103번 · 원본 2013.03.10","tm":1}],"rail":[{"t":"근로자의 추락 등의 위험을 방지하기 위한 안전난간의 설치기준으로 옳지 않은 것은?","c":["상부 난간대와 중간 난간대는 난간 길이 전체에 걸쳐 바닥면등과 평행을 유지할 것","발끝막이판은 바닥면등으로부터 20cm이상의 높이를 유지할 것","난간대는 지름 2.7cm 이상의 금속제 파이프나 그 이상의 강도가 있는 재료일 것","안전난간은 구조적으로 가장 취약한 지점에서 가장 취약한 방향으로 작용하는 100kg 이상의 하중에 견딜 수 있는 튼튼한 구조일 것"],"a":2,"pt":"<strong>안전보건규칙 제13조 — 안전난간의 구조 및 설치요건<\/strong><br><strong>상부 난간대는 90 [cm] 이상<\/strong>이며 <strong>상한은 없다<\/strong>. 120 [cm]는 <strong>중간 난간대를 몇 개 둘 것인가<\/strong>를 가르는 분기점일 뿐이다.<p><strong>◈ 암기<\/strong> <u>난간 90 이상, 폭목 10 이상, 지름 2.7, 하중 100<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C13%EC%A1%B0\" target=\"_blank\">제13조(안전난간의 구조 및 설치요건)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>사업주는 근로자의 추락 등의 위험을 방지하기 위하여 안전난간을 설치하는 경우 다음 각 호의 기준에 맞는 구조로 설치해야 한다. &lt;개정 2015.12.31, 2023.11.14&gt;<br> 1. 상부 난간대, 중간 난간대, 발끝막이판 및 난간기둥으로 구성할 것. 다만, 중간 난간대, 발끝막이판 및 난간기둥은 이와 비슷한 구조와 성능을 가진 것으로 대체할 수 있다.<br>▶  2. <strong>상부 난간대는<\/strong> 바닥면ㆍ발판 또는 경사로의 표면(이하 \"바닥면등\"이라 한다)으로부터 90센티미터 이상 지점에 설치하고, 상부 난간대를 120센티미터 이하에 설치하는 경우에는 중간 난간대는 상부 난간대와 바닥면등의 중간에 설치해야 하며, 120센티미터 이상 지점에 설치하는 경우에는 <strong>중간 난간대를<\/strong> 2단 이상으로 균등하게 설치하고 난간의 상하 간격은 60센티미터 이하가 되도록 할 것. 다만, 난간기둥 간의 간격이 25센티미터 이하인 경우에는 <strong>중간 난간대를<\/strong> 설치하지 않을 수 있다.<br>▶  3. 발끝막이판은 바닥면등으로부터 10센티미터 이상의 <strong>높이를 유지할 것<\/strong>. 다만, 물체가 떨어지거나 날아올 위험이 없거나 그 위험을 방지할 수 있는 망을 설치하는 등 필요한 예방 조치를 한 장소는 제외한다.<br>▶  4. 난간기둥은 상부 난간대와 <strong>중간 난간대를<\/strong> 견고하게 떠받칠 수 있도록 적정한 간격을 유지할 것<br> 5. 상부 난간대와 중간 난간대는 난간 길이 전체에 걸쳐 바닥면등과 평행을 유지할 것<br> 6. 난간대는 지름 2.7센티미터 이상의 금속제 파이프나 그 이상의 강도가 있는 재료일 것<br> 7. 안전난간은 구조적으로 가장 취약한 지점에서 가장 취약한 방향으로 작용하는 100킬로그램 이상의 하중에 견딜 수 있는 튼튼한 구조일 것<\/div><\/div>","src":"2026년 4회 112번 · 원본 2016.03.06","tm":3},{"t":"안전난간의 구조 및 설치요건에 대한 기준으로 옳지 않은 것은?","c":["상부난간대는 바닥면ㆍ발판 또는 경사로의 표면으로부터 90cm 이상 지점에 설치할 것","발끝막이판은 바닥면 등으로부터 10cm 이상의 높이를 유지할 것","난간대는 지름 1.5cm 이상의 금속제파이프나 그 이상의 강도를 가진 재료일 것","안전난간은 구조적으로 가장 취약한 지점에서 가장 취약한 방향으로 작용하는 100kg 이상의 하중에 견딜 수 있는 튼튼한 구조일 것"],"a":3,"pt":"<strong>안전난간의 구조<\/strong><br><strong>「90 ~ 120 · 60 · 10 · 2.7 · 100」<\/strong> 다섯 숫자다 — <strong>2.7 [cm]는 손으로 쥘 만한 굵기<\/strong>라 1.5 [cm] 로는 잡기도 어렵고 휘어진다.<p><strong>◈ 암기<\/strong> <u>난간대는 지름 2.7 [cm] 이상<\/u>.<\/p>","src":"2022년 4회 113번 · 원본 2012.03.04","tm":1},{"t":"근로자의 추락 등의 위험을 방지하기 위한 안전난간의 설치요건에서 상부난간대를 120cm 이상 지점에 설치하는 경우 중간난간대를 최소 몇 단 이상 균등하게 설치하여야 하는가?","c":["2단","3단","4단","5단"],"a":1,"pt":"<strong>안전보건규칙 제13조 — 안전난간의 구조<\/strong><br>핵심은 <strong>난간대 사이 간격을 60 [cm] 이하로 유지<\/strong> 하는 것이다. 상부 난간대가 높아질수록 그 사이를 메울 중간 난간대가 더 필요해진다.<p><strong>◈ 암기<\/strong> <u>120 [cm] 넘으면 2단 이상<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C13%EC%A1%B0\" target=\"_blank\">제13조(안전난간의 구조 및 설치요건)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>사업주는 근로자의 추락 등의 위험을 방지하기 위하여 안전난간을 설치하는 경우 다음 각 호의 기준에 맞는 구조로 설치해야 한다. &lt;개정 2015.12.31, 2023.11.14&gt;<br> 1. 상부 난간대, 중간 난간대, 발끝막이판 및 난간기둥으로 구성할 것. 다만, 중간 난간대, 발끝막이판 및 난간기둥은 이와 비슷한 구조와 성능을 가진 것으로 대체할 수 있다.<br>▶  2. 상부 난간대는 바닥면ㆍ발판 또는 경사로의 표면(이하 \"바닥면등\"이라 한다)으로부터 90센티미터 이상 지점에 설치하고, 상부 난간대를 120센티미터 이하에 설치하는 경우에는 중간 난간대는 상부 난간대와 바닥면등의 중간에 설치해야 하며, 120센티미터 이상 지점에 설치하는 경우에는 <strong>중간 난간대를 2단 이상<\/strong>으로 균등하게 설치하고 난간의 상하 간격은 60센티미터 이하가 되도록 할 것. 다만, 난간기둥 간의 간격이 25센티미터 이하인 경우에는 중간 난간대를 설치하지 않을 수 있다.<br> 3. 발끝막이판은 바닥면등으로부터 10센티미터 이상의 높이를 유지할 것. 다만, 물체가 떨어지거나 날아올 위험이 없거나 그 위험을 방지할 수 있는 망을 설치하는 등 필요한 예방 조치를 한 장소는 제외한다.<br> 4. 난간기둥은 상부 난간대와 중간 난간대를 견고하게 떠받칠 수 있도록 적정한 간격을 유지할 것<br> 5. 상부 난간대와 중간 난간대는 난간 길이 전체에 걸쳐 바닥면등과 평행을 유지할 것<br> 6. 난간대는 지름 2.7센티미터 이상의 금속제 파이프나 그 이상의 강도가 있는 재료일 것<br> 7. 안전난간은 구조적으로 가장 취약한 지점에서 가장 취약한 방향으로 작용하는 100킬로그램 이상의 하중에 견딜 수 있는 튼튼한 구조일 것<\/div><\/div>","src":"2025년 2회 112번 · 원본 2020.09.26","tm":1}],"ladder":[{"t":"사다리식 통로 등을 설치하는 경우 고정식 사다리식 통로의 기울기는 최대 몇 도 이하로 하여야 하는가?","c":["60도","75도","80도","90도"],"a":4,"pt":"<strong>안전보건규칙 제24조 — 사다리식 통로의 구조<\/strong><br>고정식은 <strong>벽에 붙여 수직으로 세우는<\/strong> 것이라 90° 까지 허용한다. 대신 <strong>높이 7 [m] 이상이면 등받이울이나 개인용 추락 방지 시스템<\/strong>을 갖춰야 한다.<p><strong>◈ 암기<\/strong> <u>일반 75°, 고정식 90°<\/u>.<\/p><p><strong>⚠ 주의사항<\/strong> 높이 7 [m] 이상 고정식 사다리의 추락 방지는 옛 조문이 「2.5 [m] 지점부터 등받이울」이었으나, <u>2024. 6. 28. 개정<\/u>으로 <u>등받이울<\/u> 또는 <u>개인용 추락 방지 시스템 설치 후 전신안전대 사용<\/u> 중 하나를 고를 수 있게 됐다.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C24%EC%A1%B0\" target=\"_blank\">제24조(사다리식 통로 등의 구조)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>▶ ① 사업주는 사다리식 통로 등을 설치하는 경우 다음 각 호의 사항을 준수하여야 한다. &lt;개정 <strong>2024.6.<\/strong>28&gt;<br> 1. 견고한 구조로 할 것<br> 2. 심한 손상ㆍ부식 등이 없는 재료를 사용할 것<br> 3. 발판의 간격은 일정하게 할 것<br> 4. 발판과 벽과의 사이는 15센티미터 이상의 간격을 유지할 것<br> 5. 폭은 30센티미터 이상으로 할 것<br> 6. 사다리가 넘어지거나 미끄러지는 것을 방지하기 위한 조치를 할 것<br> 7. 사다리의 상단은 걸쳐놓은 지점으로부터 60센티미터 이상 올라가도록 할 것<br> 8. 사다리식 통로의 길이가 10미터 이상인 경우에는 5미터 이내마다 계단참을 설치할 것<br> 9. 사다리식 통로의 기울기는 75도 이하로 할 것. 다만, 고정식 사다리식 통로의 기울기는 90도 이하로 하고, 그 높이가 7미터 이상인 경우에는 다음 각 목의 구분에 따른 조치를 할 것<br>▶  가. <strong>등받이울<\/strong>이 있어도 근로자 이동에 지장이 없는 경우: 바닥으로부터 높이가 2.5미터 되는 지점부터 <strong>등받이울<\/strong>을 설치할 것<br>▶  나. <strong>등받이울<\/strong>이 있으면 근로자가 이동이 곤란한 경우: 한국산업표준에서 정하는 기준에 적합한 <strong>개인용 추락 방지 시스템<\/strong>을 설치하고 근로자로 하여금 한국산업표준에서 정하는 기준에 적합한 전신안전대를 사용하도록 할 것<br> 10. 접이식 사다리 기둥은 사용 시 접혀지거나 펼쳐지지 않도록 철물 등을 사용하여 견고하게 조치할 것<br>② 잠함(潛函) 내 사다리식 통로와 건조ㆍ수리 중인 선박의 구명줄이 설치된 사다리식 통로(건조ㆍ수리작업을 위하여 임시로 설치한 사다리식 통로는 제외한다)에 대해서는 제1항제5호부터 제10호까지의 규정을 적용하지 아니한다.<\/div><\/div>","src":"2025년 1회 111번 · 원본 2019.03.03","tm":2},{"t":"산업안전보건법령에 따라 사다리식 통로를 설치하는 경우 준수해야 할 기준으로 틀린 것은?","c":["사다리식 통로의 기울기는 60°이하로 할 것","발판과 벽과의 사이는 15cm 이상의 간격을 유지할 것","사다리의 상단은 걸쳐놓은 지점으로부터 60cm 이상 올라가도록 할 것","사다리식 통로의 길이가 10m 이상인 경우에는 5m 이내마다 계단참을 설치할 것"],"a":1,"pt":"<strong>사다리식 통로의 기준<\/strong><br><strong>사다리는 가파르게 세우는 것<\/strong>이다 — <strong>75°가 기본, 고정식 수직사다리는 90°<\/strong>다. <strong>60°는 오히려 계단에 가까운 각<\/strong>이다.<p><strong>◈ 암기<\/strong> <u>사다리식 통로 기울기는 75° 이하<\/u>.<\/p>","src":"2021년 2회 46번 · 원본 2019.08.04","tm":1},{"t":"사다리식 통로에 대한 설치기준으로 틀린 것은?","c":["발판의 간격을 일정하게 할 것","발판과 벽과의 사이는 15cm 이상의 간격을 유지할 것","사다리식 통로의 길이가 10m 이상인 때에는 3m 이내마다 계단참을 설치할 것","사다리의 상단은 걸쳐놓은 지점으로부터 60cm 이상 올라가도록 할 것"],"a":3,"pt":"<strong>안전보건규칙 제24조 — 사다리식 통로 등의 구조<\/strong><br>숫자를 묶어 둔다 — <strong>벽에서 15 · 폭 30 · 위로 60 · 길이 10/계단참 5 · 기울기 75°<\/strong>. <strong>「10/5」는 사다리식 통로, 「15/10」은 수직갱, 「8/7」은 비계다리<\/strong>로 셋을 갈라 잡는다.<p><strong>◈ 암기<\/strong> <u>사다리식 통로는 10 [m] 이상이면 5 [m] 마다<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C24%EC%A1%B0\" target=\"_blank\">제24조(사다리식 통로 등의 구조)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>① 사업주는 사다리식 통로 등을 설치하는 경우 다음 각 호의 사항을 준수하여야 한다. &lt;개정 2024.6.28&gt;<br> 1. 견고한 구조로 할 것<br> 2. 심한 손상ㆍ부식 등이 없는 재료를 사용할 것<br> 3. 발판의 간격은 일정하게 할 것<br> 4. 발판과 벽과의 사이는 15센티미터 이상의 간격을 유지할 것<br> 5. 폭은 30센티미터 이상으로 할 것<br> 6. 사다리가 넘어지거나 미끄러지는 것을 방지하기 위한 조치를 할 것<br> 7. 사다리의 상단은 걸쳐놓은 지점으로부터 60센티미터 이상 올라가도록 할 것<br>▶  8. 사다리식 통로의 길이가 10미터 이상인 경우에는 5미터 <strong>이내마다 계단참을 설치할 것<\/strong><br> 9. 사다리식 통로의 기울기는 75도 이하로 할 것. 다만, 고정식 사다리식 통로의 기울기는 90도 이하로 하고, 그 높이가 7미터 이상인 경우에는 다음 각 목의 구분에 따른 조치를 할 것<br> 가. 등받이울이 있어도 근로자 이동에 지장이 없는 경우: 바닥으로부터 높이가 2.5미터 되는 지점부터 등받이울을 설치할 것<br> 나. 등받이울이 있으면 근로자가 이동이 곤란한 경우: 한국산업표준에서 정하는 기준에 적합한 개인용 추락 방지 시스템을 설치하고 근로자로 하여금 한국산업표준에서 정하는 기준에 적합한 전신안전대를 사용하도록 할 것<br> 10. 접이식 사다리 기둥은 사용 시 접혀지거나 펼쳐지지 않도록 철물 등을 사용하여 견고하게 조치할 것<br>▶ ② 잠함(潛函) 내 사다리식 통로와 건조ㆍ수리 중인 선박의 구명줄이 설치된 사다리식 통로(건조ㆍ수리작업을 위하여 임시로 설치한 <strong>사다리식 통로는<\/strong> 제외한다)에 대해서는 제1항제5호부터 제10호까지의 규정을 적용하지 아니한다.<\/div><\/div>","src":"2023년 2회 102번 · 원본 2014.08.17","tm":1}],"ramp":[{"t":"가설통로의 설치 기준으로 옳지 않은 것은?","c":["추락할 위험이 있는 장소에는 안전난간을 설치할 것","경사가 10° 를 초과하는 경우에는 미끄러지지 아니하는 구조로 할 것","경사는 30° 이하로 할 것","건설공사에 사용하는 높이 8m 이상인 비계다리에는 7m 이내마다 계단참을 설치할 것"],"a":2,"pt":"<strong>안전보건규칙 제23조 — 가설통로의 구조<\/strong><br>숫자 다섯을 묶어 둔다 — <strong>30 · 15 · 15 · 10 · 8 · 7<\/strong>. <strong>「경사 30 이하, 15 넘으면 미끄럼 방지」<\/strong> 두 값이 짝이고, <strong>「수직갱 15/10, 비계다리 8/7」<\/strong>이 또 한 짝이다.<p><strong>◈ 암기<\/strong> <u>30 이하, 15 넘으면 미끄럼 방지<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C23%EC%A1%B0\" target=\"_blank\">제23조(가설통로의 구조)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>사업주는 가설통로를 설치하는 경우 다음 각 호의 사항을 준수하여야 한다.<br> 1. 견고한 구조로 할 것<br> 2. 경사는 30도 이하로 할 것. 다만, 계단을 설치하거나 높이 2미터 미만의 가설통로로서 튼튼한 손잡이를 설치한 경우에는 그러하지 아니하다.<br>▶  3. 경사가 15도<strong>를 초과하는 경우에는 미끄러지지 아니하는 구조로 할 것<\/strong><br> 4. 추락할 위험이 있는 장소에는 안전난간을 설치할 것. 다만, 작업상 부득이한 경우에는 필요한 부분만 임시로 해체할 수 있다.<br> 5. 수직갱에 가설된 통로의 길이가 15미터 이상인 경우에는 10미터 이내마다 계단참을 설치할 것<br> 6. 건설공사에 사용하는 높이 8미터 이상인 비계다리에는 7미터 이내마다 계단참을 설치할 것<\/div><\/div>","src":"2024년 1회 102번 · 원본 2011.06.12","tm":4},{"t":"가설통로를 설치하는 경우 준수하여야 할 기준으로 옳지 않은 것은?","c":["경사는 30° 이하로 할 것","경사가 15°를 초과하는 경우에는 미끄러지지 아니하는 구조로 할 것","추락할 위험이 있는 장소에는 안전난간을 설치할 것","수직갱에 가설된 통로의 길이가 15m 이상인 경우에는 7m 이내마다 계단참을 설치할 것"],"a":4,"pt":"<strong>안전보건규칙 제23조 — 가설통로의 구조<\/strong><br><strong>15와 10이 짝, 8과 7이 짝<\/strong>이다. 숫자를 짝으로 묶어 외우면 뒤바꾼 보기를 바로 잡아낸다.<p><strong>◈ 암기<\/strong> <u>수직갱 15 → 10, 비계다리 8 → 7<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C23%EC%A1%B0\" target=\"_blank\">제23조(가설통로의 구조)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>사업주는 가설통로를 설치하는 경우 다음 각 호의 사항을 준수하여야 한다.<br> 1. 견고한 구조로 할 것<br> 2. 경사는 30도 이하로 할 것. 다만, 계단을 설치하거나 높이 2미터 미만의 가설통로로서 튼튼한 손잡이를 설치한 경우에는 그러하지 아니하다.<br> 3. 경사가 15도를 초과하는 경우에는 미끄러지지 아니하는 구조로 할 것<br> 4. 추락할 위험이 있는 장소에는 안전난간을 설치할 것. 다만, 작업상 부득이한 경우에는 필요한 부분만 임시로 해체할 수 있다.<br>▶  5. <strong>수직갱에 가설된 통로의 길이가<\/strong> 15미터 이상인 경우에는 10미터 이내마다 계단참을 설치할 것<br> 6. 건설공사에 사용하는 높이 8미터 이상인 비계다리에는 7미터 이내마다 계단참을 설치할 것<\/div><\/div>","src":"2026년 3회 104번 · 원본 2019.08.04","tm":3},{"t":"다음은 가설통로를 설치하는 경우의 준수사항이다. ( )안에 들어갈 숫자로 옳은 것은?","c":["7","6","5","4"],"a":1,"pt":"<strong>가설통로의 설치기준<\/strong><br><strong>숫자가 「30 · 15 · 15-10 · 8-7」<\/strong>로 이어진다 — <strong>수직갱은 「15 이상이면 10마다」, 비계다리는 「8 이상이면 7마다」<\/strong>로 두 짝이 헷갈리기 쉽다.<p><strong>◈ 암기<\/strong> <u>비계다리는 8 [m] 이상이면 7 [m] 이내마다<\/u>.<\/p>","src":"2022년 3회 101번 · 원본 2019.04.27","tm":1}],"plank":[{"t":"비계의 높이가 2m 이상인 작업장소에 설치하는 작업발판의 설치기준으로 옳지 않은 것은? (단, 달비계, 달대비계 및 말비계는 제외)","c":["작업발판의 폭은 40cm 이상으로 한다.","작업발판재료는 뒤집히거나 떨어지지 않도록 하나 이상의 지지물에 연결하거나 고정시킨다.","발판재료 간의 틈은 3cm 이하로 한다.","작업발판의 지지물은 하중에 의하여 파괴될 우려가 없는 것을 사용한다."],"a":2,"pt":"<strong>안전보건규칙 제56조 — 작업발판의 구조<\/strong><br><strong>「하나 이상」과 「둘 이상」<\/strong>을 바꿔 놓는 것이 단골 함정이다. <strong>뒤집힘을 막으려면 두 점 이상<\/strong> 이어야 한다는 것이 물리적 이유다.<p><strong>◈ 암기<\/strong> <u>지지물은 2개 이상<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C56%EC%A1%B0\" target=\"_blank\">제56조(작업발판의 구조)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>사업주는 비계(달비계, 달대비계 및 말비계는 제외한다)의 높이가 2미터 이상인 작업장소에 다음 각 호의 기준에 맞는 작업발판을 설치하여야 한다. &lt;개정 2012.5.31, 2017.12.28&gt;<br> 1. 발판재료는 작업할 때의 하중을 견딜 수 있도록 견고한 것으로 할 것<br> 2. 작업발판의 폭은 40센티미터 이상으로 하고, 발판재료 간의 틈은 3센티미터 이하로 할 것. 다만, 외줄비계의 경우에는 고용노동부장관이 별도로 정하는 기준에 따른다.<br> 3. 제2호에도 불구하고 선박 및 보트 건조작업의 경우 선박블록 또는 엔진실 등의 좁은 작업공간에 작업발판을 설치하기 위하여 필요하면 작업발판의 폭을 30센티미터 이상으로 할 수 있고, 걸침비계의 경우 강관기둥 때문에 발판재료 간의 틈을 3센티미터 이하로 유지하기 곤란하면 5센티미터 이하로 할 수 있다. 이 경우 그 틈 사이로 물체 등이 떨어질 우려가 있는 곳에는 출입금지 등의 조치를 하여야 한다.<br> 4. 추락의 위험이 있는 장소에는 안전난간을 설치할 것. 다만, 작업의 성질상 안전난간을 설치하는 것이 곤란한 경우, 작업의 필요상 임시로 안전난간을 해체할 때에 추락방호망을 설치하거나 근로자로 하여금 안전대를 사용하도록 하는 등 추락위험 방지 조치를 한 경우에는 그러하지 아니하다.<br> 5. 작업발판의 지지물은 하중에 의하여 파괴될 우려가 없는 것을 사용할 것<br>▶  6. <strong>작업발판재료는 뒤집히거나 떨어지지 않도록<\/strong> <strong>둘 이상의 지지물<\/strong>에 연결하거나 고정시킬 것<br> 7. 작업발판을 작업에 따라 이동시킬 경우에는 위험 방지에 필요한 조치를 할 것<\/div><\/div>","src":"2025년 1회 113번 · 원본 2013.06.02","tm":3},{"t":"달비계를 설치할 때 작업발판의 폭은 최소 얼마 이상으로 하여야 하는가?","c":["30cm","40cm","50cm","60cm"],"a":2,"pt":"<strong>달비계의 구조<\/strong><br><strong>작업발판의 폭 40 [cm]는 비계 일반과 같은 값<\/strong>이다 — <strong>다만 달비계는 「틈이 없도록」<\/strong>이라는 조건이 더 붙는다. <strong>비계 조립·해체 때의 20 [cm] 와는 다른 자리<\/strong>다.<p><strong>◈ 암기<\/strong> <u>달비계 작업발판은 40 [cm] 이상<\/u>.<\/p>","src":"2022년 2회 113번 · 원본 2012.08.26","tm":2},{"t":"비계의 높이가 2m 이상인 작업장소에 작업발판을 설치할 경우 준수하여야 할 기준으로 옳지 않은 것은?","c":["작업발판의 폭은 30cm 이상으로 한다.","발판재료간의 틈은 3cm 이하로 한다.","추락의 위험성이 있는 장소에는 안전난간을 설치한다.","발판재료는 뒤집히거나 떨어지지 않도록 2개 이상의 지지물에 연결하거나 고정시킨다."],"a":1,"pt":"<strong>안전보건규칙 제56조 — 작업발판의 구조<\/strong><br>사람이 두 발로 서서 몸을 돌릴 수 있어야 하므로 <strong>40 [cm]<\/strong>이 나온다. 달비계는 매달린 구조라 예외로 20 [cm]다.<p><strong>◈ 암기<\/strong> <u>폭 40, 틈 3<\/u> — 달비계만 20.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C56%EC%A1%B0\" target=\"_blank\">제56조(작업발판의 구조)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>사업주는 비계(달비계, 달대비계 및 말비계는 제외한다)의 높이가 2미터 이상인 작업장소에 다음 각 호의 기준에 맞는 작업발판을 설치하여야 한다. &lt;개정 2012.5.31, 2017.12.28&gt;<br> 1. 발판재료는 작업할 때의 하중을 견딜 수 있도록 견고한 것으로 할 것<br>▶  2. <strong>작업발판의 폭은<\/strong> 40센티미터 이상으로 하고, 발판재료 간의 틈은 3센티미터 이하로 할 것. 다만, 외줄비계의 경우에는 고용노동부장관이 별도로 정하는 기준에 따른다.<br> 3. 제2호에도 불구하고 선박 및 보트 건조작업의 경우 선박블록 또는 엔진실 등의 좁은 작업공간에 작업발판을 설치하기 위하여 필요하면 작업발판의 폭을 30센티미터 이상으로 할 수 있고, 걸침비계의 경우 강관기둥 때문에 발판재료 간의 틈을 3센티미터 이하로 유지하기 곤란하면 5센티미터 이하로 할 수 있다. 이 경우 그 틈 사이로 물체 등이 떨어질 우려가 있는 곳에는 출입금지 등의 조치를 하여야 한다.<br> 4. 추락의 위험이 있는 장소에는 안전난간을 설치할 것. 다만, 작업의 성질상 안전난간을 설치하는 것이 곤란한 경우, 작업의 필요상 임시로 안전난간을 해체할 때에 추락방호망을 설치하거나 근로자로 하여금 안전대를 사용하도록 하는 등 추락위험 방지 조치를 한 경우에는 그러하지 아니하다.<br> 5. 작업발판의 지지물은 하중에 의하여 파괴될 우려가 없는 것을 사용할 것<br> 6. 작업발판재료는 뒤집히거나 떨어지지 않도록 둘 이상의 지지물에 연결하거나 고정시킬 것<br> 7. 작업발판을 작업에 따라 이동시킬 경우에는 위험 방지에 필요한 조치를 할 것<\/div><\/div>","src":"2026년 2회 112번 · 원본 2012.05.20","tm":2}],"scaffold":[{"t":"강관비계의 수직방향 벽이음 조립간격(m)으로 옳은 것은? (단, 틀비계이며 높이가 5m 이상일 경우)","c":["2m","4m","6m","9m"],"a":3,"pt":"<strong>안전보건규칙 별표5 — 강관비계의 조립간격<\/strong><br><strong>단관 5·5, 틀비계 6·8<\/strong>을 짝으로 외운다. 벽이음은 비계가 <strong>넘어지거나 좌굴되는 것<\/strong>을 막는다.<p><strong>◈ 암기<\/strong> <u>단관 5·5, 틀비계 6·8<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawmiss>· <a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99\" target=\"_blank\">산업안전보건기준에 관한 규칙 별표 5<\/a> — 별표는 법제처 원문에서 봅니다<\/div>","src":"2025년 2회 102번 · 원본 2012.03.04","tm":2},{"t":"단관비계의 도괴 또는 전도를 방지하기 위하여 사용하는 벽이음의 간격기준으로 옳은 것은?","c":["수직방향 5m 이하, 수평방향 5m 이하","수직방향 6m 이하, 수평방향 6m 이하","수직방향 7m 이하, 수평방향 7m 이하","수직방향 8m 이하, 수평방향 8m 이하"],"a":1,"pt":"<strong>안전보건규칙 별표5 — 강관비계의 조립간격<\/strong><br>앞 문항과 짝을 이룬다. <strong>단관 5·5, 틀비계 6·8<\/strong>.<p><strong>◈ 암기<\/strong> <u>단관은 둘 다 5<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawmiss>· <a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99\" target=\"_blank\">산업안전보건기준에 관한 규칙 별표 5<\/a> — 별표는 법제처 원문에서 봅니다<\/div>","src":"2026년 2회 105번 · 원본 2018.08.19","tm":2},{"t":"강관비계를 조립할 때 준수하여야 할 사항으로 옳지 않은 것은?","c":["띠장간격은 2m 이하로 설치하되, 첫번째 띠장은 지상으로부터 3m 이하의 위치에 설치할 것","비계기둥의 간격은 띠장 방향에서 1.5m 이상 1.8m 이하로 할 것","비계기둥의 제일 윗부분으로부터 31m 되는 지점 밑부분의 비계기둥은 2개의 강관으로 묶어 세울 것","비계기둥 간의 적재하중은 400kg을 초과하지 않도록 할 것"],"a":1,"pt":"<strong>강관비계의 조립 기준<\/strong><br><strong>31m와 400kg은 예나 지금이나 그대로<\/strong>다 — <strong>바뀐 것은 띠장간격과 기둥 간격<\/strong> 이니 그 둘만 새 값으로 갈아 둔다.<p><strong>◈ 암기<\/strong> <u>31m 아래는 강관 2개, 기둥 간 400kg<\/u>.<\/p><p><strong>⚠ 주의사항<\/strong> 현행 기준은 띠장간격 2m 이하, 비계기둥 간격은 띠장 방향 1.85m 이하ㆍ장선 방향 1.5m 이하다. 이 문항은 개정 전 기준으로 출제되어 ①이 정답으로 처리되었다.<\/p>","src":"2021년 1회 102번 · 원본 2017.08.26","tm":1}],"carry":[{"t":"인력운반 작업에 대한 안전 준수사항으로 가장 거리가 먼 것은?","c":["보조기구를 효과적으로 사용한다.","물건을 들어올릴 때는 팔과 무릎을 이용하며 척추는 곧게 한다.","긴 물건은 뒤쪽으로 높이고 원통인 물건은 굴려서 운반한다.","무거운 물건은 공동작업으로 실시한다."],"a":3,"pt":"<strong>인력운반의 안전<\/strong><br><strong>「앞쪽을 높게」<\/strong>는 여러 문항에 되풀이 나온다 — <strong>뒤로 높이면 앞이 내려가 앞사람의 발을 찌른다<\/strong>.<p><strong>◈ 암기<\/strong> <u>긴 물건은 앞쪽을 높게, 원통은 굴리지 않는다<\/u>.<\/p>","src":"2021년 3회 115번 · 원본 2015.05.31","tm":1},{"t":"인력으로 화물을 인양할 때의 몸의 자세와 관련하여 준수하여야 할 사항으로 옳지 않은 것은?","c":["한쪽 발은 들어올리는 물체를 향하여 안전하게 고정시키고 다른 발은 그 뒤에 안전하게 고정시킬 것","등은 항상 직립한 상태와 90도 각도를 유지하여 가능한 한 지면과 수평이 되도록 할 것","팔은 몸에 밀착시키고 끌어당기는 자세를 취하며 가능한 한 수평거리를 짧게 할 것","손가락으로만 인양물을 잡아서는 아니 되며 손바닥으로 인양물 전체를 잡을 것"],"a":2,"pt":"<strong>인력 운반 시의 자세<\/strong><br>허리에 걸리는 힘은 <strong>물체와 몸 사이의 수평거리<\/strong>에 비례한다. 그래서 <strong>몸에 바짝 붙여 들라<\/strong>는 원칙이 나온다.<p><strong>◈ 암기<\/strong> <u>등은 펴고 무릎을 굽힌다<\/u> — 반대로 적으면 오답.<\/p>","src":"2026년 2회 118번 · 원본 2021.08.14","tm":1}],"noise":[{"t":"국내 규정상 1일 노출회수가 100일 때 최대 음압수준이 몇 dB(A)를 초과하는 충격소음에 노출되어서는 아니 되는가?","c":["110","120","130","140"],"a":4,"pt":"<strong>안전보건규칙 제512조 — 충격소음작업<\/strong><br><strong>소리가 10 [dB] 세질 때마다 허용 횟수가 1/10<\/strong>로 준다 — <strong>120/1만 · 130/1천 · 140/1백<\/strong>. 이 규칙으로 잡으면 세 값이 한꺼번에 외워진다.<p><strong>◈ 암기<\/strong> <u>120/1만 · 130/1천 · 140/1백<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C512%EC%A1%B0\" target=\"_blank\">제512조(정의)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>이 장에서 사용하는 용어의 뜻은 다음과 같다. &lt;개정 2024.6.28&gt;<br> 1. \"소음작업\"이란 1일 8시간 작업을 기준으로 85데시벨 이상의 소음이 발생하는 작업을 말한다.<br> 2. \"강렬한 소음작업\"이란 다음 각목의 어느 하나에 해당하는 작업을 말한다.<br> 가. 90데시벨 이상의 소음이 1일 8시간 이상 발생하는 작업<br> 나. 95데시벨 이상의 소음이 1일 4시간 이상 발생하는 작업<br> 다. 100데시벨 이상의 소음이 1일 2시간 이상 발생하는 작업<br> 라. 105데시벨 이상의 소음이 1일 1시간 이상 발생하는 작업<br> 마. 110데시벨 이상의 소음이 1일 30분 이상 발생하는 작업<br> 바. 115데시벨 이상의 소음이 1일 15분 이상 발생하는 작업<br> 3. \"충격소음작업\"이란 소음이 1초 이상의 간격으로 발생하는 작업으로서 다음 각 목의 어느 하나에 해당하는 작업을 말한다.<br> 가. 120데시벨을 초과하는 소음이 1일 1만회 이상 발생하는 작업<br> 나. 130데시벨을 초과하는 소음이 1일 1천회 이상 발생하는 작업<br> 다. 140데시벨을 초과하는 소음이 1일 1백회 이상 발생하는 작업<br> 4. \"진동작업\"이란 다음 각 목의 어느 하나에 해당하는 기계ㆍ기구를 사용하는 작업을 말한다.<br> 가. 착암기(鑿巖機)<br> 나. 동력을 이용한 해머<br> 다. 체인톱<br> 라. 엔진 커터(engine cutter)<br> 마. 동력을 이용한 연삭기<br> 바. 임팩트 렌치(impact wrench)<br> 사. 그 밖에 진동으로 인하여 건강장해를 유발할 수 있는 기계ㆍ기구<br> 5. \"청력보존 프로그램\"이란 다음 각 목의 사항이 포함된 소음성 난청을 예방ㆍ관리하기 위한 종합적인 계획을 말한다.<br> 가. 소음노출 평가<br> 나. 소음노출에 대한 공학적 대책<br> 다. 청력보호구의 지급과 착용<br> 라. 소음의 유해성 및 예방 관련 교육<br> 마. 정기적 청력검사<br> 바. 청력보존 프로그램 수립 및 시행 관련 기록ㆍ관리체계<br> 사. 그 밖에 소음성 난청 예방ㆍ관리에 필요한 사항<\/div><\/div>","src":"2024년 3회 36번 · 원본 2016.05.08","tm":1},{"t":"산업안전보건기준에 관한 규칙상 '강렬한 소음 작업'에 해당하는 기준은?","c":["85데시벨 이상의 소음이 1일 4시간 이상 발생하는 작업","85데시벨 이상의 소음이 1일 8시간 이상 발생하는 작업","90데시벨 이상의 소음이 1일 4시간 이상 발생하는 작업","90데시벨 이상의 소음이 1일 8시간 이상 발생하는 작업"],"a":4,"pt":"<strong>안전보건규칙 제512조 — 강렬한 소음작업<\/strong><br><strong>90 [dB] · 8시간<\/strong>에서 시작해 <strong>5 [dB] 마다 시간이 절반<\/strong>이다. <strong>충격소음작업<\/strong>은 따로 정한다 — <strong>120 [dB] 초과 1만회 · 130 [dB] 초과 1천회 · 140 [dB] 초과 100회 이상<\/strong>.<p><strong>◈ 암기<\/strong> <u>90에 8시간, 5 오르면 반으로<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C512%EC%A1%B0\" target=\"_blank\">제512조(정의)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>이 장에서 사용하는 용어의 뜻은 다음과 같다. &lt;개정 2024.6.28&gt;<br>▶  1. \"소음작업\"이란 1일 <strong>8시간<\/strong> 작업을 기준으로 85데시벨 이상의 소음이 발생하는 작업을 말한다.<br> 2. \"강렬한 소음작업\"이란 다음 각목의 어느 하나에 해당하는 작업을 말한다.<br>▶  가. <strong>90데시벨 이상의 소음이 1일 8시간 이상 발생하는 작업<\/strong><br> 나. 95데시벨 이상의 소음이 1일 4시간 이상 발생하는 작업<br> 다. 100데시벨 이상의 소음이 1일 2시간 이상 발생하는 작업<br> 라. 105데시벨 이상의 소음이 1일 1시간 이상 발생하는 작업<br> 마. 110데시벨 이상의 소음이 1일 30분 이상 발생하는 작업<br> 바. 115데시벨 이상의 소음이 1일 15분 이상 발생하는 작업<br>▶  3. \"<strong>충격소음작업<\/strong>\"이란 소음이 1초 이상의 간격으로 발생하는 작업으로서 다음 각 목의 어느 하나에 해당하는 작업을 말한다.<br> 가. 120데시벨을 초과하는 소음이 1일 1만회 이상 발생하는 작업<br> 나. 130데시벨을 초과하는 소음이 1일 1천회 이상 발생하는 작업<br> 다. 140데시벨을 초과하는 소음이 1일 1백회 이상 발생하는 작업<br> 4. \"진동작업\"이란 다음 각 목의 어느 하나에 해당하는 기계ㆍ기구를 사용하는 작업을 말한다.<br> 가. 착암기(鑿巖機)<br> 나. 동력을 이용한 해머<br> 다. 체인톱<br> 라. 엔진 커터(engine cutter)<br> 마. 동력을 이용한 연삭기<br> 바. 임팩트 렌치(impact wrench)<br> 사. 그 밖에 진동으로 인하여 건강장해를 유발할 수 있는 기계ㆍ기구<br> 5. \"청력보존 프로그램\"이란 다음 각 목의 사항이 포함된 소음성 난청을 예방ㆍ관리하기 위한 종합적인 계획을 말한다.<br> 가. 소음노출 평가<br> 나. 소음노출에 대한 공학적 대책<br> 다. 청력보호구의 지급과 착용<br> 라. 소음의 유해성 및 예방 관련 교육<br> 마. 정기적 청력검사<br> 바. 청력보존 프로그램 수립 및 시행 관련 기록ㆍ관리체계<br> 사. 그 밖에 소음성 난청 예방ㆍ관리에 필요한 사항<\/div><\/div>","src":"2025년 1회 24번 · 원본 2020.08.22","tm":1},{"t":"초음파 소음(ultrasonic noise)에 대한 설명으로 잘못된 것은?","c":["전형적으로 20000 Hz 이상이다.","가청영역 위의 주파수를 갖는 소음이다.","소음의 3dB 증가하면 허용기간은 반감한다.","20000 Hz 이상에서 노출 제한은 110 dB이다."],"a":3,"pt":"<strong>초음파 소음<\/strong><br><strong>5 [dB] 마다 절반<\/strong>이라는 규칙은 <strong>가청 소음<\/strong>의 것이다. 보기는 이 숫자만 3으로 바꿔 놓았다.<p><strong>◈ 암기<\/strong> <u>5 [dB] 마다 절반<\/u> — 3이 아니다.<\/p>","src":"2025년 4회 39번 · 원본 2017.08.26","tm":1}],"approach":[{"t":"다음 중 활선근접 작업시의 안전조치로 적절하지 않은 것 은?","c":["근로자가 절연용 방호구의 설치·해체작업을 하는 경우에 는 절연용 보호구를 착용하거나 활선작업용 기구 및 장 치를 사용하도록 하여야 한다.","저압인 경우에는 해당 전기작업자가 절연용 보호구를 착 용하되, 충전전로에 접촉할 우려가 없는 경우에는 절연 용 방호구를 설치하지 아니할 수 있다.","유자격자가 아닌 근로자가 근로자의 몸 또는 긴 도전성 물체가 방호되지 않은 충전전로에서 대지전압이 50kV이 하인 경우에는 400cm 이내로 접근할 수 없도록 하여야 한다.","고압 및 특별고압의 전로에서 전기작업을 하는 근로자에 게 활선작업용 기구 및 장치를 사용하여야 한다."],"a":3,"pt":"<strong>안전보건규칙 제321조 — 충전전로에서의 전기작업<\/strong><br><strong>절연용 보호구는 사람이 입는 것<\/strong>(안전모·장갑·장화), <strong>절연용 방호구는 충전부에 씌우는 것<\/strong>(절연관·절연시트)이다.<p><strong>◈ 암기<\/strong> 유자격자가 아니면 <u>50 [kV] 이하는 300 [cm]<\/u>, 넘으면 <u>10 [kV] 마다 10 [cm]<\/u> 더.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C321%EC%A1%B0\" target=\"_blank\">제321조(충전전로에서의 전기작업)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>① 사업주는 근로자가 충전전로를 취급하거나 그 인근에서 작업하는 경우에는 다음 각 호의 조치를 하여야 한다.<br> 1. 충전전로를 정전시키는 경우에는 제319조에 따른 조치를 할 것<br> 2. 충전전로를 방호, 차폐하거나 절연 등의 조치를 하는 경우에는 근로자의 신체가 전로와 직접 접촉하거나 도전재료, 공구 또는 기기를 통하여 간접 접촉되지 않도록 할 것<br> 3. 충전전로를 취급하는 근로자에게 그 작업에 적합한 절연용 보호구를 착용시킬 것<br> 4. 충전전로에 근접한 장소에서 전기작업을 하는 경우에는 해당 전압에 적합한 절연용 방호구를 설치할 것. 다만, 저압인 경우에는 해당 전기작업자가 절연용 보호구를 착용하되, 충전전로에 접촉할 우려가 없는 경우에는 절연용 방호구를 설치하지 아니할 수 있다.<br> 5. 고압 및 특별고압의 전로에서 전기작업을 하는 근로자에게 활선작업용 기구 및 장치를 사용하도록 할 것<br> 6. 근로자가 절연용 방호구의 설치ㆍ해체작업을 하는 경우에는 절연용 보호구를 착용하거나 활선작업용 기구 및 장치를 사용하도록 할 것<br>▶  7. 유자격자가 아닌 근로자가 충전전로 인근의 높은 곳에서 작업할 때에 근로자의 몸 또는 긴 도전성 물체가 방호되지 않은 충전전로에서 대지전압이 50킬로볼트 이하인 경우에는 300센티미터 이내로, 대지전압이 50킬로볼트를 넘는 경우에는 10킬로볼트당 10센티미터씩 더한 거리 이내로 각각 접근할 수 없도록 할 것<br> 8. 유자격자가 충전전로 인근에서 작업하는 경우에는 다음 각 목의 경우를 제외하고는 노출 충전부에 다음 표에 제시된 접근한계거리 이내로 접근하거나 절연 손잡이가 없는 도전체에 접근할 수 없도록 할 것<br> 가. 근로자가 노출 충전부로부터 절연된 경우 또는 해당 전압에 적합한 절연장갑을 착용한 경우<br> 나. 노출 충전부가 다른 전위를 갖는 도전체 또는 근로자와 절연된 경우<br> 다. 근로자가 다른 전위를 갖는 모든 도전체로부터 절연된 경우<br>&lt;img src=\"http://www.law.go.kr/flDownload.do?flSeq=23019731\" alt=\"img23019731\" &gt;<br>┌──────────┬────────┐<br>│충전전로의 선간전압 │충전전로에 대한 │<br>│(단위: 킬로볼트) │접근 한계거리 │<br>│ │(단위: 센티미터)│<br>├──────────┼────────┤<br>│0.3 이하 │접촉금지 │<br>│0.3 초과 0.75 이하 │30 │<br>│0.75 초과 2 이하 │45 │<br>│2 초과 15 이하 │60 │<br>│15 초과 37 이하 │90 │<br>│37 초과 88 이하 │110 │<br>│88 초과 121 이하 │130 │<br>│121 초과 145 이하 │150 │<br>│145 초과 169 이하 │170 │<br>│169 초과 242 이하 │230 │<br>│242 초과 362 이하 │380 │<br>│362 초과 550 이하 │550 │<br>│550 초과 800 이하 │790 │<br>└──────────┴────────┘<br>&lt;/img&gt;<br>② 사업주는 절연이 되지 않은 충전부나 그 인근에 근로자가 접근하는 것을 막거나 제한할 필요가 있는 경우에는 울타리를 설치하고 근로자가 쉽게 알아볼 수 있도록 하여야 한다. 다만, 전기와 접촉할 위험이 있는 경우에는 도전성이 있는 금속제 울타리를 사용하거나, 제1항의 표에 정한 접근 한계거리 이내에 설치해서는 아니 된다. &lt;개정 2019.10.15&gt;<br>③ 사업주는 제2항의 조치가 곤란한 경우에는 근로자를 감전위험에서 보호하기 위하여 사전에 위험을 경고하는 감시인을 배치하여야 한다.<\/div><\/div>","src":"2026년 1회 74번 · 원본 2012.05.20","tm":2},{"t":"고압선로의 활선근접작업시 작업자가 전선로로부터 어느 정도의 거리를 유지하였을 경우 안전하다고 보고 별도의 방호조치나 보호조치를 생략할 수 있는가?","c":["머리위 거리가 30cm 이상","발아래 거리가 40cm 이상","몸옆 수평거리가 50cm 이상","심장으로부터 거리가 50cm 이상"],"a":1,"pt":"<strong>활선근접작업의 접근한계거리<\/strong><br><strong>「머리 30 · 발아래 60 · 옆 30」<\/strong>이다 — <strong>발쪽이 가장 멀어야<\/strong> 한다. <strong>몸이 기울거나 미끄러질 여지가 아래쪽에 크기<\/strong> 때문이다.<p><strong>◈ 암기<\/strong> <u>머리 위 30cm, 발아래 60cm, 몸 옆 30cm<\/u>.<\/p>","src":"2021년 3회 73번 · 원본 2013.03.10","tm":1},{"t":"산업안전보건법상 가공전선의 충전전로에 접근된 장소에서 시설물의 건설, 해체, 점검, 수리 또는 이동식 크레인, 콘크리트 펌프카, 항타기, 항발기 등의 작업시 감전 위험방지 조치 사항으로 옳지 않은 것은?","c":["해당 충전전로 이설","절연용 보호구 착용","절연용 방호구 설치","감시인을 두고 작업을 감시토록 조치"],"a":2,"pt":"<strong>충전전로 인근 작업의 조치<\/strong><br><strong>「보호구」는 사람이 쓰고, 「방호구」는 전선에 씌운다<\/strong> — <strong>크레인 붐이 전선에 닿는 사고는 사람이 장갑을 껴도 막을 수 없다<\/strong>.<p><strong>◈ 암기<\/strong> <u>전선에는 방호구, 사람에게는 보호구<\/u>.<\/p>","src":"2021년 1회 63번 · 원본 2011.06.12","tm":1}],"forklift":[{"t":"화물중량이 200kgf, 지게차의 중량이 400kgf, 앞바퀴에서 화물의 무게중심까지의 최단거리가 1m일 때 지게차의 무게중심까지 최단거리는 최소 몇 m를 초과해야하는가?","c":["0.2m","0.5m","1m","2m"],"a":2,"pt":"<strong>지게차의 안정조건<\/strong><br><strong>앞바퀴가 받침점(fulcrum)<\/strong>이다. 화물은 앞쪽에서 누르고 차체는 뒤쪽에서 버틴다. <strong>뒤쪽 모멘트가 더 커야<\/strong> 앞으로 넘어지지 않는다.<p><strong>◈ 암기<\/strong> $M_{1} &lt; M_{2}$ — <u>화물 모멘트가 더 작아야 한다<\/u>.<\/p>","src":"2025년 3회 57번 · 원본 2013.03.10","tm":3},{"t":"지게차의 안정을 유지하기 위한 안정도 기준으로 틀린 것은?","c":["5톤 미만의 부하 상태에서 하역작업시의 전후안정도는 4% 이내이어야 한다.","부하 상태에서 하역작업시의 좌우 안정도는 10% 이내이어야 한다.","무부하 상태에서 주행시의 좌우 안정도는 (15 + 1.1×V)% 이내이어야 한다.(단, V는 구내 최고속도[km/h])","부하 상태에서 주행시 전후 안정도는 18%이내이어야 한다."],"a":2,"pt":"<strong>지게차의 안정도<\/strong><br><strong>하역은 작고(4 · 6) 주행은 크다(18 · 15+1.1V)<\/strong>. 짐을 들고 있을 때 무게중심이 높아 훨씬 위험하기 때문이다.<p><strong>◈ 암기<\/strong> <u>4 · 6 · 18 · (15+1.1V)<\/u>.<\/p>","src":"2025년 4회 57번 · 원본 2011.06.12","tm":2},{"t":"다음 중 지게차의 작업 상태별 안정도에 관한 설명으로 틀 린 것은? (단, V는 최고속도(km/h)이다.)","c":["기준 부하상태의 하역작업 시의 전후 안정도는 20%이 내이다.","기준 부하상태의 하역작업 시의 좌우 안정도는 6% 이내 이다.","기준 무부하상태에서 주행 시의 전후 안정도는 18%이 내이다.","기준 무부하상태의 주행 시의 좌우 안정도는 (15 + 1.1V)% 이내이다."],"a":1,"pt":"<strong>지게차의 작업 상태별 안정도<\/strong><br>안전보건규칙 제3편, 「지게차 안정도 기준」. 네 값 — <u>하역 전후 4 [%] · 하역 좌우 6 [%] · 주행 전후 18 [%] · 주행 좌우 (15 + 1.1V) [%]<\/u>. <u>하역은 작고 주행은 크다<\/u>는 방향만 알면 된다.<p><strong>◈ 암기<\/strong> <u>하역 4·6, 주행 18·(15+1.1V)<\/u> — 하역은 작고 주행은 크다.<\/p>","src":"2026년 1회 57번 · 원본 2015.08.16","tm":2}],"grinder":[{"t":"회전 중인 연삭숫돌이 근로자에게 위험을 미칠 우려가 있을 시 덮개를 설치하여야 할 연삭숫돌의 최소 지름은?","c":["지름이 5cm 이상인 것","지름이 10cm 이상인 것","지름이 15cm 이상인 것","지름이 20cm 이상인 것"],"a":1,"pt":"<strong>안전보건규칙 제122조 — 연삭기 덮개<\/strong><br>연삭기의 숫자 묶음 — <strong>덮개는 지름 5 [cm] 이상 · 플랜지는 숫돌 지름의 1/3 이상 · 작업 전 1분, 교체 후 3분 시운전 · 워크레스트와 숫돌 사이 3 [mm] 이내 · 조정편과 숫돌 사이 5 [mm] 이내<\/strong>.<p><strong>◈ 암기<\/strong> <u>5 [cm] 이상이면 덮개<\/u>.<\/p><p><strong>⚖ 근거 법령<\/strong> <span class=\"eff\">산업안전보건기준에 관한 규칙 시행 2026. 3. 2.<\/span><\/p><div class=lawart><div class=h><a href=\"https://www.law.go.kr/법령/%EC%82%B0%EC%97%85%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99/%EC%A0%9C122%EC%A1%B0\" target=\"_blank\">제122조(연삭숫돌의 덮개 등)<\/a><span class=eff>산업안전보건기준에 관한 규칙 · 시행 2026. 3. 2.<\/span><\/div><div class=t>▶ ① 사업주는 회전 중인 연삭숫돌(지름이 <strong>5센티미터<\/strong> 이상인 것으로 한정한다)이 근로자에게 위험을 미칠 우려가 있는 경우에 그 부위에 덮개를 설치하여야 한다.<br>② 사업주는 연삭숫돌을 사용하는 작업의 경우 작업을 시작하기 전에는 1분 이상, 연삭숫돌을 교체한 후에는 3분 이상 시험운전을 하고 해당 기계에 이상이 있는지를 확인하여야 한다.<br>③ 제2항에 따른 시험운전에 사용하는 연삭숫돌은 작업시작 전에 결함이 있는지를 확인한 후 사용하여야 한다.<br>④ 사업주는 연삭숫돌의 최고 사용회전속도를 초과하여 사용하도록 해서는 아니 된다.<br>⑤ 사업주는 측면을 사용하는 것을 목적으로 하지 않는 연삭숫돌을 사용하는 경우 측면을 사용하도록 해서는 아니 된다.<\/div><\/div>","src":"2025년 4회 41번 · 원본 2016.05.08","tm":2},{"t":"연삭기 작업 시 작업자가 안심하고 작업을 할 수 있는 상태는?","c":["탁상용 연삭기에서 숫돌과 작업 받침대의 간격이 5mm이다.","덮개 재료의 인장강도는 224MPa이다.","작업 시작 전 1분 정도 시운전을 실시하여 해당 기계의 이상 여부를 확인하였다.","숫돌 교체 후 2분 정도 시운전을 실시하여 해당 기계의 이상 여부를 확인하였다."],"a":3,"pt":"<strong>연삭기의 안전기준<\/strong><br><strong>「받침대 3mm, 조정편 5mm, 시운전 1분과 3분, 인장강도 274.5MPa」<\/strong>다 — <strong>네 보기가 모두 그 값을 조금씩 어긋나게 놓았고 하나만 제자리<\/strong>다.<p><strong>◈ 암기<\/strong> <u>작업 전 1분, 교체 후 3분<\/u>.<\/p>","src":"2021년 3회 42번 · 원본 2011.03.20","tm":1},{"t":"다음 중 상부를 사용할 것을 목적으로 하는 탁상용 연삭기 덮개의 노출 각도로 옳은 것은?","c":["180° 이상","120° 이내","60° 이내","15° 이내"],"a":3,"pt":"<strong>연삭기 덮개의 노출각도<\/strong><br><strong>작업점이 위에 있으면 좁게(60°), 옆이나 넓은 면을 쓰면 넓게(150 ~ 180°)<\/strong> 연다. <strong>일반 탁상용 125°<\/strong>와 <strong>상부 전용 60°<\/strong>를 갈라 둔다.<p><strong>◈ 암기<\/strong> <u>상부 사용 탁상용은 60° 이내<\/u>.<\/p>","src":"2022년 2회 42번 · 원본 2014.08.17","tm":1}],"confined":[{"t":"산업안전보건법상 방독마스크 사용이 가능한 공기 중 최소 산소농도 기준은 몇 % 이상인가?","c":["14%","16%","18%","20%"],"a":3,"pt":"<strong>방독마스크의 사용 조건<\/strong><br><strong>방독마스크는 공기 속 유해가스만 걸러 낼 뿐 산소를 만들지 못한다<\/strong>. <strong>산소가 모자란 곳에서 쓰면 오히려 질식<\/strong>한다. <strong>산소결핍의 경계가 18 [%]<\/strong>다.<p><strong>◈ 암기<\/strong> <u>산소 18 [%] 이상에서만 방독마스크<\/u>.<\/p>","src":"2023년 2회 6번 · 원본 2017.05.07","tm":1},{"t":"산소결핍이라 함은 공기 중 산소농도가 몇 퍼센트(%) 미만일 때를 의미하는가?","c":["20%","18%","15%","10%"],"a":2,"pt":"<strong>산소결핍과 적정공기<\/strong><br><strong>적정공기 네 값 「18 ~ 23.5% · 1.5% · 10 [ppm] · 30 [ppm]」<\/strong>을 한 덩어리로 잡아 둔다. <strong>산소는 위쪽 한계(23.5%)도 있다<\/strong> — 너무 많으면 불이 잘 붙는다.<p><strong>◈ 암기<\/strong> <u>산소결핍은 18% 미만<\/u>.<\/p>","src":"2023년 4회 116번 · 원본 2017.03.05","tm":1},{"t":"방진마스크의 사용 조건 중 산소농도의 최소기준으로 옳은 것은?","c":["16%","18%","21%","23.5%"],"a":2,"pt":"<strong>방진마스크·방독마스크의 사용 한계<\/strong><br>밀폐공간 <strong>적정공기<\/strong>는 산소 <strong>18 [%] 이상 23.5 [%] 미만<\/strong>, 탄산가스 1.5 [%] 미만, 일산화탄소 30 [ppm] 미만, 황화수소 10 [ppm] 미만이다.<p><strong>◈ 암기<\/strong> <u>산소가 없으면 거르는 마스크는 무용지물<\/u> — 18 [%] 미만이면 송기마스크.<\/p>","src":"2026년 2회 6번 · 원본 2020.06.06","tm":1}]};
+
+  // double(4웨이브) 에 쓸 안전 조합. fall·scaffold 는 RIG 에서 w.body(피벗)·팔·다리·w.tick 을
+  // 전혀 안 건드리는 표라(로프/자재만 g 에 얹는다) 다른 어떤 표와 묶어도 pivot 축이 겹치거나
+  // 같은 팔을 두 표가 같이 돌리는 일이 없다. approach+forklift 도 각각 팔 하나(arms[1].x)·
+  // tick 하나만 건드려 서로 안 겹친다. rail+approach(둘 다 arms[1].x) 나 ladder+plank(pivot
+  // 축 높이가 0.35 vs 0 으로 달라 pivotAll 이 console.error 를 낸다) 같은 조합은 여기 없다.
+  const DOUBLE_ANCHORS = ['fall', 'scaffold'];
+  function doublePairsFor(pool){
+    const ids = pool.map(a=> a.id), pairs = [];
+    DOUBLE_ANCHORS.forEach(anchor=>{
+      if(ids.indexOf(anchor) < 0) return;
+      ids.forEach(id=>{ if(id !== anchor) pairs.push([anchor, id]); });
+    });
+    if(ids.indexOf('approach') >= 0 && ids.indexOf('forklift') >= 0) pairs.push(['approach', 'forklift']);
+    return pairs;
+  }
+  // 한 사람에 ACT_BUILD 를 두 번 건다 — spawnWorker(act1,false) 가 act1 표를 붙이고 나면,
+  // 그 위에 act2 의 RIG 를 그대로 한 번 더 부른다. RIG 자체는 안 바꾼다.
+  function spawnDouble(act1, act2){
+    const w = spawnWorker(act1, false);
+    ACT_BUILD[act2.id](w);
+    w.act2 = act2;
+    return w;
+  }
+
+  // trap(5웨이브) — fall 의 변형. RIG.fall(unsafe) 을 그대로 쓰면 바닥까지 끄는 표준 자세가
+  // 같이 나와 「멀리서는 정상처럼 보인다」가 안 된다(그러려면 RIG 를 고쳐야 하는데 그건 이
+  // 과제 범위 밖이다). 그래서 spawnWorker(null) 로 소품 없는 사람을 받아 밖에서 직접 짓는다.
+  // 로프는 안전 쪽처럼 벨트에서 위로 올라가 멀리서는 실루엣이 비슷하지만, 구명줄 케이블까지
+  // 닿지 못하고 중간에서 되돌아와 자기 벨트에 걸린다 — 가까이 와야 그 되돌아옴이 보인다.
+  function buildTrap(w){
+    const g = w.g;
+    tube(0.05, 2.5, steelMat, g, -1.25, 1.25, -0.55);
+    tube(0.05, 2.5, steelMat, g,  1.25, 1.25, -0.55);
+    link(P3(-1.25, 2.42, -0.55), P3(1.25, 2.42, -0.55), 0.04, steelMat, g);
+    // 1차로 로프를 몸 뒤쪽(z 음수)에 두고 짧게 접었더니 8m 에서 몸통에 완전히 가려 아무것도
+    // 안 보였다(스크린샷으로 확인하고 고쳤다). 그래서 (1) 로프를 몸 앞쪽(z 양수)에 두고
+    // (2) 안전 쪽 고리 높이(2.30)에 거의 닿을 만큼 올려 멀리서 실루엣을 거의 같게 만들고
+    // (3) 접어 내려오는 두 번째 가닥을 첫 가닥과 가깝게(같은 높이·조금만 옆으로) 둬서,
+    // 멀리서는 겹쳐 한 줄로 보이고 가까이서만 두 가닥(=되돌아옴)이 갈린다.
+    const belt = P3(0.18, 0.72, 0.16);
+    const near = P3(0.15, 2.22, 0.10);                 // 안전 쪽(2.30) 바로 밑까지 올라간다
+    const back = P3(0.30, 0.75, 0.24);                 // 케이블에 안 걸리고 옆으로 접혀 자기 벨트로 되돌아온다
+    link(belt, near, 0.034, lanyMat, g);
+    link(near, back, 0.03, lanyMat, g);
+    const hook = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.026, 8, 16), steelMat);
+    hook.position.copy(back); hook.rotation.z = Math.PI/2; g.add(hook);
+  }
+  // fix round 1: ACT_BY_ID.fall 을 그대로 물리면(공유 객체) tell 이 fall 의 "고리가 바닥에
+  // 끌린다" 로 나온다 — trap 의 실제 표는 그게 아니라 "고리가 자기 벨트에 걸려 있다" 다.
+  // id·topic·law·name 은 fall 과 완전히 같아야(같은 위반이니) 얕은 복사로 tell 한 필드만
+  // 바꾼다. HAZARD_ACTS 원본(ACT_BY_ID.fall)은 손대지 않는다 — lawcheck.py 는 원본만 본다.
+  const TRAP_ACT = Object.assign({}, ACT_BY_ID.fall, { tell: '고리가 자기 벨트에 걸려 있다' });
+  /* fix round 2(C3) — 「가까운 스폰」. 예전 함정은 spawnWorker 가 준 x(±2~5)를 그대로 둔 채
+     z 만 앞으로 당겼다(스폰 거리 8 m · z −3~−1). 390×800 세로 화면에서 z=−2 의 가로 반폭은
+     2.0 m 뿐이라 x 가 2~5 면 사람이 프레임 밖에 서 있다 — 실측(400회, 페이지 자신의
+     stepWorkers·camera) 결과 80.5 % 가 사고구역에 닿을 때까지 한 번도 전신이 안 보였고 전신
+     노출 시간 중앙값이 0초였다. 데스크톱(가로 화면)은 반폭이 6.7 m 라 안 드러난다.
+     그러면 함정은 「표를 가까이서 보고 가리는 것」이 아니라 「가운데에서 갑자기 나타나는 것」이
+     된다 — 표가 아닌 새 신호이고, 이 게임의 첫째 기준(표를 안 보고 이기는 길이 있으면 실패)
+     위반이다.
+     그래서 (1) 스폰 거리를 11~13 m 로 물려 사고구역까지 8~10 m(≈7~11초)를 걷게 하고 — 일반
+     작업자(18~22 m · ≈16초)보다는 여전히 확실히 빠르다 — (2) x 를 그 거리에서 화면에 들어오는
+     폭 안에서 다시 뽑는다. 폭은 고정 상수가 아니라 실제 카메라(fov·aspect)로 매번 잰다:
+     세로 화면이면 좁게, 가로 화면이면 넓게 저절로 맞는다. */
+  const BODY_HALF = 0.45;              // 사람 몸의 반폭(측정 0.37) + 걸을 때 팔이 벌어지는 여유
+  function frameHalfWidthAt(z){
+    camera.updateMatrixWorld();
+    // 카메라는 위아래로만 기울어 있다(요·롤 없음) — 월드 x 축이 카메라 x 축과 나란하므로
+    // 그 깊이의 가로 반폭은 tan(fov/2)·aspect·(카메라 앞 거리)다. 앞 거리는 카메라 공간에서 잰다.
+    const p = P3(0, 0.9, z).applyMatrix4(camera.matrixWorldInverse);
+    return Math.tan(camera.fov * Math.PI / 360) * camera.aspect * Math.max(0.1, -p.z);
+  }
+  function nearSpawn(w){
+    const d = 11 + Math.random()*2;               // 카메라에서 11~13 m
+    const z = 6 - d;
+    const lim = Math.max(0.5, frameHalfWidthAt(z) - BODY_HALF);
+    const side = w.g.position.x < 0 ? -1 : 1;     // 어느 쪽에서 오는지는 그대로 둔다
+    // 화면 반폭의 35~90 % 자리에 세운다 — 일반 작업자가 스폰 순간 화면에서 차지하는 자리와
+    // 같은 범위다. 늘 한가운데 두면 「가운데 = 함정」이라는 새 신호가 그대로 생긴다.
+    w.g.position.set(side * lim * (0.35 + Math.random()*0.55), 0, z);
+    return w;
+  }
+  function spawnTrapWorker(){
+    const w = spawnWorker(null);
+    w.act = TRAP_ACT; w.look = 'fall'; w.trap = true;
+    buildTrap(w);
+    return nearSpawn(w);
+  }
+
+  // ---------- 웨이브 진행 ----------
+  const WV = { row: null, T: 0, spawnT: 0, baitOut: false, seen: null };
+  S.sweeps = 3; S.cleared = false;                 // 일제 점검 3회 · 5웨이브 완주 여부
+  S.waveStats = {};                                // fix round 1: 웨이브별 스폰·도달 실측(§검증 참고)
+  function wstat(n){
+    if(!S.waveStats[n]) S.waveStats[n] = { spawned: 0, arrived: 0, baitSpawned: 0, baitArrived: 0 };
+    return S.waveStats[n];
+  }
+
+  // fix round 1 — 스폰 지점(z −12~−16)에서 사고구역(z>3)까지는 15~19 사이 거리를 속도
+  // 0.9~1.2 로 걷는다. 가장 느린 경우(거리 19 ÷ 속도 0.9) = 21.1초. 이 값보다 짧게 남았을 때
+  // 강제 미끼를 내면 그 미끼가 "스폰은 됐지만 사고구역엔 못 닿고" 다음 웨이브 전환에 지워지는
+  // 사고가 났다(리뷰 Critical). 이걸 고치는 손은 둘이다 — (1) 마감을 이 값보다 넉넉히 앞당기고
+  // (2) startWave 가 더 이상 진행 중인 작업자를 지우지 않는다(clearWorkers 자동 호출 제거,
+  // 아래). 어느 한쪽만으론 부족하다 — (1)만 하면 그래도 아슬아슬하고, (2)만 하면 강제 미끼가
+  // 다음 웨이브까지 늦게 넘어가 "그 웨이브의 미끼"로 잡히지 않을 수 있다.
+  const MAX_TRAVEL_S = 22;   // 21.1초 + 여유
+
+  function doSpawn(row){
+    const pool = ACTS_ALL.filter(row.acts);
+    if(!pool.length) return;
+    const remaining = row.sec - WV.T;
+    // 강제 미끼 마감을 "최악 이동시간 + 스폰 간격 한 틱" 만큼 남았을 때로 당겼다(이전엔
+    // every*1.4 = 1.8~3.6초뿐이라 미끼가 나와도 사고구역까지 갈 시간이 없었다).
+    const lastCall = remaining <= MAX_TRAVEL_S + row.every;
+    let kind;
+    // !WV.baitOut 은 "아직 하나도 안 나왔다면" 을 뜻하는 최저선 가드다 — bait 판정 전체를
+    // 가두면(첫 미끼가 나온 뒤로는 다시 못 나오면) safeRatio 가 그 뒤로 뜻이 없어진다.
+    // 그래서 확률 판정은 매번 살아 있고, "이번이 마지막 기회인데 아직 하나도 없었다" 일 때만 강제한다.
+    if((!WV.baitOut && lastCall) || Math.random() < row.safeRatio) kind = 'bait';
+    else if(Math.random() < 0.12) kind = 'passer';           // 행인 — 미끼와는 별개(선택 사항)
+    else if(row.trap && pool.some(a=> a.id === 'fall') && Math.random() < 0.35) kind = 'trap';
+    else if(row.double && Math.random() < 0.35) kind = 'double';
+    else kind = 'hazard';
+
+    const st = wstat(row.n); st.spawned++;
+    let w = null;
+    if(kind === 'bait'){
+      const act = pool[(Math.random()*pool.length)|0];
+      w = spawnWorker(act, true); WV.baitOut = true; st.baitSpawned++;
+    }else if(kind === 'passer'){
+      w = spawnWorker(null);
+    }else if(kind === 'trap'){
+      w = spawnTrapWorker(); WV.seen.add('fall');
+    }else if(kind === 'double'){
+      const pairs = doublePairsFor(pool);
+      if(pairs.length){
+        const [id1, id2] = pairs[(Math.random()*pairs.length)|0];
+        w = spawnDouble(ACT_BY_ID[id1], ACT_BY_ID[id2]);
+        WV.seen.add(id1); WV.seen.add(id2);
+      }
+    }
+    if(!w){                              // double 인데 조합이 없었거나 위에서 안 만들어진 나머지
+      const act = pool[(Math.random()*pool.length)|0];
+      w = spawnWorker(act, false); WV.seen.add(act.id);
+    }
+    // fix round 2(C3) — 웨이브 5에서 함정만 가까이 나오면 「가까이서 나타나면 함정」이 표를
+    // 대신하는 신호가 된다(첫째 기준 위반). 같은 웨이브의 일반 위험·미끼·행인도 같은 비율로
+    // 가까이 내보내 거리로는 못 가리게 한다 — 가리려면 표(고리가 어디에 걸렸는가)를 봐야 한다.
+    if(row.trap && !w.trap && Math.random() < 0.3) nearSpawn(w);
+    w.spawnWave = row.n;                 // reachedZone 이 "어느 웨이브가 스폰했는지" 로 도달을 센다
+  }
+
+  function stepWave(dt){
+    if(!WV.row) return;
+    WV.T += dt; WV.spawnT += dt;
+    if(WV.spawnT >= WV.row.every){ WV.spawnT = 0; doSpawn(WV.row); }
+    if(WV.T >= WV.row.sec) endWave();
+  }
+
+  // fix round 1 — startWave 는 더 이상 진행 중인 작업자를 지우지 않는다. 예전엔 여기서
+  // clearWorkers() 를 불러 이전 웨이브에서 아직 걷고 있던(특히 강제 미끼처럼 웨이브 막판에
+  // 나온) 사람들을 통째로 지웠다 — 스폰된 사람의 25~45% 가 사고구역(z>3)에 닿기도 전에
+  // 삭제되는 구조적 결함이었다(리뷰 Critical·Important, 같은 뿌리). stepWorkers 는 웨이브를
+  // 모르고 S.workers 전체를 계속 걷게 하므로, 지우지만 않으면 늦게 나온 사람도 다음 웨이브
+  // 시간을 빌려 결국 사고구역까지 걷는다 — 스폰된 사람은 하나도 버려지지 않는다.
+  // (직접 지워야 할 일이 생기면 clearWorkers() 는 남겨 뒀고 __dbg.clearWorkers 로 부를 수 있다.)
+  function startWave(n){
+    const row = WAVES[n - 1]; if(!row) return;
+    S.wave = n; WV.row = row; WV.T = 0; WV.spawnT = 0; WV.baitOut = false; WV.seen = new Set();
+    S.running = true;
+    hideMaintCard();
+    doSpawn(row); WV.spawnT = 0;      // 웨이브 시작과 동시에 한 명은 바로 나온다
+    updateSweepBtn();
+    hud();
+  }
+  function clearWorkers(){            // 이제 자동으로는 안 불린다 — 디버그/테스트 전용으로 남겨 둔다
+    S.workers.slice().forEach(w=>{ scene.remove(w.g); });
+    S.workers.length = 0;
+  }
+
+  function finishAllWaves(){
+    S.running = false; S.over = true; S.cleared = true;
+    el('hint').textContent = '5웨이브 완료 — 근무 종료';
+    showEndScreen();
+  }
+
+  // fix round 3(I7) — 게임 오버 뒤에는 웨이브가 더 돌지 않는다.
+  // 예전엔 frame() 이 `if(S.running){ stepWorkers(dt); stepWave(dt); }` 로 두 함수를 한 블록에
+  // 묶어 불렀다. stepWorkers 안에서 마지막 목숨이 떨어져 gameOver() 가 S.running=false 를 해도
+  // 같은 블록의 stepWave(dt) 는 그대로 실행된다 — 45초 만료가 그 프레임에 겹치면 endWave →
+  // showMaintCard 가 종료 화면 뒤에 정비 카드를 띄우고, 문항이 없으면 advanceWave → startWave 가
+  // S.running 을 다시 true 로 만든다. 웨이브 5에서 그러면 finishAllWaves 가 헤드라인을
+  // 「사고 발생 — 게임 오버」에서 「근무 종료 — 5웨이브 완주」로 덮어써 결과가 뒤집힌다.
+  // 가드는 endWave 하나에만 둔다. 처음엔 advanceWave 에도 같은 줄을 넣었는데, 그러면 검사11이
+  // endWave 의 가드를 지워도 통과해 버렸다(실측: 무너뜨림 D 가 34/34 통과) — 정비 문항이 없어
+  // advanceWave 로 흐르는 경우를 advanceWave 쪽 가드가 대신 막아, 결함이 화면에 아무 자국도
+  // 남기지 않았기 때문이다. 「실패할 수 없는 검사」는 이 리포에서 반복된 실패다. advanceWave 는
+  // endWave(정비 카드) 를 거쳐야만 닿는 자리라 그 가드는 어차피 도달 불가능한 죽은 줄이었고,
+  // 지우고 나니 endWave 의 가드를 지웠을 때 두 갈래(정비 카드가 뜬다 / 완주로 덮인다)가 모두
+  // 화면에 드러나 검사11이 실제로 실패한다.
+  function advanceWave(){
+    hideMaintCard();
+    const next = S.wave + 1;
+    if(next > WAVES.length){ finishAllWaves(); return; }
+    startWave(next);
+  }
+
+  function endWave(){
+    if(S.over) return;               // 이미 끝난 판이면 웨이브를 마무리하지 않는다(정비 카드·다음 웨이브 없음)
+    S.running = false;
+    showMaintCard();
+  }
+
+  // ---------- 정비 시간 카드 ----------
+  function pickMaintCard(){
+    const ids = Array.from(WV.seen || []);
+    for(let i = ids.length - 1; i > 0; i--){ const j = (Math.random()*(i+1))|0; const t = ids[i]; ids[i] = ids[j]; ids[j] = t; }
+    for(const id of ids){
+      const pool = MAINT_QUIZ[id];
+      if(pool && pool.length) return pool[(Math.random()*pool.length)|0];
+    }
+    return null;                                   // 문항이 없으면 null — 호출부가 카드를 안 띄운다
+  }
+  let maintAnswered = false;
+  function showMaintCard(){
+    const q = pickMaintCard();
+    if(!q){ advanceWave(); return; }                // 문항이 없으면 카드를 안 띄우고 바로 다음 웨이브
+    maintAnswered = false;
+    el('mSrc').textContent = q.src + (q.tm > 1 ? ' · ' + q.tm + '회 출제' : '');
+    el('mStem').textContent = q.t;
+    const ol = el('mChoices'); ol.className = 'mChoices'; ol.innerHTML = '';
+    q.c.forEach((c, i)=>{
+      const li = document.createElement('li');
+      const b = document.createElement('b'); b.textContent = '①②③④⑤'[i];
+      const s = document.createElement('span'); s.textContent = c;
+      li.appendChild(b); li.appendChild(s);
+      li.addEventListener('click', ()=> pickChoice(q, i + 1, ol));
+      ol.appendChild(li);
+    });
+    const pt = el('mPoint'); pt.hidden = true; pt.innerHTML = '';
+    el('dMaint').hidden = false;
+  }
+  function pickChoice(q, picked, ol){
+    if(maintAnswered) return; maintAnswered = true;
+    ol.classList.add('answered');
+    Array.from(ol.children).forEach((li, i)=>{
+      if(i + 1 === q.a) li.classList.add('ok');
+      else if(i + 1 === picked) li.classList.add('bad');
+    });
+    if(q.pt){ const pt = el('mPoint'); pt.innerHTML = q.pt; pt.hidden = false; }
+  }
+  function hideMaintCard(){ const d = el('dMaint'); if(d) d.hidden = true; }
+  const btnNextWave = el('btnNextWave'); if(btnNextWave) btnNextWave.addEventListener('click', advanceWave);
+
+  // ---------- 일제 점검(3회): 불안전 작업자에만 EdgesGeometry 테두리를 3초 씌운다 ----------
+  // skinMat·pantsMat 같은 몸 재질은 작업자끼리 공유한다(Task 3 의 fadeOut 주석과 같은 이유) —
+  // 그 재질의 emissive 를 건드리면 미끼·행인까지 같이 빛난다. 그래서 mesh.material 은 그대로
+  // 두고, geometry 로 EdgesGeometry 를 새로 만들어 자식으로 얹는다(재질은 이 용도로만 쓰는
+  // 새 재질 하나를 모든 테두리가 같이 쓴다 — 몸 재질과 무관하니 공유해도 안전하다).
+  // Task 6: 원래 EdgesGeometry(o.geometry) 를 문턱각 없이(기본 1°) 부르면 몸통·팔다리 원기둥의
+  // 16각 근사 옆면 하나하나가 전부 선이 되어(팔다리 8개 원기둥 × 세로선 10~16개) 사람 전체가
+  // 빽빽한 노란 철사 뭉치가 된다 — 「누가」는 튀지만 그 아래 표(로프가 늘어졌는지, 몸이
+  // 기울었는지)가 그 뭉치에 묻혀 안 보인다(390px 재측정으로 확인, 스크린샷 t6_sweep_*).
+  // 문턱각을 40°로 올리면 원기둥 옆면처럼 인접면 각차가 작은(360/16=22.5°) 선은 빠지고,
+  // 상자 모서리·모자 챙 같은 실루엣 급전환 선만 남는다 — 같은 라이브러리 호출로 밀도만 뺀다.
+  // 눈·입처럼 실루엣에 안 쓰이는 자잘한 부품은 통째로 건너뛴다(반경 0.03 미만).
+  // 색도 로프(lanyMat 0xF2D24A)·난간(RAIL_Y 0xE3B54D)과 겹치던 앰버 대신, 12종 표 어디에도
+  // 안 쓰는 흰빛 하늘색으로 바꿔 표 색과 안 섞이게 했다.
+  const sweepLineMat = new THREE.LineBasicMaterial({color: col(0xCFEBFF), transparent: true, opacity: .7, depthTest: false});
+  const SWEEP_EDGE_THRESHOLD = 40;
+  function sweepHighlight(w, ms){
+    const added = [];
+    w.body.traverse(o=>{
+      if(o.isMesh && o.geometry){
+        // boundingSphere 는 spawnWorker 가 몸을 지을 때 이미 한 번 계산해 뒀다(리뷰 Minor) —
+        // 혹시 그 경로를 안 거친 메시가 섞여도 조용히 죽지 않도록 없으면 여기서도 한 번 잰다.
+        if(!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
+        if(o.geometry.boundingSphere && o.geometry.boundingSphere.radius < 0.03) return;   // 눈·입 등 잔부품 제외
+        const ln = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, SWEEP_EDGE_THRESHOLD), sweepLineMat);
+        ln.renderOrder = 999; o.add(ln); added.push([o, ln]);
+      }
+    });
+    setTimeout(()=>{ added.forEach(([o, ln])=>{ o.remove(ln); ln.geometry.dispose(); }); }, ms);
+  }
+  function sweepCheck(){
+    if(S.sweeps <= 0 || !S.running) return;
+    S.sweeps--;
+    S.workers.forEach(w=>{ if(w.act && !w.stopped && !w.done) sweepHighlight(w, 3000); });   // 미끼(w.act=null)는 제외된다
+    updateSweepBtn();
+  }
+  function updateSweepBtn(){
+    // Task 5: 남은 횟수는 이제 HUD(#hudSweepN)가 보여준다 — 버튼은 동작 이름만 낸다.
+    const b = el('btnSweep'); if(!b) return;
+    b.textContent = '일제 점검';
+    b.disabled = S.sweeps <= 0;
+  }
+  const btnSweep = el('btnSweep'); if(btnSweep) btnSweep.addEventListener('click', sweepCheck);
+
+  // Task 7 검사기가 __dbg.wave(n) 으로 특정 웨이브로 건너뛴다.
+  function wave(n){ startWave(n); }
+
+  // Task 5: 무재해 기록 3칸 — 안전모 아이콘. 하트(♥)를 지우고 다시 만들었다.
+  const HELMET_SVG = '<svg viewBox="0 0 22 16" aria-hidden="true"><path d="M11 1.4c-4.1 0-7.5 3-8 6.9h16C18.5 4.4 15.1 1.4 11 1.4z"/><rect x="1.2" y="8.3" width="19.6" height="2.7" rx="1.35"/></svg>';
+  // Task 3·5 브리프가 인터페이스로 쓰는 이름은 hud() 다 — judge(w) 예제가 마지막 줄에서 hud() 를 부른다.
+  function hud(){
+    const lives = el('hudLives');
+    lives.innerHTML = '';
+    for(let i=0;i<3;i++) lives.insertAdjacentHTML('beforeend', '<span class="life' + (i < S.lives ? ' on' : '') + '">' + HELMET_SVG + '</span>');
+    el('hudScoreN').textContent = S.score.toLocaleString('ko-KR');
+    el('hudWaveN').textContent = S.wave;
+    el('hudSweepN').textContent = S.sweeps;
+    // fix round 3(C1): 오지적 누적 — 「잘못 분 것도 놓친 것만큼 나쁘다」를 규칙으로 보여준다
+    el('hudWrongN').textContent = S.wrong;
+    const wr = el('hudWrong'); if(wr) wr.classList.toggle('near', S.wrong >= WRONG_PER_LIFE - 1);
+  }
+
+  /* ---------- Task 5: 종료 화면 ---------- */
+  // S.missed 를 act.id 로 묶는다. trap(5웨이브 함정)은 fall 을 얕은 복사해 tell 만 바꾼
+  // 별도 객체(TRAP_ACT)라 id·name·law·fix 는 fall 과 완전히 같다 — 이름·해결·조문·링크는
+  // 그룹 대표 act 것을 그대로 써도 안전하다(전부 같은 값). tell 은 다를 수 있어(trap 이 자기
+  // 문구를 갖는다) 대표 하나만 보여주면 병합된 인스턴스 일부와 어긋난다 — 그래서 그룹은 유지한
+  // 채 등장한 distinct tell 을 전부 모은다(fix round 1: 리뷰가 지적한 "그룹은 유지, tell 은 모아
+  // 보여준다"를 따름).
+  function groupMissed(){
+    const order = [], byId = {};
+    S.missed.forEach(act=>{
+      if(!byId[act.id]){ byId[act.id] = { act, count: 0, tells: [] }; order.push(act.id); }
+      const g = byId[act.id];
+      g.count++;
+      if(act.tell && g.tells.indexOf(act.tell) < 0) g.tells.push(act.tell);   // 등장 순서 유지한 distinct
+    });
+    return order.map(id=> byId[id]);
+  }
+  function renderMissed(){
+    const box = el('eMissed'); box.innerHTML = '';
+    const groups = groupMissed();
+    if(!groups.length){
+      const p = document.createElement('p'); p.className = 'eMissedEmpty';
+      p.textContent = '놓친 행동이 없습니다.';
+      box.appendChild(p);
+      return;
+    }
+    groups.forEach(({act, count, tells})=>{
+      const card = document.createElement('div'); card.className = 'eGroup';
+      const head = document.createElement('div'); head.className = 'eGroupHead';
+      const name = document.createElement('span'); name.className = 'eGroupName'; name.textContent = act.name;
+      const cnt = document.createElement('span'); cnt.className = 'eGroupCount mono'; cnt.textContent = '×' + count;
+      head.appendChild(name); head.appendChild(cnt); card.appendChild(head);
+
+      // 이렇게 보였습니다 — 놓친 표(tell). trap 처럼 이 그룹에 서로 다른 tell 이 섞여 있으면
+      // 전부 나열한다(하나만 골라 보여주면 병합된 나머지 인스턴스의 실제 모습과 어긋난다).
+      if(tells.length){
+        const spot = document.createElement('p'); spot.className = 'eGroupTell';
+        spot.textContent = '이렇게 보였습니다 — ' + tells.join(' · ');
+        card.appendChild(spot);
+      }
+
+      const fix = document.createElement('p'); fix.className = 'eGroupFix';
+      fix.textContent = '이렇게 했어야 합니다 — ' + act.fix;
+      card.appendChild(fix);
+
+      // 조문은 자르지 않는다(confined 는 셋) — details/summary 로 접어서 보여준다.
+      const det = document.createElement('details'); det.className = 'eGroupLaw';
+      const sum = document.createElement('summary'); sum.textContent = '근거 조문';
+      const lawP = document.createElement('p'); lawP.textContent = act.law;
+      det.appendChild(sum); det.appendChild(lawP);
+      card.appendChild(det);
+
+      const link = document.createElement('a'); link.className = 'eGroupLink';
+      link.href = 'lab.html?v=09091036#topic=' + act.topic;   // id 가 곧 3D 실습장 주제 키 — lab.html?v=09091036 은 변형별 실습장 경로(build_defense.py VARIANTS)
+      link.target = '_blank'; link.rel = 'noopener';
+      link.textContent = '실습장에서 보기';
+      card.appendChild(link);
+
+      box.appendChild(card);
+    });
+  }
+  function showEndScreen(){
+    // fix round 3(C1): 오지적으로 끝난 판은 「사고 발생」이 아니다 — 사고는 한 건도 없을 수 있다.
+    // 끝나는 방식은 놓쳐서 끝난 것과 똑같고(무재해 0 = 종료), 헤드라인만 왜 끝났는지를 말한다.
+    el('eHead').textContent = S.cleared ? '근무 종료 — 5웨이브 완주'
+                            : (S.overCause === 'wrong' ? '오지적 누적 — 게임 오버' : '사고 발생 — 게임 오버');
+    el('eScore').textContent = S.score.toLocaleString('ko-KR');
+    const ok = S.judgeOk, n = S.judgeN, pct = n ? Math.round(ok / n * 100) : 0;
+    el('eAcc').textContent = pct + '%';
+    el('eAccSub').textContent = '맞은 지적 ' + ok + ' / 전체 지적 ' + n;
+    // fix round 3(C1): 오지적 총 횟수 — 이것으로 무재해를 몇 칸 잃었는지까지 같이 낸다.
+    el('eWrongSub').textContent = '오지적 ' + S.wrongTotal + '회'
+      + (S.wrongLives ? ' — 무재해 ' + S.wrongLives + '칸 소진' : '')
+      + (S.wrong ? ' (다음 칸까지 ' + S.wrong + '/' + WRONG_PER_LIFE + ')' : '');
+    el('eWave').textContent = (S.cleared ? 5 : S.wave) + ' / 5';
+    renderMissed();
+    el('dEnd').hidden = false;
+  }
+  const btnAgain = el('btnAgain'); if(btnAgain) btnAgain.addEventListener('click', ()=> location.reload());
+
+  /* ---------- 리사이즈 · 시작 · 루프 ---------- */
+  function resize(){ renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); layoutWhistle(); }
+  addEventListener('resize', resize); resize();
+
+  ensureWhistle();
+  updateSweepBtn();
+  // HUD 의 「오지적 n/3」에서 분모는 WRONG_PER_LIFE 다. 예전엔 마크업에 3이 글자로 박혀 있어
+  // 상수를 바꾸면 화면만 옛 숫자를 말했다 — 규칙이 바뀌면 표시도 따라오게 상수에서 찍는다.
+  { const wm = el('hudWrongMax'); if(wm) wm.textContent = '/' + WRONG_PER_LIFE; }
+  startWave(1);                    // Task 4: 웨이브 1로 시작한다(Step 3 의 행인 하나는 여기서 대체됨)
+  hud();
+
+  // Task 7 검사기가 쓰는 다섯 키(S·ACTS·spawn·judge·wave)는 그대로 두고 뒤에만 더한다.
+  window.__dbg = { S, ACTS: window.HAZARD_ACTS, spawn: spawnWorker, judge, wave,
+                   build: ACT_BUILD, safe: ACT_SAFE,
+                   act: id=> (window.HAZARD_ACTS || []).find(a=> a.id === id),
+                   startWave, endWave, sweep: sweepCheck, stepWave, stepWorkers, buildTrap, clearWorkers,
+                   // fix round 2(C3): 함정 작업자가 화면 안에 들어오는지를 「페이지 자신의 카메라로」
+                   // 재려면 검사기에 camera 와 spawnTrapWorker 가 있어야 한다. 카메라를 검사기가
+                   // 새로 만들어 재면 fov·aspect·위치를 베껴 쓰는 셈이라(사본끼리 비교) 규격이
+                   // 바뀌어도 못 잡는다 — 실제 렌더에 쓰는 그 객체를 그대로 내준다.
+                   // HUD 분모가 상수를 읽는지 검사기가 확인하려면 상수 자체가 있어야 한다
+                   // (DOM 만 보면 글자로 박아 둔 3 과 상수에서 찍은 3 을 못 가른다).
+                   camera, spawnTrap: spawnTrapWorker, WRONG_PER_LIFE };   // Task 4 가 뒤에 더한 것들(stepWave·stepWorkers·buildTrap·clearWorkers 는 검증용)
+
+  let last = performance.now();
+  function frame(now){
+    const dt = Math.min(0.05, (now - last)/1000); last = now;
+    // fix round 3(I7): stepWorkers 안에서 마지막 목숨이 떨어지면 그 프레임의 stepWave 는 돌지
+    // 않는다 — 45초 만료가 겹쳐 종료 화면 뒤에서 웨이브가 되살아나던 자리다(endWave 주석 참고).
+    if(S.running){ S.t += dt; stepWorkers(dt); if(S.running) stepWave(dt); }
+    if(S.stun > 0){ S.stun -= dt; if(S.stun <= 0){ S.stun = 0; lockUi(false); } }
+    if(S.warnT > 0){ S.warnT -= dt; if(S.warnT <= 0){ S.warnT = 0; const b = el('dWarn'); if(b) b.hidden = true; } }
+    if(S.basisT > 0){ S.basisT -= dt; if(S.basisT <= 0){ S.basisT = 0; const b = el('dBasis'); if(b) b.hidden = true; } }
+    stepWhistleFx(dt);
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
